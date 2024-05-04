@@ -1,0 +1,52 @@
+.dashboardContainer {
+    margin-top: 20px;
+}
+.gridContainer {
+    margin-bottom: 70px;
+}
+.earningsIcon {
+    color: lightgreen;
+}
+.expendituresIcon {
+    color: red;
+}
+.payableIcon {
+    color: pink;
+}
+.receivableIcon {
+    color: green;
+}
+.operatingIcon {
+    color: #2daab8;
+}
+.investingIcon {
+    color: #49db99;
+}
+.financingIcon {
+    color: #4e4fde;
+}
+.transactionTypeIcon {
+    color: #dea64e;
+}
+.transactionTypeIcon,
+.paymentIcon,
+.transactionWithIcon {
+    position: relative;
+    bottom: -3px;
+}
+.boldText {
+    font-weight: bold;
+}
+.paymentIcon {
+    color: #6c3b20;
+}
+.paymentHeader {
+    display: flex;
+}
+.transactionWithIcon {
+    color: #6c204f;
+}
+.circular-progress {
+    width: 24px; /* Adjust the width as needed */
+    height: 24px; /* Adjust the height as needed */
+}

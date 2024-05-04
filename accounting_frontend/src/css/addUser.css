@@ -1,0 +1,14 @@
+.submitButton {
+    float: right;
+}
+.input {
+    width: 90%;
+    height: 30px;
+}
+.addUserTable {
+    margin-bottom: 50px;
+}
+.addUserErrorText {
+    font-size: 12px;
+    color: red;
+}

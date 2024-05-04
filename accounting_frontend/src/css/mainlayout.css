@@ -1,0 +1,39 @@
+.drawer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: #262626;
+    color: rgb(190, 197, 192);
+    font-weight: bold;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+.leftIcon {
+    color: white;
+}
+.box {
+    display: flex;
+}
+.toolbar {
+    padding-right: 24px;
+}
+.typographyHeader {
+    flex-grow: 1;
+}
+.typographyLogout {
+    display: flex;
+    color: rgb(190, 197, 192); /* White text color */
+    border: none;
+    padding: 10px 20px; /* Padding for the button */
+    border-radius: 5px; /* Rounded corners */
+    cursor: pointer; /* Set cursor to pointer */
+    transition: background-color 0.3s;
+}
+
+.typographyLogout:hover {
+    background-color: #262626; /* Darker blue background color on hover */
+}
+
+.typographyLogout:active {
+    background-color: #404141; /* Even darker blue background color when clicked */
+}

@@ -1,0 +1,14 @@
+.footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    color: rgb(227, 224, 224);
+    height: 50px;
+    background-color: #868788;
+    text-align: right;
+    line-height: 50px; /* Vertical centering */
+}
+.content {
+    margin-right: 2%;
+}
