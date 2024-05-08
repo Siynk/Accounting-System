@@ -98,9 +98,9 @@ const Transaction = () => {
                                         <TableCell><span className='transaction-content'>{transaction.amount}</span></TableCell>
                                         <TableCell>
                                             <div className='actions-container'>
-                                                <span className='actions view' onClick={() => handleView(transaction.id)}><ViewIcon /></span>
-                                                <span className='actions update' onClick={() => handleUpdate(transaction.id)}><UpdateIcon /></span>
-                                                <span className='actions delete' onClick={() => handleDelete(transaction.id)}><DeleteIcon /></span>
+                                                <span title="View Transaction" className='actions view' onClick={() => handleView(transaction.id)}><ViewIcon /></span>
+                                                <span title="Edit Transaction" className='actions update' onClick={() => handleUpdate(transaction.id)}><UpdateIcon /></span>
+                                                <span title="Delete Transaction" className='actions delete' onClick={() => handleDelete(transaction.id)}><DeleteIcon /></span>
                                             </div>
                                         </TableCell>
                                     </TableRow>

@@ -84,11 +84,11 @@ class TransactionController extends Controller
     {
         $counts = [
             'paymentMethods' => [
-                'cash' => Transaction::where('paymentMethod', 'cash')->count(),
-                'check' => Transaction::where('paymentMethod', 'check')->count(),
-                'creditCard' => Transaction::where('paymentMethod', 'creditCard')->count(),
-                'debitCard' => Transaction::where('paymentMethod', 'debitCard')->count(),
-                'online' => Transaction::where('paymentMethod', 'online')->count(),
+                'cash' => Transaction::where('paymentMethod', 'Cash')->count(),
+                'check' => Transaction::where('paymentMethod', 'Check')->count(),
+                'creditCard' => Transaction::where('paymentMethod', 'Credit Card')->count(),
+                'debitCard' => Transaction::where('paymentMethod', 'Debit Card')->count(),
+                'online' => Transaction::where('paymentMethod', 'Online')->count(),
             ],
             'transactionTypes' => [
                 'cashIn' => Transaction::where('transactionType', 'Cash In')->count(),

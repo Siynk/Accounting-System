@@ -57,7 +57,7 @@ const AddTransaction = () => {
                                 Payment Method:
                                 <select name="paymentMethod" className="addTransactionSelect">
                                     <option value="Cash">Cash</option>
-                                    <option value="Creadit Card">Credit Card</option>
+                                    <option value="Credit Card">Credit Card</option>
                                     <option value="Debit Card">Debit Card</option>
                                     <option value="Check">Check</option>
                                     <option value="Online">Online</option>
