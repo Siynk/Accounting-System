@@ -65,7 +65,7 @@ const AddTransaction = () => {
                             </label>
                             {error && <span className="error">{error.paymentMethod}</span>}
                             <label>
-                                Counter Party:
+                                Client:
                                 <input type="text" name="counterParty" />
                             </label>
                             {error && <span className="error">{error.counterParty}</span>}
@@ -96,7 +96,7 @@ const AddTransaction = () => {
                             {selectedAccount === 'receivable' || selectedAccount === 'payable' ? (
                                 <>
                                     <label>
-                                        Effectivity Date:
+                                        Due Date:
                                         <input type="date" name="effectivityDate" />
                                     </label>
                                     {error && <span className="error">{error.effectivityDate}</span>}

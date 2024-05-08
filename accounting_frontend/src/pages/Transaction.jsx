@@ -64,10 +64,10 @@ const Transaction = () => {
                             <TableCell><span className='transaction-header'>TYPE</span></TableCell>
                             <TableCell><span className='transaction-header'>DESCRIPTION</span></TableCell>
                             <TableCell><span className='transaction-header'>PAYMENT METHOD</span></TableCell>
-                            <TableCell><span className='transaction-header'>COUNTER PARTY</span></TableCell>
+                            <TableCell><span className='transaction-header'>CLIENT</span></TableCell>
                             <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>
                             <TableCell><span className='transaction-header'>ACCOUNTS</span></TableCell>
-                            <TableCell><span className='transaction-header'>EFFECTIVITY ON</span></TableCell>
+                            <TableCell><span className='transaction-header'>DUE DATE</span></TableCell>
                             <TableCell><span className='transaction-header'>ACTIVITY</span></TableCell>
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
                             <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
