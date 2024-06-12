@@ -1,0 +1,19 @@
+.client-search-result {
+    font-size: 12px;
+    color: darkgreen;
+}
+.generate-report-button-container {
+    margin-left: 20px;
+}
+.generate-report-button-container button {
+    background-color: #04aa6d; /* Green */
+    border: none;
+    color: white;
+    padding: 7px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}

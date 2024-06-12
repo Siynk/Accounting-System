@@ -21,19 +21,15 @@ class AuthController extends Controller
         $credentials = $request->validated();
 
         $authorizedUserData = $this->authService->authorize($credentials);
-        if ($authorizedUserData) {
+
+        if ($authorizedUserData['success']) {
             return response()->json($authorizedUserData);
         }
 
-        // Authentication failed
+        // Authentication failed or client not approved
         return response()->json([
-            'message' => 'Invalid username or password',
+            'message' => $authorizedUserData['message'],
         ], 401);
-
-        // return response()->json([
-        //     'user' => Hash::make('asdf1234'),
-        //     'token' => "test"
-        // ]);
     }
 
     public function logout(Request $request)

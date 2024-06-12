@@ -7,6 +7,11 @@ import MainLayout from './components/MainLayout';
 import AccountInfo from './pages/AccountInfo';
 import Transaction from './pages/Transaction';
 import AddTransaction from './pages/AddTransaction';
+import Reports from './pages/Reports';
+import ClientManagement from './pages/ClientManagement';
+import SingleTransaction from './pages/SingleTransaction';
+import Register from './pages/Register';
+
 
 const router = createBrowserRouter([
     {
@@ -16,7 +21,12 @@ const router = createBrowserRouter([
             {
                 path: '/',
                 element: <Login />
+            },
+            {
+                path: '/register',
+                element: <Register />
             }
+
         ]
     },
     {
@@ -42,6 +52,18 @@ const router = createBrowserRouter([
             {
                 path: '/add-transaction',
                 element: <AddTransaction />
+            },
+            {
+                path: '/reports',
+                element: <Reports />
+            },
+            {
+                path: '/client-management',
+                element: <ClientManagement />
+            },
+            {
+                path: '/single-transaction',
+                element: <SingleTransaction />
             },
 
         ]

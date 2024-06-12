@@ -28,6 +28,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('add-transaction', [TransactionController::class, 'addTransaction']);
     Route::get('get-all-transactions', [TransactionController::class, 'getAllTransactions']);
     Route::get('get-counts', [TransactionController::class, 'getCounts']);
+    Route::post('filter-transactions', [TransactionController::class, 'filterTransactions']);
+    Route::post('update-transaction', [TransactionController::class, 'updateTransaction']);
+    Route::get('get-all-clients', [UserController::class, 'getAllClients']);
+    Route::post('delete-transaction', [TransactionController::class, 'deleteTransaction']);
 });
-
+Route::post('register-client', [UserController::class, 'registerClient']);
 Route::post('login', [AuthController::class, 'login']);

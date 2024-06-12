@@ -1,9 +1,38 @@
 .headerTitle {
-    color: rgb(82, 82, 106);
-    font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
-        "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+    color: rgb(65, 195, 102);
     font-weight: bold;
 }
 .error {
     color: red;
+}
+.login-outlet {
+    margin-right: 100px;
+    margin-top: -100px;
+}
+.starter-layout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    height: 97vh; /* Adjust the height as needed */
+}
+
+.content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; /* Adjust the width as needed */
+}
+
+.logo-container {
+    /* Adjust the size of the logo as needed */
+    width: 150px;
+    height: auto;
+    margin-left: 5%; /* Adjust the margin as needed */
+}
+
+/* Additional styles for the Outlet (login form) */
+.outlet-container {
+    margin-right: 5%; /* Adjust the margin as needed */
 }

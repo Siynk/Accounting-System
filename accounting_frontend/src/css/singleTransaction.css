@@ -1,0 +1,84 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.history-container {
+    padding: 30px;
+    border: 1px solid gray;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.45);
+    background-color: #ededed;
+    color: #454141;
+    margin-top: 75px;
+    border-radius: 3px;
+}
+
+.header {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.printButton {
+    background-color: #035b03;
+    color: red;
+}
+
+h2 {
+    font-size: 24px;
+    margin: 0;
+    font-weight: normal;
+}
+
+.balances {
+    background-color: #cee2ce;
+    padding: 20px;
+}
+
+.account-balance {
+    display: flex;
+    align-items: baseline;
+    margin-top: 15px;
+}
+
+.label {
+    font-size: 14px;
+    width: 150px;
+}
+
+.amount {
+    font-size: 16px;
+}
+
+.dots {
+    border-bottom: 1px dotted #ccc;
+    flex-grow: 1;
+    margin: 0 10px;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #print-content,
+    #print-content * {
+        visibility: visible;
+    }
+    #print-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    #print-content .hidebtn {
+        visibility: hidden;
+    }
+
+    #print-content .history-container {
+        width: 100%; /* Set the container to full width */
+        margin: 0 auto; /* Optional: Center the container */
+        max-width: none; /* Override any max-width */
+    }
+}

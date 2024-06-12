@@ -128,3 +128,93 @@ export async function getCounts(setError, setCounts) {
     });
 }
 
+export async function getClients(setError, setClients) {
+  await axiosInstance.get('/get-all-clients')
+    .then(({ data }) => {
+      setClients(data);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 400) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        console.log('An unexpected error occurred');
+      }
+    });
+}
+
+export async function filterTransactions(setError, setTransactions, payload) {
+  await axiosInstance.post('/filter-transactions', payload)
+    .then(({ data }) => {
+      setTransactions(data);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 400) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        console.log('An unexpected error occurred');
+      }
+    });
+}
+
+export async function updateTransaction(setError, payload) {
+  await axiosInstance.post('/update-transaction', payload)
+    .then(({ data }) => {
+      console.log(data.message);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+export async function deleteTransaction(setError, transactionID) {
+  await axiosInstance.post('/delete-transaction', transactionID)
+    .then(({ data }) => {
+      alert(data.message);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function registerClient(payload, setError, event) {
+  
+  await axiosInstance.post('/register-client', payload)
+    .then(({ data }) => {
+      alert(data.message);
+      event.target.reset();
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}

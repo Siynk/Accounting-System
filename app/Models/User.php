@@ -24,6 +24,8 @@ class User extends Authenticatable
         'password',
         'address',
         'contact',
-        'username'
+        'username',
+        'company',
+        'userType'
     ];
 }

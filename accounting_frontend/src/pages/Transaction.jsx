@@ -3,43 +3,43 @@ import ViewIcon from '@mui/icons-material/Visibility';
 import UpdateIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import '../css/transaction.css';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import Filters from '../components/Filters';
-import { getAllTransactions } from '../utils/backend';
 import dayjs from 'dayjs';
+import { Link } from 'react-router-dom';
+import { useStateContext } from '../context/ContextProvider';
+import { formatMoney } from '../utils/helper';
+import EditTransactionModal from '../components/EditTransactionModal';
+import { deleteTransaction } from '../utils/backend';
 
 const Transaction = () => {
     // Add your logic to handle view, update, and delete actions
-    const handleView = (id) => { /* ... */ };
-    const handleUpdate = (id) => { /* ... */ };
-    const handleDelete = (id) => { /* ... */ };
+    let { setSingleTransaction } = useStateContext();
 
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Debounce function to prevent too many requests
-    const debounce = (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
+    const handleView = (transaction) => {
+        setSingleTransaction(transaction);
     };
 
-    // Fetch transactions with debounce to avoid too many requests
-    const fetchTransactions = useCallback(debounce(() => {
-        getAllTransactions(setError, setTransactions)
-            .finally(() => setLoading(false));
-    }, 500), [getAllTransactions]); // Adjust the debounce time as needed
+    const handleUpdatePopup = (transaction) => {
+        setSelectedTransaction(transaction);
+    };
 
-    useEffect(() => {
-        fetchTransactions();
-    }, []);
+    const handleCloseModal = () => {
+        setSelectedTransaction(null);
+    };
+
+    const handleDelete = (id) => {
+        deleteTransaction(setError, { id });
+    };
+
+
+
+
 
     return (
         <Box
@@ -55,20 +55,17 @@ const Transaction = () => {
             }}
         >
             <Toolbar />
-            <Container maxWidth="lg" className='tableContainer'>
-                <Filters />
+            {<Container maxWidth="lg" className='tableContainer'>
+                <Filters setTransactions={setTransactions} setError={setError} setLoading={setLoading} />
                 <Table className="transaction-table" aria-label="simple table">
                     <TableHead>
                         <TableRow>
                             <TableCell><span className='transaction-header'>DATE</span></TableCell>
                             <TableCell><span className='transaction-header'>TYPE</span></TableCell>
                             <TableCell><span className='transaction-header'>DESCRIPTION</span></TableCell>
-                            <TableCell><span className='transaction-header'>PAYMENT METHOD</span></TableCell>
+                            <TableCell><span className='transaction-header'>PRODUCT LINE</span></TableCell>
                             <TableCell><span className='transaction-header'>CLIENT</span></TableCell>
-                            <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>
-                            <TableCell><span className='transaction-header'>ACCOUNTS</span></TableCell>
-                            <TableCell><span className='transaction-header'>DUE DATE</span></TableCell>
-                            <TableCell><span className='transaction-header'>ACTIVITY</span></TableCell>
+                            <TableCell><span className='transaction-header'>CASH FLOW CATEGORY</span></TableCell>
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
                             <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
                         </TableRow>
@@ -89,17 +86,14 @@ const Transaction = () => {
                                         <TableCell><span className='transaction-content'>{dayjs(transaction.transactionDate).format('MM-DD-YYYY')}</span></TableCell>
                                         <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>
                                         <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.paymentMethod}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.counterParty}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.accounts ? transaction.accounts : 'N/A'}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.effectivityDate ? dayjs(transaction.effectivityDate).format('MM-DD-YYYY') : 'N/A'}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.activity}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.amount}</span></TableCell>
+                                        <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
+                                        <TableCell><span className='transaction-content'>{transaction.company}</span></TableCell>
+                                        <TableCell><span className='transaction-content'>{transaction.cashFlowCategory}</span></TableCell>
+                                        <TableCell><span className='transaction-content'>{formatMoney(transaction.amount)}</span></TableCell>
                                         <TableCell>
                                             <div className='actions-container'>
-                                                <span className='actions view' onClick={() => handleView(transaction.id)}><ViewIcon /></span>
-                                                <span className='actions update' onClick={() => handleUpdate(transaction.id)}><UpdateIcon /></span>
+                                                <span onClick={() => handleView(transaction)}><Link className='actions view' to="/single-transaction"><ViewIcon /></Link></span>
+                                                <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span>
                                                 <span className='actions delete' onClick={() => handleDelete(transaction.id)}><DeleteIcon /></span>
                                             </div>
                                         </TableCell>
@@ -109,7 +103,13 @@ const Transaction = () => {
                         )}
                     </TableBody>
                 </Table>
-            </Container>
+            </Container>}
+            {selectedTransaction && (
+                <EditTransactionModal
+                    transaction={selectedTransaction}
+                    onClose={handleCloseModal}
+                />
+            )}
         </Box >
     );
 }

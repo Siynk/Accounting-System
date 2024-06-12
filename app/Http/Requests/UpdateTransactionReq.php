@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
 
-class AddTransactionReq extends FormRequest
+class UpdateTransactionReq extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,13 +23,11 @@ class AddTransactionReq extends FormRequest
     public function rules(): array
     {
         return [
-            'transactionTypes' => 'required', // Optional, must be a string if provided
-            'description'     => 'required|string|max:255',
-            'productLine'   => 'required|string|max:255',
-            'clientID'        => 'required',
-            'amount'          => 'required|numeric|min:0', // Assuming amount cannot be negative
-            'cashFlowCategory'   => 'required|string|max:255',
-
+            'newDescription'     => 'required|string|max:255',
+            'newAmount'          => 'required|numeric|min:0',
+            'clientID'           => 'required|int',
+            'transactionID'      => 'required|int',
+            'status'             => 'required|string',
         ];
     }
 }

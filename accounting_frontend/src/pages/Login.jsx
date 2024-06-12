@@ -9,6 +9,8 @@ import '../css/login.css';
 import { useStateContext } from "../context/ContextProvider";
 import { useState } from "react";
 import { login } from "../utils/backend.js";
+import { Grid } from "@mui/material";
+import { Link } from "react-router-dom";
 
 export default function Login() {
 
@@ -38,7 +40,7 @@ export default function Login() {
                     alignItems: "center",
                 }}
             >
-                <Typography component="h1" variant="h5" className="headerTitle">
+                <Typography component="h1" variant="h5" className="headerTitle" sx={{ fontFamily: 'Verdana' }}>
                     LOGIN USER
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
@@ -51,6 +53,31 @@ export default function Login() {
                         name="username"
                         autoComplete="username"
                         autoFocus
+                        sx={{
+                            '& label': {
+                                color: 'rgb(38, 143, 67)', // Normal label color
+                            },
+                            '& label.Mui-focused': {
+                                color: 'rgb(65, 195, 102)',
+                            },
+                            '& .MuiInput-underline:after': {
+                                borderBottomColor: 'rgb(65, 195, 102)',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'rgb(65, 195, 102)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'rgb(65, 195, 102)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'rgb(65, 195, 102)',
+                                },
+                                '& .MuiInputBase-input': {
+                                    color: 'rgb(65, 195, 102)', // Text field value color
+                                },
+                            },
+                        }}
                     />
                     <TextField
                         margin="normal"
@@ -61,23 +88,64 @@ export default function Login() {
                         type="password"
                         id="password"
                         autoComplete="current-password"
+                        sx={{
+                            '& label': {
+                                color: 'rgb(38, 143, 67)', // Normal label color
+                            },
+                            '& label.Mui-focused': {
+                                color: 'rgb(65, 195, 102)',
+                            },
+                            '& .MuiInput-underline:after': {
+                                borderBottomColor: 'rgb(65, 195, 102)',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                                '& fieldset': {
+                                    borderColor: 'rgb(65, 195, 102)',
+                                },
+                                '&:hover fieldset': {
+                                    borderColor: 'rgb(65, 195, 102)',
+                                },
+                                '&.Mui-focused fieldset': {
+                                    borderColor: 'rgb(65, 195, 102)',
+                                },
+                                '& .MuiInputBase-input': {
+                                    color: 'rgb(65, 195, 102)', // Text field value color
+                                },
+                            },
+                        }}
                     />
-                    <Typography className="error">
+                    <Typography className="error" color="error">
                         {error}
                     </Typography>
-                    <FormControlLabel
-                        control={<Checkbox value="remember" color="primary" />}
-                        label="Remember me"
-                    />
+                    <Grid container spacing={2}>
+                        <Grid item xs>
+                            <FormControlLabel
+                                control={<Checkbox value="remember" sx={{ color: 'rgb(162, 233, 182)' }} />}
+                                label="Remember me"
+                                sx={{ color: 'rgb(65, 195, 102)' }}
+                            />
+                        </Grid>
+                        <Grid item xs sx={{ marginTop: '12px', marginRight: '-130px' }}>
+                            <Link href="#" variant="body2" style={{ color: 'rgb(154, 150, 240)', }}>
+                                Forgot password?
+                            </Link>
+                        </Grid>
+                    </Grid>
                     <Button
                         type="submit"
                         fullWidth
                         variant="contained"
-                        sx={{ mt: 3, mb: 2, backgroundColor: '#262626' }}
+                        sx={{ mt: 3, mb: 2, backgroundColor: 'rgb(65, 195, 102)' }}
                     >
-                        LogIn
+                        Log In
                     </Button>
-
+                    <Grid container spacing={2}>
+                        <Grid item>
+                            <Link to="/register" variant="body2" style={{ color: 'rgb(154, 150, 240)' }}>
+                                {"Don't have an account? Sign Up"}
+                            </Link>
+                        </Grid>
+                    </Grid>
                 </Box>
             </Box>
         </Container>

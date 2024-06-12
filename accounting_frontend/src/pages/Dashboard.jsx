@@ -15,6 +15,7 @@ import '../css/dashboard.css';
 import { getCounts } from "../utils/backend";
 
 
+
 export default function Dashboard() {
     const [counts, setCounts] = useState({});
     const [error, setError] = useState(null);
@@ -50,185 +51,88 @@ export default function Dashboard() {
     }, []);
 
     return (
-        <Box
-            component="main"
-            sx={{
-                backgroundColor: (theme) =>
-                    theme.palette.mode === 'light'
-                        ? theme.palette.grey[100]
-                        : theme.palette.grey[900],
-                flexGrow: 1,
-                height: '100vh',
-                overflow: 'auto',
-            }}
-        >
-            <Toolbar />
-            <Container maxWidth="lg" className='dashboardContainer'>
-                <Grid container spacing={3} >
-                    {/* Earnings */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Earnings</Typography>
-                                <Typography>
-                                    <EarningsIcon className='earningsIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.earningsCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    {/* Expenditures */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Expenditures</Typography>
-                                <Typography>
-                                    <ExpendituresIcon className='expendituresIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.expendituresCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    {/* Payable */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Payable</Typography>
-                                <Typography>
-                                    <PayableIcon className='payableIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.payableCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    {/* Receivable */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Receivable</Typography>
-                                <Typography>
-                                    <ReceivableIcon className='receivableIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.receivableCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    {/* Operating */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Operating</Typography>
-                                <Typography>
-                                    <OperatingIcon className='operatingIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.operatingCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+        <>
+            <Box
+                component="main"
+                sx={{
+                    backgroundColor: (theme) =>
+                        theme.palette.mode === 'light'
+                            ? theme.palette.grey[100]
+                            : theme.palette.grey[900],
+                    flexGrow: 1,
+                    height: '100vh',
+                    overflow: 'auto',
+                }}
+            >
+                <Toolbar />
+                <Container maxWidth="lg" className='dashboardContainer'>
+                    <Grid container spacing={3} >
+                        {/* Earnings */}
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Earnings</Typography>
+                                    <Typography>
+                                        <EarningsIcon className='earningsIcon' />
+                                        {loading ? <CircularProgress size={15} /> : counts.earnings}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        {/* Expenditures */}
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Expenditures</Typography>
+                                    <Typography>
+                                        <ExpendituresIcon className='expendituresIcon' />
+                                        {loading ? <CircularProgress size={15} /> : counts.expenditures}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+                        {/* Operating */}
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Operating</Typography>
+                                    <Typography>
+                                        <OperatingIcon className='operatingIcon' />
+                                        {loading ? <CircularProgress size={15} /> : counts.operating}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
 
-                    {/* Investing */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Investing</Typography>
-                                <Typography>
-                                    <InvestingIcon className='investingIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.investingCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
-                    </Grid>
+                        {/* Investing */}
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Investing</Typography>
+                                    <Typography>
+                                        <InvestingIcon className='investingIcon' />
+                                        {loading ? <CircularProgress size={15} /> : counts.investing}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
 
-                    {/* Financing */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">Financing</Typography>
-                                <Typography>
-                                    <FinancingIcon className='financingIcon' />
-                                    {loading ? <CircularProgress size={15} /> : counts.financingCount}
-                                </Typography>
-                            </CardContent>
-                        </Card>
+                        {/* Financing */}
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Card>
+                                <CardContent>
+                                    <Typography variant="h6">Financing</Typography>
+                                    <Typography>
+                                        <FinancingIcon className='financingIcon' />
+                                        {loading ? <CircularProgress size={15} /> : counts.financing}
+                                    </Typography>
+                                </CardContent>
+                            </Card>
+                        </Grid>
+
                     </Grid>
-                    {/* Transaction Type */}
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <div style={{ display: 'flex' }}>
-                                    <TransactionTypeIcon className='transactionTypeIcon' />
-                                    <Typography variant="h6">Transaction Type</Typography>
-                                </div>
-                                <Divider />
-                                <Grid container spacing={1} sx={{ mt: 1 }}>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Cash In:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>
-                                            {loading ? <CircularProgress size={15} /> : counts.transactionTypes && counts.transactionTypes.cashIn}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                <Grid container spacing={1} sx={{ mt: 1 }}>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Cash Out:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>
-                                            {loading ? <CircularProgress size={15} /> : counts.transactionTypes && counts.transactionTypes.cashOut}
-                                        </Typography>
-                                    </Grid>
-                                </Grid>
-                                {/* Repeat similar structure for other transaction types */}
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                        <Card>
-                            <CardContent>
-                                <div className='paymentHeader'>
-                                    <PaymentIcon className='paymentIcon' />
-                                    <Typography variant="h6"> Payment Method</Typography>
-                                </div>
-                                <Divider />
-                                <Grid container spacing={1} sx={{ mt: 1 }}>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Cash:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>{loading ? <CircularProgress size={15} /> : counts.paymentMethods && counts.paymentMethods.cash} </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Credit Card:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>{loading ? <CircularProgress size={15} /> : counts.paymentMethods && counts.paymentMethods.creditCard} </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Debit Card:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>{loading ? <CircularProgress size={15} /> : counts.paymentMethods && counts.paymentMethods.debitCard} </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Check:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>{loading ? <CircularProgress size={15} /> : counts.paymentMethods && counts.paymentMethods.check} </Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography><span className='boldText'>Online:</span></Typography>
-                                    </Grid>
-                                    <Grid item xs={6}>
-                                        <Typography>{loading ? <CircularProgress size={15} /> : counts.paymentMethods && counts.paymentMethods.online} </Typography>
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                </Grid>
-            </Container>
-        </Box >
+                </Container>
+            </Box >
+        </>
     );
 }

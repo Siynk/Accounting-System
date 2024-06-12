@@ -5,14 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Activity extends Model
+class ClientTransactionRequest extends Model
 {
     use HasFactory;
-    protected $table = 'activity';
+    protected $table = 'clienttransactionrequest';
     protected $fillable = [
+        'clientID',
         'transactionID',
-        'description',
+        'status',
+        'action',
+        'requestDate'
     ];
-
     public $timestamps = false;
 }

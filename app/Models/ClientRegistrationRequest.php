@@ -5,10 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Transaction extends Model
+class ClientRegistrationRequest extends Model
 {
     use HasFactory;
-    protected $table = 'transaction';
+    protected $table = 'clientregistrationrequest';
 
     /**
      * The attributes that are mass assignable.
@@ -16,14 +16,8 @@ class Transaction extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'transactionDate',
-        'description',
-        'productLine',
-        'clientID',
-        'amount',
-        'cashFlowCategory',
-        'isDeleted'
+        'status',
+        'userID',
     ];
-
     public $timestamps = false;
 }

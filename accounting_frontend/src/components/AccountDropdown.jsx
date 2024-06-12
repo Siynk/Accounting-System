@@ -7,7 +7,7 @@ import { useStateContext } from '../context/ContextProvider';
 
 const AccountDropdown = () => {
     let [anchorEl, setAnchorEl] = useState(null);
-    let { setUser, setToken } = useStateContext();
+    let { user } = useStateContext();
 
     const handleMenuOpen = (event) => {
         setAnchorEl(event.currentTarget);
@@ -38,7 +38,9 @@ const AccountDropdown = () => {
                 onClose={handleMenuClose}
             >
                 <MenuItem component={Link} to="/account-info" className='menu' onClick={handleMenuClose}>Account Info</MenuItem>
-                <MenuItem component={Link} to="/add-user" onClick={handleMenuClose}>Add New User</MenuItem>
+                {user.userType === 'admin' && (
+                    <MenuItem component={Link} to="/add-user" onClick={handleMenuClose}>Add New Admin</MenuItem>
+                )}
             </Menu>
         </div>
     );

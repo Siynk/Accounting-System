@@ -1,43 +1,45 @@
 import { useState, createContext, useContext } from "react";
 
-let StateContext = createContext({
+// Define the context with an initial structure
+const StateContext = createContext({
     user: {},
     token: null,
+    singleTransaction: null,
     setUser: () => { },
-    setToken: () => { }
+    setToken: () => { },
+    setSingleTransaction: () => { }
 });
 
-export let ContextProvider = ({ children }) => {
-    let [user, setUser] = useState({});
-    let [token, _setToken] = useState(localStorage.getItem('ACCESS_TOKEN'));
+// Define the provider component
+export const ContextProvider = ({ children }) => {
+    const [user, setUser] = useState({});
+    const [token, _setToken] = useState(localStorage.getItem('ACCESS_TOKEN'));
+    const [singleTransaction, setSingleTransaction] = useState(null);
 
-    let setToken = (token) => {
+    // Function to set the token and manage local storage
+    const setToken = (token) => {
         _setToken(token);
         if (token) {
-            localStorage.setItem('ACCESS_TOKEN', token)
+            localStorage.setItem('ACCESS_TOKEN', token);
         } else {
-            localStorage.removeItem('ACCESS_TOKEN')
+            localStorage.removeItem('ACCESS_TOKEN');
         }
-    }
+    };
 
-    // const loginUser = (userData) => {
-    //     setUser(userData);
-    //     localStorage.setItem('USER', JSON.stringify(userData));
-    // }
-
-    // const logoutUser = () => {
-    //     setUser({});
-    //     localStorage.removeItem('USER');
-    //     localStorage.removeItem('ACCESS_TOKEN');
-    // }
-
+    // Provide state and setter functions to the context
     return (
         <StateContext.Provider value={{
-            user, token, setToken, setUser
+            user,
+            token,
+            singleTransaction,
+            setUser,
+            setToken,
+            setSingleTransaction
         }}>
             {children}
         </StateContext.Provider>
     );
-}
+};
 
-export let useStateContext = () => useContext(StateContext);
+// Hook to use the context
+export const useStateContext = () => useContext(StateContext);

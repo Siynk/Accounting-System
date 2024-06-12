@@ -11,6 +11,15 @@
     max-width: 600px;
     margin: auto;
 }
+.addTransactionInputsRight {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.addTransactionInputsRight label {
+    display: flex;
+    flex-direction: column;
+}
 
 .addTransactionInputs {
     display: flex;
@@ -32,6 +41,15 @@
     border-radius: 4px;
 }
 
+.addTransactionInputsRight input[type="text"],
+.addTransactionInputsRight input[type="number"],
+.addTransactionInputsRight input[type="date"],
+.addTransactionInputsRight select {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
 .addTransactionButton {
     grid-column: span 2;
     padding: 10px 15px;
@@ -40,7 +58,6 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 10px;
 }
 
 .addTransactionButton:hover {
@@ -51,4 +68,25 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+}
+.ttypeContainer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.ttypeContainer div {
+    width: 48%; /* Adjust the width to control spacing between columns */
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px; /* Add space between rows */
+}
+
+.ttypeContainer input[type="checkbox"] {
+    margin-right: 10px; /* Space between checkbox and label */
+}
+
+.ttype {
+    display: inline-block;
+    font-size: 12px;
 }

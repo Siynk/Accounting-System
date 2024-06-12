@@ -11,22 +11,33 @@ import { addUser } from '../utils/backend';
 
 const AddUser = () => {
     let [error, setError] = useState(null);
-
+    let [passwordMismatch, setPasswordMismatch] = useState(false);
 
     const handleSubmit = (event) => {
         event.preventDefault();
         let data = new FormData(event.currentTarget);
+        let password = data.get("password");
+        let confirmPassword = data.get("confirmPassword");
+
+        if (password !== confirmPassword) {
+            setPasswordMismatch(true);
+            return;
+        } else {
+            setPasswordMismatch(false);
+        }
+
         let payload = {
             name: data.get("name"),
             username: data.get("username"),
-            password: data.get("password"),
+            password: password,
             address: data.get("address"),
             email: data.get("email"),
             contact: data.get("contact"),
-        }
+            userType: 'admin'
+        };
+
         console.log(data);
         addUser(payload, setError, event);
-
     };
 
     return (
@@ -51,10 +62,9 @@ const AddUser = () => {
                                         <TableRow>
                                             <TableCell colSpan={2} >
                                                 <div className='submitButtonAndErrorContainer'>
-                                                    <div className='submitButtonContainer"'>
+                                                    <div className='submitButtonContainer'>
                                                         <Button type='submit' style={{ backgroundColor: "#858a8f", color: "white" }} className="submitButton">Submit</Button>
                                                     </div>
-
                                                 </div>
                                             </TableCell>
                                         </TableRow>
@@ -73,7 +83,7 @@ const AddUser = () => {
                                                     autoFocus
                                                 />
                                                 {error && error.name && error.name.map((errorMessage, index) => (
-                                                    <Typography key={index} ><span className='addUserErrorText'>{errorMessage}</span></Typography>
+                                                    <Typography key={index}><span className='addUserErrorText'>{errorMessage}</span></Typography>
                                                 ))}
                                             </TableCell>
                                         </TableRow>
@@ -88,7 +98,7 @@ const AddUser = () => {
                                                     autoComplete="username"
                                                 />
                                                 {error && error.username && error.username.map((errorMessage, index) => (
-                                                    <Typography key={index} ><span className='addUserErrorText'>{errorMessage}</span></Typography>
+                                                    <Typography key={index}><span className='addUserErrorText'>{errorMessage}</span></Typography>
                                                 ))}
                                             </TableCell>
                                         </TableRow>
@@ -103,13 +113,27 @@ const AddUser = () => {
                                                     autoComplete="password"
                                                 />
                                                 {error && error.password && error.password.map((errorMessage, index) => (
-                                                    <Typography key={index} ><span className='addUserErrorText'>{errorMessage}</span></Typography>
+                                                    <Typography key={index}><span className='addUserErrorText'>{errorMessage}</span></Typography>
                                                 ))}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
+                                            <TableCell><strong>Confirm Password:</strong></TableCell>
+                                            <TableCell>
+                                                <input
+                                                    type="password"
+                                                    className="input"
+                                                    id="confirmPassword"
+                                                    name="confirmPassword"
+                                                    autoComplete="confirm-password"
+                                                />
+                                                {passwordMismatch && (
+                                                    <Typography><span className='addUserErrorText'>Passwords do not match</span></Typography>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                        <TableRow>
                                             <TableCell><strong>Address:</strong></TableCell>
-
                                             <TableCell>
                                                 <input
                                                     type="text"
@@ -119,13 +143,12 @@ const AddUser = () => {
                                                     autoComplete="address"
                                                 />
                                                 {error && error.address && error.address.map((errorMessage, index) => (
-                                                    <Typography key={index} ><span className='addUserErrorText'>{errorMessage}</span></Typography>
+                                                    <Typography key={index}><span className='addUserErrorText'>{errorMessage}</span></Typography>
                                                 ))}
                                             </TableCell>
                                         </TableRow>
                                         <TableRow>
                                             <TableCell><strong>Email:</strong></TableCell>
-
                                             <TableCell>
                                                 <input
                                                     type="email"
@@ -138,7 +161,6 @@ const AddUser = () => {
                                                     <Typography key={index}><span className='addUserErrorText'>{errorMessage}</span></Typography>
                                                 ))}
                                             </TableCell>
-
                                         </TableRow>
                                         <TableRow>
                                             <TableCell><strong>Contact:</strong></TableCell>
@@ -151,19 +173,18 @@ const AddUser = () => {
                                                     autoComplete="contact"
                                                 />
                                                 {error && error.contact && error.contact.map((errorMessage, index) => (
-                                                    <Typography key={index} ><span className='addUserErrorText'>{errorMessage}</span></Typography>
+                                                    <Typography key={index}><span className='addUserErrorText'>{errorMessage}</span></Typography>
                                                 ))}
                                             </TableCell>
                                         </TableRow>
                                     </TableBody>
-
                                 </Table>
                             </TableContainer>
                         </Box>
                     </Grid>
                 </Grid>
             </Container>
-        </Box >
+        </Box>
     );
 }
 

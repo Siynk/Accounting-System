@@ -1,0 +1,166 @@
+import React, { useState } from 'react';
+import { Container } from '@mui/material';
+import '../css/registration.scss';
+import Username from '@mui/icons-material/Person';
+import Password from '@mui/icons-material/Lock';
+import Email from '@mui/icons-material/Email';
+import Address from '@mui/icons-material/Home';
+import Contact from '@mui/icons-material/Phone';
+import Company from '@mui/icons-material/Business';
+import Name from '@mui/icons-material/AccountCircle'; // Import the Name icon
+import { registerClient } from '../utils/backend';
+
+
+
+const Register = () => {
+    const [formData, setFormData] = useState({
+        name: '', // Add the name field to the formData state
+        username: '',
+        password: '',
+        email: '',
+        address: '',
+        contact: '',
+        company: '',
+    });
+    const [errors, setErrors] = useState({});
+    const [confirmError, setConfirmError] = useState('');
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (formData.password !== formData.confirmPassword) {
+            setConfirmError('Passwords do not match');
+            return;
+        }
+
+        const payload = {
+            ...formData,
+            userType: 'client' // Add userType with a constant value
+        };
+
+        registerClient(payload, setErrors, e);
+    };
+
+    return (
+        <Container maxWidth="md">
+            <div className="form_wrapper-register">
+                <div className="form_container-register">
+                    <div className="title_container-register">
+                        <h2>Client Registration</h2>
+                    </div>
+                    <div className="row_register clearfix-register">
+                        <div>
+                            <form onSubmit={handleSubmit}>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Name /></span> {/* Use the Name icon */}
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        placeholder="Name"
+                                        value={formData.name}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.name && <p className="error-message">{errors.name}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Username /></span>
+                                    <input
+                                        type="text"
+                                        name="username"
+                                        placeholder="Username"
+                                        value={formData.username}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.username && <p className="error-message">{errors.username}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Password /></span>
+                                    <input
+                                        type="password"
+                                        name="password"
+                                        placeholder="Password"
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.password && <p className="error-message">{errors.password}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Email /></span>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.email && <p className="error-message">{errors.email}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Password /></span>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        placeholder="Confirm Password"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {confirmError && <p className="error-message">{confirmError}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Address /></span>
+                                    <input
+                                        type="text"
+                                        name="address"
+                                        placeholder="Address"
+                                        value={formData.address}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.address && <p className="error-message">{errors.address}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Contact /></span>
+                                    <input
+                                        type="text"
+                                        name="contact"
+                                        placeholder="Contact"
+                                        value={formData.contact}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.contact && <p className="error-message">{errors.contact}</p>}
+                                </div>
+                                <div className="input_field-register">
+                                    <span className='register-icon'><Company /></span>
+                                    <input
+                                        type="text"
+                                        name="company"
+                                        placeholder="Company"
+                                        value={formData.company}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {errors.company && <p className="error-message">{errors.company}</p>}
+                                </div>
+                                <input className="button-register" type="submit" value="Register" />
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </Container>
+    );
+};
+
+export default Register;

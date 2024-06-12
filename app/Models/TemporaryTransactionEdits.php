@@ -5,15 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Account extends Model
+class TemporaryTransactionEdits extends Model
 {
     use HasFactory;
-    protected $table = 'accounts';
+    protected $table = 'temporarytransactionedits';
     protected $fillable = [
+        'newDescription',
+        'clientID',
         'transactionID',
-        'payable',
-        'receivable',
-        'effectivityDate',
+        'newAmount',
+        'status',
+        'editDate'
     ];
     public $timestamps = false;
 }
