@@ -64,7 +64,6 @@ const AddTransaction = () => {
                                 <input type="text" name="description" />
                             </label>
                             {error && <span className="error">{error.description}</span>}
-
                             <label>
                                 Client:
                                 <select name="clientID">
