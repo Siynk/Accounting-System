@@ -7,10 +7,16 @@ import MainLayout from './components/MainLayout';
 import AccountInfo from './pages/AccountInfo';
 import Transaction from './pages/Transaction';
 import AddTransaction from './pages/AddTransaction';
-import Reports from './pages/Reports';
+import TrendAnalysisReports from './pages/TrendAnalysisReports';
+import BalanceSheet from './pages/BalanceSheet';
 import ClientManagement from './pages/ClientManagement';
 import SingleTransaction from './pages/SingleTransaction';
 import Register from './pages/Register';
+import SingleUser from './pages/SingleUser';
+import IncomeStatement from './pages/IncomeStatement';
+import CashflowStatement from './pages/CashflowStatement';
+import SegmentReport from './pages/SegmentReport';
+import ForgotPassword from './pages/ForgotPassword';
 
 
 const router = createBrowserRouter([
@@ -25,6 +31,10 @@ const router = createBrowserRouter([
             {
                 path: '/register',
                 element: <Register />
+            },
+            {
+                path: '/forgot-password',
+                element: <ForgotPassword />
             }
 
         ]
@@ -54,16 +64,36 @@ const router = createBrowserRouter([
                 element: <AddTransaction />
             },
             {
-                path: '/reports',
-                element: <Reports />
+                path: '/reports/trend-analysis',
+                element: <TrendAnalysisReports />
+            },
+            {
+                path: '/reports/balance-sheet',
+                element: <BalanceSheet />
+            },
+            {
+                path: '/reports/income-statement',
+                element: <IncomeStatement />
+            },
+            {
+                path: '/reports/cashflow-statement',
+                element: <CashflowStatement />
+            },
+            {
+                path: '/reports/segment-report',
+                element: <SegmentReport />
             },
             {
                 path: '/client-management',
                 element: <ClientManagement />
             },
             {
-                path: '/single-transaction',
+                path: '/view-transaction',
                 element: <SingleTransaction />
+            },
+            {
+                path: '/view-client',
+                element: <SingleUser />
             },
 
         ]

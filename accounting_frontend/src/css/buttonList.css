@@ -1,0 +1,12 @@
+.buttonListSelected {
+    background-color: lightgray; /* Background color for selected items */
+}
+
+.buttonListCollapse {
+    transition: height 0.3s ease;
+}
+
+/* Optional: Add specific styles for sub-items */
+.buttonListSubItem {
+    padding-left: 32px; /* Indent for sub-buttons */
+}

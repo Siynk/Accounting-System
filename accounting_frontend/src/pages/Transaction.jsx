@@ -92,7 +92,7 @@ const Transaction = () => {
                                         <TableCell><span className='transaction-content'>{formatMoney(transaction.amount)}</span></TableCell>
                                         <TableCell>
                                             <div className='actions-container'>
-                                                <span onClick={() => handleView(transaction)}><Link className='actions view' to="/single-transaction"><ViewIcon /></Link></span>
+                                                <span onClick={() => handleView(transaction)}><Link className='actions view' to="/view-transaction"><ViewIcon /></Link></span>
                                                 <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span>
                                                 <span className='actions delete' onClick={() => handleDelete(transaction.id)}><DeleteIcon /></span>
                                             </div>

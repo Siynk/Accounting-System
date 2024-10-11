@@ -11,7 +11,6 @@ class TransactionType extends Model
     protected $table = 'transactiontype';
     protected $fillable = [
         'description',
-        'transactionID',
     ];
     public $timestamps = false;
 }

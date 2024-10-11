@@ -164,6 +164,24 @@ export async function filterTransactions(setError, setTransactions, payload) {
     });
 }
 
+export async function filterClients(setError, setUsers, payload) {
+  await axiosInstance.post('/filter-clients', payload)
+    .then(({ data }) => {
+      setUsers(data);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 400) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        console.log('An unexpected error occurred');
+      }
+    });
+}
+
 export async function updateTransaction(setError, payload) {
   await axiosInstance.post('/update-transaction', payload)
     .then(({ data }) => {
@@ -181,8 +199,27 @@ export async function updateTransaction(setError, payload) {
       }
     });
 }
+
 export async function deleteTransaction(setError, transactionID) {
   await axiosInstance.post('/delete-transaction', transactionID)
+    .then(({ data }) => {
+      alert(data.message);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function deleteUser(setError, userID) {
+  await axiosInstance.post('/delete-user', userID)
     .then(({ data }) => {
       alert(data.message);
       setError(null);
@@ -217,4 +254,137 @@ export async function registerClient(payload, setError, event) {
         alert('An unexpected error occurred');
       }
     });
+}
+
+export async function updateClient(setError, payload) {
+  await axiosInstance.post('/update-transaction', payload)
+    .then(({ data }) => {
+      console.log(data.message);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function generateTrendAnalysisReport(setError, setTrendAnalysisReport, payload) {
+  await axiosInstance.post('/generate-trend-analysis-report', payload)
+    .then(({ data }) => {
+      console.log(data);
+      setError(null);
+      setTrendAnalysisReport(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function generateBalanceSheet(setError, setBalanceSheet, payload) {
+  await axiosInstance.post('/generate-balance-sheet', payload)
+    .then(({ data }) => {
+      console.log(data);
+      setError(null);
+      setBalanceSheet(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function generateIncomeStatement(setError, setIncomeStatement, payload) {
+  await axiosInstance.post('/generate-income-statement', payload)
+    .then(({ data }) => {
+      console.log(data);
+      setError(null);
+      setIncomeStatement(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function generateCashflowStatement(setError, setCashflowStatement, payload) {
+  await axiosInstance.post('/generate-cashflow-statement', payload)
+    .then(({ data }) => {
+      console.log(data);
+      setError(null);
+      setCashflowStatement(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function generateSegmentReport(setError, setSegmentReport, payload) {
+  await axiosInstance.post('/generate-segment-report', payload)
+    .then(({ data }) => {
+      console.log(data);
+      setError(null);
+      setSegmentReport(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+export async function sendForgotPasswordEmail(setError, setResponse, payload) {
+  try {
+    const { data } = await axiosInstance.post('/send-forgot-password-email', payload);
+    setResponse(data.message); // Set the success message
+    setError(null); // Clear any existing errors
+    return { message: data.message }; // Return structured response
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      // Handle validation errors
+      const errors = error.response.data.errors;
+      setError(errors.message || "An error occurred"); // Use a default message
+      return { error: errors.message || "An error occurred" }; // Return structured response
+    } else {
+      // Handle other types of errors (network error, error 500, etc.)
+      console.log('An unexpected error occurred');
+      setError("An unexpected error occurred");
+      return { error: "An unexpected error occurred" }; // Return structured response
+    }
+  }
 }

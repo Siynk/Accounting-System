@@ -126,7 +126,7 @@ export default function Login() {
                             />
                         </Grid>
                         <Grid item xs sx={{ marginTop: '12px', marginRight: '-130px' }}>
-                            <Link href="#" variant="body2" style={{ color: 'rgb(154, 150, 240)', }}>
+                            <Link to={'/forgot-password'} variant="body2" style={{ color: 'rgb(154, 150, 240)', }}>
                                 Forgot password?
                             </Link>
                         </Grid>

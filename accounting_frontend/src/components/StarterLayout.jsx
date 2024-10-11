@@ -14,7 +14,7 @@ function StarterLayout() {
 
     return (
         <div className="starter-layout" style={{ backgroundImage: `url(${background})` }}>
-            <div className="content">
+            <div className="starter-layout-content">
                 <div className="logo-container">
                     {/* Place your logo here */}
                     <img src={logo} alt="Logo" />

@@ -2,11 +2,12 @@ import { Box, Container, Toolbar } from "@mui/material";
 import React, { useState, useEffect } from 'react';
 import '../css/addTransaction.css';
 import { addTransaction, getClients } from "../utils/backend";
+import { useStateContext } from "../context/ContextProvider";
 
 const AddTransaction = () => {
     const [clients, setClients] = useState([]);
     const [error, setError] = useState({});
-
+    let { user } = useStateContext();
     const transactionTypes = [
         { id: 1, name: 'Asset' },
         { id: 2, name: 'Liabilities' },
@@ -14,7 +15,9 @@ const AddTransaction = () => {
         { id: 4, name: 'Revenue' },
         { id: 5, name: 'Expense' },
         { id: 6, name: 'Sale' },
-        { id: 7, name: 'Purchase' }
+        { id: 7, name: 'Purchase' },
+        { id: 8, name: 'Loan' },
+        { id: 9, name: 'Dividends' }
     ];
 
     useEffect(() => {
@@ -67,9 +70,13 @@ const AddTransaction = () => {
                             <label>
                                 Client:
                                 <select name="clientID">
-                                    {clients.map(client => (
-                                        <option key={client.id} value={client.id}>{client.name}</option>
-                                    ))}
+                                    {user.userType === 'client' ? (
+                                        <option value={user.company}>{user.company}</option>
+                                    ) : (
+                                        user.userType === 'admin' && clients.map(client => (
+                                            <option key={client.id} value={client.id}>{client.company}</option>
+                                        ))
+                                    )}
                                 </select>
                             </label>
                             {error && <span className="error">{error.clientID}</span>}
@@ -78,7 +85,7 @@ const AddTransaction = () => {
                                 <div className="ttypeContainer">
                                     {transactionTypes.map(type => (
                                         <div key={type.id}>
-                                            <input type="checkbox" name="transactionTypes[]" value={type.name} />
+                                            <input type="checkbox" name="transactionTypes[]" value={type.id} />
                                             <label className="ttype">{type.name}</label>
                                         </div>
                                     ))}

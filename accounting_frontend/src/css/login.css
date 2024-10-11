@@ -18,7 +18,7 @@
     height: 97vh; /* Adjust the height as needed */
 }
 
-.content {
+.starter-layout-content {
     display: flex;
     justify-content: space-between;
     align-items: center;

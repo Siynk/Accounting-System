@@ -117,7 +117,7 @@
     /* Add your desired active styles here */
     transform: scale(0.95); /* Slightly shrink the button when clicked */
 }
-
+     
 .update:active {
     /* Add your desired active styles here */
     transform: scale(0.95); /* Slightly shrink the button when clicked */

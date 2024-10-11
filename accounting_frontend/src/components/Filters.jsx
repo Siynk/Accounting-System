@@ -92,6 +92,8 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                             <option value="Expense">Expense</option>
                             <option value="Sale">Sale</option>
                             <option value="Purchase">Purchase</option>
+                            <option value="Loan">Loan</option>
+                            <option value="Dividends">Dividends</option>
                         </select>
                     </div>
 

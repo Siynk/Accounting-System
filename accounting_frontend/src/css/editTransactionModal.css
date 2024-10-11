@@ -18,14 +18,17 @@
     margin-left: 200px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
+
 .modal-close-button {
     background-color: rgb(216, 225, 231);
     border-radius: 20px;
 }
+
 .modal-close-button:hover {
     background-color: rgb(175, 176, 176);
     cursor: pointer;
 }
+
 .modal-error {
     color: red;
 }
@@ -33,11 +36,13 @@
 h2 {
     color: #06b161;
 }
+
 .modal-header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 5px;
 }
+
 .modal-content {
     margin-top: 15px;
 }

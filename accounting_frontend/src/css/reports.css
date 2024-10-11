@@ -1,19 +1,443 @@
-.client-search-result {
-    font-size: 12px;
-    color: darkgreen;
+.trendAnalysis-search-container-report {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
-.generate-report-button-container {
-    margin-left: 20px;
+
+.trendAnalysis-filter {
+    width: 70%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
-.generate-report-button-container button {
-    background-color: #04aa6d; /* Green */
-    border: none;
-    color: white;
-    padding: 7px;
+
+.trendAnalysis-generate-report-button-container,
+.trendAnalysis-print-button-container {
+    margin-left: 10px;
+}
+
+.trendAnalysis-user-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.trendAnalysis-user-header {
+    font-weight: bold;
+    background-color: #f4f4f4;
+}
+
+.trendAnalysis-user-content {
+    padding: 8px;
     text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    border-radius: 5px;
+}
+
+.balanceSheet-container {
+    width: 80%;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.balanceSheet-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.balanceSheet-header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.balanceSheet-inputs {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.balanceSheet-input {
+    padding: 10px;
+    margin: 0 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.balanceSheet-button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
+}
+
+.balanceSheet-button.print-button {
+    background-color: #28a745;
+}
+
+.balanceSheet-content {
+    text-align: center;
+}
+
+.balanceSheet-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.balanceSheet-table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+
+.balanceSheet-table th,
+.balanceSheet-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.balanceSheet-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.balanceSheet-subheader-asset {
+    background-color: rgba(0, 128, 0, 0.1); /* Light gray for subheader */
+    font-weight: bold;
+}
+.balanceSheet-subheader-liability {
+    background-color: rgba(255, 0, 0, 0.1);
+    font-weight: bold;
+}
+.balanceSheet-subheader-equity {
+    background-color: rgba(0, 0, 255, 0.1);
+    font-weight: bold;
+}
+
+.balanceSheet-total {
+    background-color: #f5f5f5; /* Light gray for totals */
+    font-weight: bold;
+}
+
+.balanceSheet-table td:nth-child(2) {
+    text-align: right;
+}
+
+/* Color scheme for assets, liabilities, and equity */
+.balanceSheet-asset td {
+    color: green;
+}
+
+.balanceSheet-liability td {
+    color: red;
+}
+
+.balanceSheet-equity td {
+    color: blue;
+}
+
+/* Additional background colors for categories */
+.balanceSheet-tr {
+    background-color: #e0e0e0;
+}
+
+.incomeStatement-container {
+    width: 80%;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.incomeStatement-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.incomeStatement-header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.incomeStatement-inputs {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.incomeStatement-input {
+    padding: 10px;
+    margin: 0 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.incomeStatement-button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.incomeStatement-button.print-button {
+    background-color: #28a745;
+}
+
+.incomeStatement-content {
+    text-align: center;
+}
+
+.incomeStatement-title {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.income-statement-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.income-statement-table th,
+.income-statement-table td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+}
+
+.income-statement-table th {
+    background-color: #f0f0f0;
+}
+
+.sub-header {
+    font-weight: bold;
+    background-color: #e0f7fa; /* Light cyan for revenues */
+}
+
+.total-header {
+    font-weight: bold;
+    background-color: #ffe0b2; /* Light orange for totals */
+}
+
+.cashflowStatement-container {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.cashflowStatement-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.cashflowStatement-header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.cashflowStatement-title {
+    text-align: center;
+    color: #333;
+    margin: 20px 0;
+}
+
+.cashflowStatement-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cashflowStatement-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 150px;
+}
+
+.cashflowStatement-button {
+    padding: 10px 15px;
+    background-color: #4caf50; /* Green */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.cashflowStatement-button:hover {
+    background-color: #45a049;
+}
+
+.print-button {
+    background-color: #2196f3; /* Blue */
+}
+
+.print-button:hover {
+    background-color: #1e88e5;
+}
+
+.cashflowStatement-content {
+    margin-top: 20px;
+}
+
+.cashflowStatement-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.cashflowStatement-table th,
+.cashflowStatement-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.cashflowStatement-table th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.cashflowStatement-subheader-operatingActivities,
+.cashflowStatement-subheader-investingActivities,
+.cashflowStatement-subheader-financingActivities {
+    background-color: #e0e0e0;
+    font-weight: bold;
+}
+
+.cashflowStatement-total {
+    background-color: #d9ffd9; /* Light Green */
+    font-weight: bold;
+}
+
+.cashflowStatement-operatingActivity,
+.cashflowStatement-operatingIncomeActivities,
+.cashflowStatement-operatingExpenseActivities,
+.cashflowStatement-investingActivity,
+.cashflowStatement-investingIncomeActivities,
+.cashflowStatement-investingExpenseActivities,
+.cashflowStatement-financingActivity,
+.cashflowStatement-financingIncomeActivities,
+.cashflowStatement-financingExpenseActivities {
+    transition: background-color 0.3s ease;
+}
+
+.cashflowStatement-operatingActivity:hover,
+.cashflowStatement-operatingIncomeActivities:hover,
+.cashflowStatement-operatingExpenseActivities:hover,
+.cashflowStatement-investingActivity:hover,
+.cashflowStatement-investingIncomeActivities:hover,
+.cashflowStatement-investingExpenseActivities:hover,
+.cashflowStatement-financingActivity:hover,
+.cashflowStatement-financingIncomeActivities:hover,
+.cashflowStatement-financingExpenseActivities:hover {
+    background-color: #f1f1f1;
+}
+
+.segmentReport-container {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+.segmentReport-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.segmentReport-header h1 {
+    font-size: 24px;
+    color: #333;
+}
+
+.segmentReport-title {
+    text-align: center;
+    color: #333;
+    margin: 20px 0;
+}
+
+.segmentReport-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.segmentReport-input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 150px;
+}
+
+.segmentReport-button {
+    padding: 10px 15px;
+    background-color: #4caf50; /* Green */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.segmentReport-button:hover {
+    background-color: #45a049;
+}
+
+.print-button {
+    background-color: #2196f3; /* Blue */
+}
+
+.print-button:hover {
+    background-color: #1e88e5;
+}
+
+.segmentReport-content {
+    margin-top: 20px;
+}
+
+.segmentReport-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.segmentReport-table th,
+.segmentReport-table td {
+    padding: 12px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.segmentReport-table th {
+    background-color: #4caf50;
+    color: white;
+}
+
+.segmentReport-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.segmentReport-table tr:hover {
+    background-color: #ddd;
 }

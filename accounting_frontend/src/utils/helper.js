@@ -3,7 +3,7 @@ import { useStateContext } from '../context/ContextProvider';
 export default function getHeaderTitle(useLocation){
     let location = useLocation();
     let pageTitle = '';
-    let { singleTransaction } = useStateContext();
+    let { singleTransaction, viewClient } = useStateContext();
 
     switch (location.pathname) {
         case '/dashboard':
@@ -21,8 +21,29 @@ export default function getHeaderTitle(useLocation){
         case '/account-info':
             pageTitle = 'ACCOUNT INFO';
             break;
-        case '/single-transaction':
+        case '/client-management':
+            pageTitle = 'CLIENT MANAGEMENT';
+            break;
+        case '/reports/balance-sheet':
+            pageTitle = 'BALANCE SHEET';
+            break;
+        case '/reports/income-statement':
+            pageTitle = 'INCOME STATEMENT';
+            break;
+        case '/reports/cashflow-statement':
+            pageTitle = 'CASHFLOW STATEMENT';
+            break;
+        case '/reports/segment-report':
+            pageTitle = 'SEGMENT REPORT';
+            break;
+        case '/reports/trend-analysis':
+            pageTitle = 'TREND ANALYSIS REPORT';
+            break;
+        case '/view-transaction':
             pageTitle = singleTransaction.company.toUpperCase() + ' TRANSACTION DETAILS';
+            break;
+        case '/view-client':
+            pageTitle = viewClient.name.toUpperCase() + ' ACCOUNT DETAILS';
             break;
         default:
             pageTitle = 'DASHBOARD'; // default page title

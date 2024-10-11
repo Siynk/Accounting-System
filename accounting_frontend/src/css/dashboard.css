@@ -1,5 +1,6 @@
 .dashboardContainer {
     margin-top: 20px;
+    margin-bottom: 70px;
 }
 .gridContainer {
     margin-bottom: 70px;
@@ -49,4 +50,28 @@
 .circular-progress {
     width: 24px; /* Adjust the width as needed */
     height: 24px; /* Adjust the height as needed */
+}
+
+.db-icon {
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+/* Additional styles for charts */
+.chartCard {
+    margin-bottom: 20px;
+}
+.kpiCard {
+    background-color: #e1f5fe;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.kpiHeader {
+    color: #0288d1;
+}
+
+.kpiValue {
+    color: #757575;
 }

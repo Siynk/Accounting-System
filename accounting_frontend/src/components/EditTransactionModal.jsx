@@ -20,8 +20,6 @@ const EditTransactionModal = ({ transaction, onClose }) => {
         updateTransaction(setError, payload);
 
         onClose();
-
-
     };
 
     return (
