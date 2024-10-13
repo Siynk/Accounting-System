@@ -64,7 +64,7 @@ function MainLayout() {
         } else {
             setLoading(true); // If no token, just set loading to false
         }
-    }, [token, user]);
+    }, []);
 
     React.useEffect(() => {
         if (currentPath !== '/account-info') {
@@ -79,7 +79,7 @@ function MainLayout() {
             }
         }
 
-    }, [user, loading, accesses, currentPath, navigate]);
+    }, [currentPath]);
 
 
 
@@ -91,7 +91,7 @@ function MainLayout() {
 
     React.useEffect(() => {
         getLoggedInUser(setUser);
-    }, [setUser]);
+    }, []);
 
     const [open, setOpen] = React.useState(true);
     const toggleDrawer = () => {

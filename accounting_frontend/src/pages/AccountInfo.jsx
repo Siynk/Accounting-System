@@ -16,7 +16,7 @@ const AccountInfo = () => {
 
   React.useEffect(() => {
     getLoggedInUser(setUser);
-  }, [user]);
+  }, []);
 
   const [isEdit, setIsEdit] = useState(false);
   let [error, setError] = useState(null);
