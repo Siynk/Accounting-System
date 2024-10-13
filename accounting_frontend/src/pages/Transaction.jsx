@@ -65,7 +65,7 @@ const Transaction = () => {
                             <TableCell><span className='transaction-header'>DESCRIPTION</span></TableCell>
                             <TableCell><span className='transaction-header'>PRODUCT LINE</span></TableCell>
                             <TableCell><span className='transaction-header'>CLIENT</span></TableCell>
-                            <TableCell><span className='transaction-header'>CASH FLOW CATEGORY</span></TableCell>
+                            <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
                             <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
                         </TableRow>
@@ -88,7 +88,7 @@ const Transaction = () => {
                                         <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
                                         <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
                                         <TableCell><span className='transaction-content'>{transaction.company}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.cashFlowCategory}</span></TableCell>
+                                        <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
                                         <TableCell><span className='transaction-content'>{formatMoney(transaction.amount)}</span></TableCell>
                                         <TableCell>
                                             <div className='actions-container'>

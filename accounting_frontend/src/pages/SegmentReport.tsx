@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Container } from '@mui/material';
 import '../css/reports.css';
 import { generateSegmentReport } from '../utils/backend';
+import { useStateContext } from '../context/ContextProvider';
 
 const SegmentReport = () => {
     const [segmentReport, setSegmentReport] = useState({});
@@ -9,6 +10,13 @@ const SegmentReport = () => {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [error, setError] = useState(null);
+    const { user } = useStateContext();
+
+    useEffect(() => {
+        if (user && user.userType === 'client') {
+            setCompanyName(user.company);
+        }
+    }, [user]);
 
     const handleGenerate = useCallback(() => {
         const params = {
@@ -55,13 +63,13 @@ const SegmentReport = () => {
                 <div className="segmentReport-header">
                     <h1>Generate Segment Report</h1>
                     <div className="segmentReport-inputs">
-                        <input
+                    {user.userType !== 'client' && <input
                             type="text"
                             placeholder="Enter Company Name"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="segmentReport-input"
-                        />
+                        />}
                         <input
                             type="date"
                             value={dateFrom}

@@ -233,6 +233,10 @@
     font-weight: bold;
     background-color: #ffe0b2; /* Light orange for totals */
 }
+.total-header-net {
+    font-weight: bold;
+    background-color: #959afd; /* Light orange for totals */
+}
 
 .cashflowStatement-container {
     padding: 20px;
@@ -325,6 +329,18 @@
 
 .cashflowStatement-total {
     background-color: #d9ffd9; /* Light Green */
+    font-weight: bold;
+}
+
+.cashflowStatement-total-net {
+    background-color: #ffe0b2; /* Light Green */
+    color: black;
+    font-weight: bold;
+}
+
+.cashflowStatement-total-cashflow {
+    background-color: #959afd; /* Light Green */
+    color: black;
     font-weight: bold;
 }
 
@@ -440,4 +456,66 @@
 
 .segmentReport-table tr:hover {
     background-color: #ddd;
+}
+.icon-operating-activities::before {
+    content: "\f085"; /* Font Awesome code for 'cogs' */
+    font-family: "Font Awesome 5 Free"; /* Make sure to use the correct font family */
+    font-weight: 900; /* Ensure the solid icon is used */
+    margin-right: 5px;
+}
+
+.icon-operating-inflows::before {
+    content: "\f062"; /* Font Awesome code for 'arrow-up' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-operating-outflows::before {
+    content: "\f063"; /* Font Awesome code for 'arrow-down' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-investing-activities::before {
+    content: "\f0e7"; /* Font Awesome code for 'money-bill-alt' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-investing-inflows::before {
+    content: "\f062"; /* Font Awesome code for 'arrow-up' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-investing-outflows::before {
+    content: "\f063"; /* Font Awesome code for 'arrow-down' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-financing-activities::before {
+    content: "\f0e7"; /* Font Awesome code for 'hand-holding-usd' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-financing-inflows::before {
+    content: "\f062"; /* Font Awesome code for 'arrow-up' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.icon-financing-outflows::before {
+    content: "\f063"; /* Font Awesome code for 'arrow-down' */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
 }

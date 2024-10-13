@@ -5,19 +5,34 @@ const StateContext = createContext({
     user: {},
     token: null,
     singleTransaction: null,
-    viewClient: null, // New state for viewClient
+    viewClient: null,
     setUser: () => { },
     setToken: () => { },
     setSingleTransaction: () => { },
-    setViewClient: () => { } // Function to set viewClient
+    setViewClient: () => { }
 });
 
 // Define the provider component
 export const ContextProvider = ({ children }) => {
-    const [user, setUser] = useState({});
     const [token, _setToken] = useState(localStorage.getItem('ACCESS_TOKEN'));
     const [singleTransaction, setSingleTransaction] = useState(null);
-    const [viewClient, setViewClient] = useState(null); // State for viewClient
+    const [viewClient, setViewClient] = useState(null);
+
+    // Retrieve user data from localStorage or set as empty object initially
+    const [user, _setUser] = useState(() => {
+        const storedUser = localStorage.getItem('USER_DATA');
+        return storedUser ? JSON.parse(storedUser) : {};
+    });
+
+    // Function to set the user and manage local storage
+    const setUser = (user) => {
+        _setUser(user);
+        if (user) {
+            localStorage.setItem('USER_DATA', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('USER_DATA');
+        }
+    };
 
     // Function to set the token and manage local storage
     const setToken = (token) => {
@@ -35,11 +50,11 @@ export const ContextProvider = ({ children }) => {
             user,
             token,
             singleTransaction,
-            viewClient, // Include viewClient in the context value
+            viewClient,
             setUser,
             setToken,
             setSingleTransaction,
-            setViewClient // Function to set viewClient
+            setViewClient
         }}>
             {children}
         </StateContext.Provider>

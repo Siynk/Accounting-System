@@ -1,17 +1,26 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box, CircularProgress, Container, Table, TableBody, TableCell, TableHead, TableRow, Typography, Button } from '@mui/material';
 import '../css/reports.css';
 import { generateTrendAnalysisReport } from '../utils/backend';
 import PrintIcon from '@mui/icons-material/Print';
+import { useStateContext } from '../context/ContextProvider';
 
 const TrendAnalysisReports = () => {
     const [searchText, setSearchText] = useState('');
     const [error, setError] = useState(null);
     const [trendAnalysisReport, setTrendAnalysisReport] = useState([]);
     const [loading, setLoading] = useState(false);
+    const { user } = useStateContext();
+
+    useEffect(() => {
+        if (user && user.userType === 'client') {
+            setSearchText(user.company);
+        }
+    }, [user]);
 
     const handleGenerateTrendAnalysisReport = () => {
         const payload = searchText;
+        console.log(payload)
         fetchReport(payload);
     };
 
@@ -61,14 +70,14 @@ const TrendAnalysisReports = () => {
         >
             <Container maxWidth="md" style={{ marginTop: '100px' }}>
                 <div className="trendAnalysis-search-container-report">
-                    <input
+                    {user.userType !== 'client' && <input
                         type="text"
                         id="search-field"
                         placeholder="Search Client"
                         className="trendAnalysis-filter"
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
-                    />
+                    />}
                     <span className='trendAnalysis-generate-report-button-container'>
                         <Button variant="contained" onClick={handleGenerateTrendAnalysisReport}>Generate</Button>
                     </span>

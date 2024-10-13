@@ -17,6 +17,8 @@ import IncomeStatement from './pages/IncomeStatement';
 import CashflowStatement from './pages/CashflowStatement';
 import SegmentReport from './pages/SegmentReport';
 import ForgotPassword from './pages/ForgotPassword';
+import NoModuleAccess from './pages/NoModuleAccess';
+import ManageAccess from './pages/ManageAccess';
 
 
 const router = createBrowserRouter([
@@ -48,6 +50,10 @@ const router = createBrowserRouter([
                 element: <Dashboard />
             },
             {
+                path: '/no-module',
+                element: <NoModuleAccess />
+            },
+            {
                 path: '/account-info',
                 element: <AccountInfo />
             },
@@ -58,6 +64,10 @@ const router = createBrowserRouter([
             {
                 path: '/transactions',
                 element: <Transaction />
+            },
+            {
+                path: '/manage-access',
+                element: <ManageAccess />
             },
             {
                 path: '/add-transaction',

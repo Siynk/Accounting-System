@@ -36,3 +36,36 @@
 .outlet-container {
     margin-right: 5%; /* Adjust the margin as needed */
 }
+.loading-dialog {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* Ensure it appears above other content */
+}
+
+.loading-content {
+    text-align: center;
+    color: white; /* Change color based on your theme */
+}
+
+.spinner {
+    border: 8px solid rgba(255, 255, 255, 0.3);
+    border-left-color: #fff; /* Color for the spinner */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 10px auto; /* Center the spinner */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

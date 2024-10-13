@@ -3,17 +3,19 @@ import dayjs from 'dayjs';
 import '../css/transaction.css';
 import { Link } from 'react-router-dom';
 import { filterTransactions } from '../utils/backend';
+import { useStateContext } from '../context/ContextProvider';
 
 const Filters = ({ setError, setTransactions, setLoading }) => {
     // State for each filter
     const [transactionType, setTransactionType] = useState('');
     const [paymentMethod, setPaymentMethod] = useState('');
-    const [cashFlowCategory, setCashFlowCategory] = useState('');
+    const [category, setCategory] = useState('');
     const [balance, setBalance] = useState('');
     const [activity, setActivity] = useState('');
     const [fromDate, setFromDate] = useState(dayjs().format('YYYY-MM-DD'));
     const [toDate, setToDate] = useState(dayjs().format('YYYY-MM-DD'));
     const [searchText, setSearchText] = useState('');
+    const { user } = useStateContext();
 
     // Function to log the current state of filters
     const handleFilterChange = () => {
@@ -22,11 +24,16 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
             toDate,
             transactionType,
             paymentMethod,
-            cashFlowCategory,
+            category,
             balance,
             activity,
             searchText
         };
+
+        if (user.userType === 'client') {
+            payload.company = user.company;
+        }
+
         fetchTransactions(payload);
 
     };
@@ -53,7 +60,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
     // Effect to run the handleFilterChange function whenever any state changes
     useEffect(() => {
         handleFilterChange();
-    }, [fromDate, toDate, transactionType, paymentMethod, cashFlowCategory, balance, activity, searchText]);
+    }, [fromDate, toDate, transactionType, paymentMethod, category, balance, activity, searchText]);
 
     return (
         <div className="filters-container">
@@ -98,13 +105,13 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                     </div>
 
                     <div className="grid-item">
-                        <label htmlFor="cashFlowCategory">Cash Flow Category</label>
+                        <label htmlFor="category">Cash Flow Category</label>
                         <select
-                            id="cashFlowCategory"
-                            value={cashFlowCategory}
-                            onChange={(e) => setCashFlowCategory(e.target.value)}
+                            id="category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
                         >
-                            <option value="">Select Cash Flow Category</option>
+                            <option value="">Select Category</option>
                             <option value="Operating">Operating</option>
                             <option value="Investing">Investing</option>
                             <option value="Financing">Financing</option>

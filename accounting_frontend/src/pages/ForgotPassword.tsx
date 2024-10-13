@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Container } from '@mui/material';
+import { Container, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import '../css/forgotPassword.scss';
 import Email from '@mui/icons-material/Email';
 import { sendForgotPasswordEmail } from '../utils/backend';
 import CustomAlert from '../components/CustomAlert';
 
 const ForgotPassword = () => {
+    const navigate = useNavigate(); // Initialize useNavigate
     const [email, setEmail] = useState('');
     const [showAlert, setShowAlert] = useState(false);
     const [responseMessage, setResponseMessage] = useState('');
@@ -22,7 +24,7 @@ const ForgotPassword = () => {
 
         const params = { email };
         const result = await sendForgotPasswordEmail(setError, setResponseMessage, params);
-
+        setEmail('');
         if (result.error) {
             setError(result.error);
             setResponseMessage('');
@@ -49,6 +51,9 @@ const ForgotPassword = () => {
                     <div className="title_container-forgot">
                         <h2>Forgot Password</h2>
                     </div>
+                    <Button variant="outlined" onClick={() => navigate(-1)} style={{ marginBottom: '20px', background: '#8da58f', color: 'white' }}>
+                        Back
+                    </Button>
                     <div className="row_forgot clearfix-forgot">
                         <div>
                             <form onSubmit={handleSubmit}>

@@ -1,0 +1,38 @@
+.noModuleAccessContainer {
+    text-align: center;
+    padding: 20px;
+}
+
+.noAccessText {
+    margin-bottom: 20px;
+    color: #ff0000; /* Red color for emphasis */
+}
+
+.requestAccessButton {
+    margin-top: 10px;
+}
+
+.noModuleAccessContainer {
+    text-align: center;
+}
+
+.noModuleRequestAccessButton {
+    margin-top: 20px;
+}
+
+.noModuleDialogTitle {
+    font-weight: bold;
+}
+
+.noModuleDialogContent {
+    margin-bottom: 20px;
+}
+
+.noModuleCancelButton {
+    margin-right: 10px;
+}
+
+.noModuleSubmitButton {
+    background-color: #4caf50;
+    color: white;
+}

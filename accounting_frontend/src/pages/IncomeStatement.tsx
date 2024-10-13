@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Container } from '@mui/material';
 import '../css/reports.css';
 import { generateIncomeStatement } from '../utils/backend';
+import { useStateContext } from '../context/ContextProvider';
 
 const IncomeStatement = () => {
     const [incomeStatement, setIncomeStatement] = useState({});
@@ -9,6 +10,13 @@ const IncomeStatement = () => {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [error, setError] = useState(null);
+    const { user } = useStateContext();
+
+    useEffect(() => {
+        if (user && user.userType === 'client') {
+            setCompanyName(user.company);
+        }
+    }, [user]);
 
     const handleGenerate = useCallback(() => {
         const params = {
@@ -83,13 +91,13 @@ const IncomeStatement = () => {
                 <div className="incomeStatement-header">
                     <h1>Generate Income Statement</h1>
                     <div className="incomeStatement-inputs">
-                        <input
+                    {user.userType !== 'client' && <input
                             type="text"
                             placeholder="Enter Company Name"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="incomeStatement-input"
-                        />
+                        />}
                         <input
                             type="date"
                             value={dateFrom}
@@ -124,7 +132,7 @@ const IncomeStatement = () => {
                             {renderSection('Operating Expenses', incomeStatement.operatingExpenses, 'totalOperatingExpenses')}
                             {renderSection('Financing Expenses', incomeStatement.financingExpenses, 'totalFinancingExpenses')}
                             {renderSection('Investing Expenses', incomeStatement.investingExpenses, 'totalInvestingExpenses')}
-                            <tr className="total-header">
+                            <tr className="total-header-net">
                                 <td>Net Income</td>
                                 <td>{formatAmount(incomeStatement.netIncome)}</td>
                             </tr>

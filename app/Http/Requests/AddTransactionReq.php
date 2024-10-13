@@ -28,7 +28,9 @@ class AddTransactionReq extends FormRequest
             'productLine'   => 'required|string|max:255',
             'clientID'        => 'required',
             'amount'          => 'required|numeric|min:0', // Assuming amount cannot be negative
-            'cashFlowCategory'   => 'required|string|max:255',
+            'category'   => 'required|string|max:255',
+            'cashFlow'   => 'required|string|max:255',
+            'status'   => 'required|string',
 
         ];
     }

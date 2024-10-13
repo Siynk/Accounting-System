@@ -28,6 +28,7 @@ import {
     Bar,
 } from 'recharts';
 import { getCounts, generateBalanceSheet, generateCashflowStatement, generateIncomeStatement, generateSegmentReport, generateTrendAnalysisReport } from "../utils/backend";
+import { useStateContext } from "../context/ContextProvider";
 
 
 export default function Dashboard() {
@@ -39,19 +40,33 @@ export default function Dashboard() {
     const [segmentReport, setSegmentReport] = useState([]);
     const [trendAnalysisReport, setTrendAnalysisReport] = useState([]);
     const [incomeStatement, setIncomeStatement] = useState({});
-    const [companyName, setCompanyName] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
-
+    const { user } = useStateContext();
+    const [companyName, setCompanyName] = useState('');
     // Set the initial date range on component mount
     useEffect(() => {
         const currentDate = new Date();
         const startOfYear = new Date(currentDate.getFullYear(), 0, 1); // January 1st of the current year
 
-        setDateFrom(startOfYear.toISOString().split('T')[0]); // Format: YYYY-MM-DD
-        setDateTo(currentDate.toISOString().split('T')[0]); // Format: YYYY-MM-DD
+        // Format dates as YYYY-MM-DD without converting to UTC
+        const formatDate = (date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
+
+        setDateFrom(formatDate(startOfYear));
+        setDateTo(formatDate(currentDate));
     }, []);
 
+
+    useEffect(() => {
+        if (user && user.userType === 'client') {
+            setCompanyName(user.company);
+        }
+    }, [user]);
     // Debounce function to prevent too many requests
     const debounce = (func, wait) => {
         let timeout;
@@ -69,12 +84,12 @@ export default function Dashboard() {
     const fetchCounts = useCallback(
         debounce(() => {
             setLoading(true);
-            getCounts(setError, setCounts)
+            getCounts(setError, setCounts, companyName) // Pass the companyName here
                 .finally(() => {
                     setLoading(false);
                 });
         }, 500),
-        []
+        [companyName] // Make sure to add companyName to dependencies
     );
 
     useEffect(() => {
@@ -181,7 +196,7 @@ export default function Dashboard() {
                                         <Box>
                                             <Typography variant="h6" color="primary">Earnings</Typography>
                                             <Typography color="textSecondary">
-                                                {loading ? <CircularProgress size={15} /> : `₱${parseFloat(counts.earnings).toLocaleString()}`}
+                                                {loading ? <CircularProgress size={15} /> : counts.earnings}
                                             </Typography>
                                         </Box>
                                         <Box position="relative" display="inline-flex">
@@ -211,7 +226,7 @@ export default function Dashboard() {
                                         <Box>
                                             <Typography variant="h6" color="secondary">Expenditures</Typography>
                                             <Typography color="textSecondary">
-                                                {loading ? <CircularProgress size={15} /> : `₱${parseFloat(counts.expenditures).toLocaleString()}`}
+                                                {loading ? <CircularProgress size={15} /> : counts.expenditures}
                                             </Typography>
                                         </Box>
                                         <Box position="relative" display="inline-flex">
@@ -241,7 +256,7 @@ export default function Dashboard() {
                                         <Box>
                                             <Typography variant="h6" color="success.main">Operating</Typography>
                                             <Typography color="textSecondary">
-                                                {loading ? <CircularProgress size={15} /> : `₱${parseFloat(counts.operating).toLocaleString()}`}
+                                                {loading ? <CircularProgress size={15} /> : counts.operating}
                                             </Typography>
                                         </Box>
                                         <Box position="relative" display="inline-flex">
@@ -271,7 +286,7 @@ export default function Dashboard() {
                                         <Box>
                                             <Typography variant="h6" color="purple">Investing</Typography>
                                             <Typography color="textSecondary">
-                                                {loading ? <CircularProgress size={15} /> : `₱${parseFloat(counts.investing).toLocaleString()}`}
+                                                {loading ? <CircularProgress size={15} /> : counts.investing}
                                             </Typography>
                                         </Box>
                                         <Box position="relative" display="inline-flex">
@@ -301,7 +316,7 @@ export default function Dashboard() {
                                         <Box>
                                             <Typography variant="h6" color="error.main">Financing</Typography>
                                             <Typography color="textSecondary">
-                                                {loading ? <CircularProgress size={15} /> : `₱${parseFloat(counts.financing).toLocaleString()}`}
+                                                {loading ? <CircularProgress size={15} /> : counts.financing}
                                             </Typography>
                                         </Box>
                                         <Box position="relative" display="inline-flex">

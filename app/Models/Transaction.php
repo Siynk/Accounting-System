@@ -21,7 +21,8 @@ class Transaction extends Model
         'productLine',
         'clientID',
         'amount',
-        'cashFlowCategory',
+        'category',
+        'cashFlow',
         'isDeleted'
     ];
 

@@ -5,19 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ClientRegistrationRequest extends Model
+class ModuleAccess extends Model
 {
     use HasFactory;
-    protected $table = 'clientregistrationrequest';
-
+    protected $table = 'module_access';
     protected $fillable = [
-        'status',
-        'userID',
+        'user_id',
+        'module_id',
+        'hasAccess'
     ];
     public $timestamps = false;
 
-    public function user()
+    public function module()
     {
-        return $this->belongsTo(User::class, 'userID', 'id');
+        return $this->belongsTo(Modules::class, 'module_id');
     }
 }

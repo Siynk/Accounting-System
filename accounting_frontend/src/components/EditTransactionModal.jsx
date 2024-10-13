@@ -15,7 +15,7 @@ const EditTransactionModal = ({ transaction, onClose }) => {
             clientID: transaction.clientID,
             newAmount,
             transactionID: transaction.id,
-            status: user.userType === 'admin' ? 'Approve' : 'Pending'
+            status: user.userType === 'client' ? 'Pending' : 'Approved'
         };
         updateTransaction(setError, payload);
 

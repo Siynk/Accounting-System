@@ -38,10 +38,15 @@ const AddTransaction = () => {
                 data[key] = value;
             }
         }
+
+        // Set status based on userType
+        data.status = user.userType === 'client' ? 'Pending' : 'Approved';
+
         // Perform other validations as needed
         // If all validations pass, submit the form
         addTransaction(data, setError, e);
     };
+
 
     return (
         <Box
@@ -71,9 +76,9 @@ const AddTransaction = () => {
                                 Client:
                                 <select name="clientID">
                                     {user.userType === 'client' ? (
-                                        <option value={user.company}>{user.company}</option>
+                                        <option value={user.id}>{user.company}</option>
                                     ) : (
-                                        user.userType === 'admin' && clients.map(client => (
+                                        user.userType === 'admin' || user.userType === 'superadmin' && clients.map(client => (
                                             <option key={client.id} value={client.id}>{client.company}</option>
                                         ))
                                     )}
@@ -100,11 +105,18 @@ const AddTransaction = () => {
                             </label>
                             {error && <span className="error">{error.amount}</span>}
                             <label>
-                                Cash Flow Category:
-                                <select name="cashFlowCategory" >
+                                Transaction Category:
+                                <select name="category" >
                                     <option value="Operating">Operating</option>
                                     <option value="Investing">Investing</option>
                                     <option value="Financing">Financing</option>
+                                </select>
+                            </label>
+                            <label>
+                                Cash flow:
+                                <select name="cashFlow" >
+                                    <option value="Inflow">Inflow</option>
+                                    <option value="Outflow">Outflow</option>
                                 </select>
                             </label>
                             {error && <span className="error">{error.cashFlowCategory}</span>}

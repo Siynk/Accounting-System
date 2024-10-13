@@ -1,11 +1,10 @@
 import CryptoJS from 'crypto-js';
 import { useStateContext } from '../context/ContextProvider';
-export default function getHeaderTitle(useLocation){
-    let location = useLocation();
+export default function getHeaderTitle(pathname){
     let pageTitle = '';
     let { singleTransaction, viewClient } = useStateContext();
 
-    switch (location.pathname) {
+    switch (pathname) {
         case '/dashboard':
             pageTitle = 'DASHBOARD';
             break;
@@ -38,6 +37,12 @@ export default function getHeaderTitle(useLocation){
             break;
         case '/reports/trend-analysis':
             pageTitle = 'TREND ANALYSIS REPORT';
+            break;
+        case '/no-module':
+            pageTitle = 'NO MODULE ACCESS';
+            break;
+        case '/manage-access':
+            pageTitle = 'ACCESS PRIVELEGE MANAGEMENT';
             break;
         case '/view-transaction':
             pageTitle = singleTransaction.company.toUpperCase() + ' TRANSACTION DETAILS';

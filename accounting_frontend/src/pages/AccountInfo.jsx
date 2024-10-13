@@ -36,7 +36,8 @@ const AccountInfo = () => {
       address: data.get("address"),
       email: data.get("email"),
       contact: data.get("contact"),
-      id: user.id
+      id: user.id,
+      confirm_password: data.get('cpass')
     }
 
     updateUser(payload, setError, setIsEdit);
@@ -132,6 +133,22 @@ const AccountInfo = () => {
                             autoComplete="password"
                           />
                           {error && error.password && error.password.map((errorMessage, index) => (
+                            <Typography key={index} ><span className='updateUserErrorText'>{errorMessage}</span></Typography>
+                          ))}
+                        </TableCell>
+                      </TableRow>)}
+                    {isEdit &&
+                      (<TableRow>
+                        <TableCell><strong>Confirm Password:</strong></TableCell>
+                        <TableCell>
+                          <input
+                            type="text"
+                            className="input"
+                            id="cpass"
+                            name="cpass"
+                            autoComplete="confirm_password"
+                          />
+                          {error && error.confirm_password && error.confirm_password.map((errorMessage, index) => (
                             <Typography key={index} ><span className='updateUserErrorText'>{errorMessage}</span></Typography>
                           ))}
                         </TableCell>

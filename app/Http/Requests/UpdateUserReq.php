@@ -33,6 +33,7 @@ class UpdateUserReq extends FormRequest
         // Conditionally apply password validation rules if the password field is not empty
         if ($this->filled('password')) {
             $rules['password'] = ['string', 'min:8', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'];
+            $rules['confirm_password'] = ['same:password']; // Add this line
         }
 
         return $rules;

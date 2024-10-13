@@ -7,6 +7,9 @@ use App\Http\Requests\RegisterClientReq;
 use App\Http\Requests\UpdateUserReq;
 use App\Http\Services\UserService;
 use App\Models\ClientRegistrationRequest;
+use App\Models\ModuleAccess;
+use App\Models\Modules;
+use App\Models\RequestAccess;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -86,6 +89,48 @@ class UserController extends Controller
         }
     }
 
+    public function getPendingClientRegistrationRequests()
+    {
+        $clientRequests = ClientRegistrationRequest::with('user:id,name,email')
+            ->where('status', 'pending') // Adjust the status as necessary
+            ->get()
+            ->map(function ($request) {
+                return [
+                    'id' => $request->id,
+                    'userID' => $request->userID,
+                    'status' => $request->status,
+                    'user' => [
+                        'name' => $request->user->name ?? null,
+                        'email' => $request->user->email ?? null,
+                    ],
+                ];
+            });
+
+        return response()->json($clientRequests);
+    }
+
+
+    public function respondToClientRequest(Request $request)
+    {
+        $validatedData = $request->validate([
+            'userID' => 'required|exists:users,id',
+            'status' => 'required|in:Approved,Declined', // Ensure status is either Approve or Decline
+        ]);
+
+        $clientRequest = ClientRegistrationRequest::where('userID', $validatedData['userID'])->first();
+
+        if (!$clientRequest) {
+            return response()->json(['message' => 'Client registration request not found.'], 404);
+        }
+
+        // Update the status of the client registration request
+        $clientRequest->status = $validatedData['status'];
+        $clientRequest->save();
+
+        return response()->json(['message' => 'Client registration request processed successfully.']);
+    }
+
+
     public function getAllClients()
     {
         $clients = User::where('userType', 'client')->get();
@@ -161,5 +206,199 @@ class UserController extends Controller
         });
 
         return response()->json(['message' => 'An email has been sent with your temporary password.'], 200);
+    }
+
+    public function getAllAdmin()
+    {
+        $admins = User::where('userType', 'admin')->get();
+        return response()->json($admins);
+    }
+
+    public function addNewAccess(Request $request)
+    {
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'modules' => 'required|array',
+            'modules.*' => 'required|exists:modules,id',
+            'hasAccess' => 'required|boolean',
+        ]);
+
+        foreach ($validatedData['modules'] as $moduleId) {
+            // Check existing access
+            $existingAccess = ModuleAccess::where('user_id', $validatedData['user_id'])
+                ->where('module_id', $moduleId)
+                ->first();
+
+            if (!$existingAccess) {
+                ModuleAccess::create(['user_id' => $validatedData['user_id'], 'module_id' => $moduleId, 'hasAccess' => $validatedData['hasAccess']]);
+            }
+        }
+
+        return response()->json(['message' => 'Access added successfully'], 201);
+    }
+
+
+    public function updateAccess(Request $request)
+    {
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'module_id' => 'required|exists:modules,id',
+            'hasAccess' => 'required|boolean',
+        ]);
+
+        $access = ModuleAccess::where('user_id', $validatedData['user_id'])
+            ->where('module_id', $validatedData['module_id'])
+            ->first();
+
+        if (!$access) {
+            return response()->json(['message' => 'Access not found'], 404);
+        }
+
+        $access->hasAccess = $validatedData['hasAccess'];
+        $access->save();
+
+        return response()->json(['message' => 'Access updated successfully', 'data' => $access]);
+    }
+
+    public function getAccess(Request $request)
+    {
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $accesses = ModuleAccess::with('module:id,description') // Eager load the module relationship
+            ->where('user_id', $validatedData['user_id'])
+            ->get()
+            ->map(function ($access) {
+                return [
+                    'user_id' => $access->user_id,
+                    'module_id' => $access->module_id,
+                    'hasAccess' => $access->hasAccess,
+                    'module_description' => $access->module->description ?? null,
+                ];
+            });
+
+        return response()->json($accesses);
+    }
+
+
+
+    public function getModules()
+    {
+        $modules = Modules::all();
+        return response()->json($modules);
+    }
+
+    public function requestAccess(Request $request)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'modules' => 'required|array',
+            'modules.*' => 'required|exists:modules,id',
+            'status' => 'required|string', // Assuming status is a string
+        ]);
+
+        // Extract the validated data
+        $userId = $validatedData['user_id'];
+        $modules = $validatedData['modules'];
+        $status = $validatedData['status'];
+
+        // Prepare data for bulk insert into request_access table
+        $requestAccessData = [];
+
+        foreach ($modules as $moduleId) {
+            // Check if the user already has access to this module
+            $existingAccess = ModuleAccess::where('user_id', $userId)
+                ->where('module_id', $moduleId)
+                ->where('hasAccess', true) // Only check for granted access
+                ->first();
+
+            if ($existingAccess) {
+                // If the admin already has access, you can either skip or return an error message
+                return response()->json([
+                    'message' => "Admin already has access to module ID {$moduleId}.",
+                    'module_id' => $moduleId
+                ], 400);
+            }
+
+            // If no existing access, prepare the request data
+            $requestAccessData[] = [
+                'user_id' => $userId,
+                'module_id' => $moduleId,
+                'status' => $status,
+            ];
+        }
+
+        // Insert the data into the request_access table if there are new requests
+        if (!empty($requestAccessData)) {
+            RequestAccess::insert($requestAccessData);
+        }
+
+        return response()->json(['message' => 'Access requests submitted successfully'], 201);
+    }
+
+
+    public function getPendingRequestAccess()
+    {
+        // Retrieve all access requests with a status of 'pending' and eager load the related module
+        $pendingRequests = RequestAccess::join('modules', 'request_access.module_id', '=', 'modules.id')
+            ->join('users', 'request_access.user_id', '=', 'users.id')
+            ->select('request_access.*', 'users.name as name', 'modules.description as description')
+            ->where('status', 'Pending')->get();
+        // Return the results as JSON, including the module description
+        return response()->json($pendingRequests);
+    }
+
+
+    public function approvePendingAccessRequest(Request $request)
+    {
+        $validatedData = $request->validate([
+            'request_id' => 'required|exists:request_access,id',
+        ]);
+
+        // Retrieve the pending request
+        $requestAccess = RequestAccess::with('module')->find($validatedData['request_id']);
+        $requestAccess->status = 'Approved';
+        $requestAccess->save();
+
+        if ($requestAccess->module) {
+            // Check if the ModuleAccess already exists
+            $existingAccess = ModuleAccess::where('user_id', $requestAccess->user_id)
+                ->where('module_id', $requestAccess->module->id)
+                ->first();
+
+            if ($existingAccess) {
+                // Update existing access
+                $existingAccess->hasAccess = true;
+                $existingAccess->save();
+            } else {
+                // Create new ModuleAccess
+                ModuleAccess::create([
+                    'user_id' => $requestAccess->user_id,
+                    'module_id' => $requestAccess->module->id,
+                    'hasAccess' => true,
+                ]);
+            }
+        } else {
+            return response()->json(['message' => 'Module not found for this request.'], 404);
+        }
+
+        return response()->json(['message' => 'Access request approved successfully.']);
+    }
+
+
+
+    public function declinePendingAccessRequest(Request $request)
+    {
+        $validatedData = $request->validate([
+            'request_id' => 'required|exists:request_access,id',
+        ]);
+
+        $requestAccess = RequestAccess::find($validatedData['request_id']);
+        $requestAccess->status = 'Declined';
+        $requestAccess->save();
+
+        return response()->json(['message' => 'Access request declined successfully.']);
     }
 }

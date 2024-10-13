@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Container } from '@mui/material';
+import { Container, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import '../css/registration.scss';
 import Username from '@mui/icons-material/Person';
 import Password from '@mui/icons-material/Lock';
@@ -7,14 +8,13 @@ import Email from '@mui/icons-material/Email';
 import Address from '@mui/icons-material/Home';
 import Contact from '@mui/icons-material/Phone';
 import Company from '@mui/icons-material/Business';
-import Name from '@mui/icons-material/AccountCircle'; // Import the Name icon
+import Name from '@mui/icons-material/AccountCircle';
 import { registerClient } from '../utils/backend';
 
-
-
 const Register = () => {
+    const navigate = useNavigate(); // Initialize useNavigate
     const [formData, setFormData] = useState({
-        name: '', // Add the name field to the formData state
+        name: '',
         username: '',
         password: '',
         email: '',
@@ -40,10 +40,26 @@ const Register = () => {
 
         const payload = {
             ...formData,
-            userType: 'client' // Add userType with a constant value
+            userType: 'client'
         };
 
-        registerClient(payload, setErrors, e);
+        try {
+            await registerClient(payload, setErrors, e);
+            // Clear the form data
+            setFormData({
+                name: '',
+                username: '',
+                password: '',
+                email: '',
+                address: '',
+                contact: '',
+                company: '',
+            });
+            // Redirect to home
+            navigate('/');
+        } catch (error) {
+            console.error("Registration failed:", error);
+        }
     };
 
     return (
@@ -53,11 +69,14 @@ const Register = () => {
                     <div className="title_container-register">
                         <h2>Client Registration</h2>
                     </div>
+                    <Button variant="outlined" onClick={() => navigate(-1)} style={{ marginBottom: '20px', background: '#8da58f', color: 'white' }}>
+                        Back
+                    </Button>
                     <div className="row_register clearfix-register">
                         <div>
                             <form onSubmit={handleSubmit}>
                                 <div className="input_field-register">
-                                    <span className='register-icon'><Name /></span> {/* Use the Name icon */}
+                                    <span className='register-icon'><Name /></span>
                                     <input
                                         type="text"
                                         name="name"
@@ -66,7 +85,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.name && <p className="error-message">{errors.name}</p>}
+                                    {errors && <p className="error-message">{errors.name}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Username /></span>
@@ -78,7 +97,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.username && <p className="error-message">{errors.username}</p>}
+                                    {errors && <p className="error-message">{errors.username}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Password /></span>
@@ -90,7 +109,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.password && <p className="error-message">{errors.password}</p>}
+                                    {errors && <p className="error-message">{errors.password}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Email /></span>
@@ -102,7 +121,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.email && <p className="error-message">{errors.email}</p>}
+                                    {errors && <p className="error-message">{errors.email}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Password /></span>
@@ -126,7 +145,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.address && <p className="error-message">{errors.address}</p>}
+                                    {errors && <p className="error-message">{errors.address}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Contact /></span>
@@ -138,7 +157,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.contact && <p className="error-message">{errors.contact}</p>}
+                                    {errors && <p className="error-message">{errors.contact}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Company /></span>
@@ -150,7 +169,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors.company && <p className="error-message">{errors.company}</p>}
+                                    {errors && <p className="error-message">{errors.company}</p>}
                                 </div>
                                 <input className="button-register" type="submit" value="Register" />
                             </form>
@@ -158,7 +177,6 @@ const Register = () => {
                     </div>
                 </div>
             </div>
-
         </Container>
     );
 };

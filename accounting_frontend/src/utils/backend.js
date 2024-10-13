@@ -110,23 +110,22 @@ export async function getAllTransactions(setError, setAllTransactions) {
     });
 }
 
-export async function getCounts(setError, setCounts) {
-  await axiosInstance.get('/get-counts')
+export async function getCounts(setError, setCounts, company) {
+  await axiosInstance.get('/get-counts', { params: { company } })
     .then(({ data }) => {
       setCounts(data);
       setError(null);
     })
     .catch(error => {
       if (error.response && error.response.status === 400) {
-        // Assuming the backend sends the errors as an object with keys as field names
         const errors = error.response.data.errors;
         setError(errors);
       } else {
-        // Handle other types of errors (network error, error 500, etc.)
         console.log('An unexpected error occurred');
       }
     });
 }
+
 
 export async function getClients(setError, setClients) {
   await axiosInstance.get('/get-all-clients')
@@ -277,7 +276,7 @@ export async function updateClient(setError, payload) {
 export async function generateTrendAnalysisReport(setError, setTrendAnalysisReport, payload) {
   await axiosInstance.post('/generate-trend-analysis-report', payload)
     .then(({ data }) => {
-      console.log(data);
+      console.log(data, "TREND ANALYSIS REPORT");
       setError(null);
       setTrendAnalysisReport(data);
     })
@@ -296,7 +295,7 @@ export async function generateTrendAnalysisReport(setError, setTrendAnalysisRepo
 export async function generateBalanceSheet(setError, setBalanceSheet, payload) {
   await axiosInstance.post('/generate-balance-sheet', payload)
     .then(({ data }) => {
-      console.log(data);
+      console.log(data, "BALANCE SHEET DATA");
       setError(null);
       setBalanceSheet(data);
     })
@@ -315,7 +314,7 @@ export async function generateBalanceSheet(setError, setBalanceSheet, payload) {
 export async function generateIncomeStatement(setError, setIncomeStatement, payload) {
   await axiosInstance.post('/generate-income-statement', payload)
     .then(({ data }) => {
-      console.log(data);
+      console.log(data, "INCOME STATEMENT");
       setError(null);
       setIncomeStatement(data);
     })
@@ -334,7 +333,7 @@ export async function generateIncomeStatement(setError, setIncomeStatement, payl
 export async function generateCashflowStatement(setError, setCashflowStatement, payload) {
   await axiosInstance.post('/generate-cashflow-statement', payload)
     .then(({ data }) => {
-      console.log(data);
+      console.log(data, "CASHFLOW");
       setError(null);
       setCashflowStatement(data);
     })
@@ -353,7 +352,7 @@ export async function generateCashflowStatement(setError, setCashflowStatement, 
 export async function generateSegmentReport(setError, setSegmentReport, payload) {
   await axiosInstance.post('/generate-segment-report', payload)
     .then(({ data }) => {
-      console.log(data);
+      console.log(data, "SEGMENT REPORT");
       setError(null);
       setSegmentReport(data);
     })
@@ -386,5 +385,227 @@ export async function sendForgotPasswordEmail(setError, setResponse, payload) {
       setError("An unexpected error occurred");
       return { error: "An unexpected error occurred" }; // Return structured response
     }
+  }
+}
+export async function getAllAdmins(setError, setAdmins) {
+  await axiosInstance.get('/get-all-admin')
+      .then(({ data }) => {
+          setAdmins(data);
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 400) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              console.log('An unexpected error occurred');
+          }
+      });
+}
+
+export async function addNewAccess(payload, setError) {
+  await axiosInstance.post('/add-new-access', payload)
+      .then(({ data }) => {
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 422) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              alert('An unexpected error occurred');
+          }
+      });
+}
+
+export async function updateAccess(payload, setError) {
+  await axiosInstance.post('/update-access', payload)
+      .then(({ data }) => {
+          alert(data.message);
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 422) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              alert('An unexpected error occurred');
+          }
+      });
+}
+
+export async function getAccess(payload, setError, setAccess) {
+  await axiosInstance.get(`/get-access`, { params: payload })
+      .then(({ data }) => {
+          setAccess(data);
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 400) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              console.log('An unexpected error occurred');
+          }
+      });
+}
+
+export async function getModules(setError, setModules) {
+  await axiosInstance.get('/get-modules')
+      .then(({ data }) => {
+        
+          setModules(data);
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 400) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              console.log('An unexpected error occurred');
+          }
+      });
+}
+
+export async function requestAccess(payload, setError) {
+  await axiosInstance.post('/request-access', payload)
+      .then(({ data }) => {
+          alert(data.message);
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 422) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              alert('An unexpected error occurred');
+          }
+      });
+}
+
+export async function getPendingAccess(setError, setPendingAccess) {
+  await axiosInstance.get('/pending-request-access')
+      .then(({ data }) => {
+        
+        setPendingAccess(data);
+        setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 400) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              console.log('An unexpected error occurred');
+          }
+      });
+}
+
+export async function approvePendingAccessRequest(payload, setError,notify) {
+  await axiosInstance.post('/approve-pending-access-request', payload)
+      .then(({ data }) => {
+notify("Successfully Approved");
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 422) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              alert('An unexpected error occurred');
+          }
+      });
+}
+
+export async function declinePendingAccessRequest(payload, setError, notify) {
+  await axiosInstance.post('/decline-pending-access-request', payload)
+      .then(({ data }) => {
+        notify("Declined Request");
+          setError(null);
+      })
+      .catch(error => {
+          if (error.response && error.response.status === 422) {
+              const errors = error.response.data.errors;
+              setError(errors);
+          } else {
+              alert('An unexpected error occurred');
+          }
+      });
+}
+
+export async function getPendingClientRegistrationRequests(setError, setRequests) {
+  await axiosInstance.get('/client-registration-requests/pending')
+    .then(({ data }) => {
+      setRequests(data);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 400) {
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        console.log('An unexpected error occurred');
+      }
+    });
+}
+
+
+export async function respondToClientRequest(payload, setError) {
+  await axiosInstance.post('/client-registration-request/respond', payload)
+    .then(({ data }) => {
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function getClientPendingTransactionRequests(setError, setPendingTransactionRequests) {
+  try {
+      const { data } = await axiosInstance.get(`/client-pending-transaction-requests`);
+      setPendingTransactionRequests(data) // return the pending requests
+  } catch (error) {
+      setError(handleError(error));
+  }
+}
+
+export async function getPendingTemporaryTransactionEdits(setError, setPendingTemporaryEdits) {
+  try {
+      const { data } = await axiosInstance.get(`/pending-temporary-transaction-edits`);
+      setPendingTemporaryEdits(data);
+  } catch (error) {
+      setError(handleError(error));
+  }
+}
+export async function respondToPendingTransactionRequest(payload, setError) {
+  await axiosInstance.post('/transaction-request/respond', payload)
+      .then(({ data }) => {
+          setError(null);
+      })
+      .catch(error => {
+          setError(handleError(error));
+      });
+}
+
+export async function respondToPendingTransactionEdit(payload, setError) {
+  await axiosInstance.post('/transaction-edit/respond', payload)
+      .then(({ data }) => {
+          setError(null);
+      })
+      .catch(error => {
+          setError(handleError(error));
+      });
+}
+
+function handleError(error) {
+  if (error.response && error.response.status === 422) {
+      return error.response.data.errors;
+  } else {
+      alert('An unexpected error occurred');
+      return null;
   }
 }

@@ -1,0 +1,268 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* Light background for the page */
+    margin: 0;
+}
+
+.manageAccessContainer {
+    padding: 20px;
+    background-color: #ffffff; /* White background for the container */
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    margin-top: 80px;
+    margin-bottom: 50px;
+}
+
+h1 {
+    color: #0c6c2f; /* Dark gray for the header */
+}
+
+.search-container {
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center items vertically */
+    margin-bottom: 20px; /* Space below the container */
+}
+
+.searchInput {
+    flex: 1; /* Allow input to grow */
+    padding: 10px; /* Padding for input */
+    border: 1px solid #ccc; /* Border styling */
+    border-radius: 4px; /* Rounded corners */
+    margin-right: 10px; /* Space between input and button */
+}
+
+.manageAccess-addButton {
+    padding: 10px 20px; /* Padding for button */
+    background-color: #007bff; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Change cursor on hover */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.manageAccess-addButton:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+.accessTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.accessTable th,
+.accessTable td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd; /* Light gray border */
+}
+
+.accessTable th {
+    background-color: #4caf50; /* Green background for headers */
+    color: white; /* White text for headers */
+}
+
+.accessTable tr:hover {
+    background-color: #f1f1f1; /* Light gray on hover */
+}
+
+button {
+    padding: 10px 15px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white; /* White text for better contrast */
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+button.approve {
+    background-color: #4caf50; /* Green background for approve */
+}
+
+button.approve:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: scale(1.05); /* Slight scale up on hover */
+}
+
+button.decline {
+    background-color: #f44336; /* Red background for decline */
+}
+
+button.decline:hover {
+    background-color: #e53935; /* Darker red on hover */
+    transform: scale(1.05); /* Slight scale up on hover */
+}
+
+.custom-alert {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+}
+
+.alert-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.alert-message {
+    margin-bottom: 15px;
+    font-size: 16px;
+    color: #333;
+}
+
+.alert-close {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.alert-close:hover {
+    background-color: #0056b3;
+}
+
+.custom-alert.success {
+    border-left: 5px solid #28a745;
+}
+
+.custom-alert.error {
+    border-left: 5px solid #dc3545;
+}
+
+.manageAccess-dialogOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.manageAccess-dialog {
+    background: white;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+.manageAccess-dialogHeader {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.manageAccess-dialogContent {
+    padding: 15px;
+}
+
+.manageAccess-selectAdmin {
+    margin-bottom: 15px;
+    display: block;
+}
+
+.manageAccess-moduleSelection {
+    margin-top: 15px;
+}
+
+.manageAccess-moduleLabel {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.manageAccess-dialogFooter {
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.manageAccess-closeButton {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.manageAccess-submitButton {
+    background-color: #2196f3; /* Blue */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+}
+
+.manageAccess-submitButton:hover {
+    background-color: #1976d2; /* Darker Blue */
+}
+.manageAccess-moduleSelection {
+    margin-top: 15px;
+}
+
+.manageAccess-moduleGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+    gap: 10px; /* Space between items */
+}
+
+.manageAccess-moduleLabel {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.manageAccess-closeButton {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: black;
+}
+.enable {
+    background-color: #28a745;
+    color: white;
+}
+
+.disable {
+    background-color: #dc3545;
+    color: white;
+}
+
+.accessTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.accessTable th,
+.accessTable td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.accessTable th {
+    background-color: #0c6c2f;
+}

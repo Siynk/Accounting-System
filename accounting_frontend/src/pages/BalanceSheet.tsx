@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Container } from '@mui/material';
 import '../css/reports.css';
 import { generateBalanceSheet } from '../utils/backend';
+import { useStateContext } from '../context/ContextProvider';
 
 const BalanceSheet = () => {
     const [balanceSheet, setBalanceSheet] = useState({});
@@ -9,6 +10,13 @@ const BalanceSheet = () => {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
     const [error, setError] = useState(null);
+    const { user } = useStateContext();
+
+    useEffect(() => {
+        if (user && user.userType === 'client') {
+            setCompanyName(user.company);
+        }
+    }, [user]);
 
     const handleGenerate = useCallback(() => {
         const params = {
@@ -56,13 +64,13 @@ const BalanceSheet = () => {
                 <div className="balanceSheet-header">
                     <h1>Generate Balance Sheet</h1>
                     <div className="balanceSheet-inputs">
-                        <input
+                    {user.userType !== 'client' && <input
                             type="text"
                             placeholder="Enter Company Name"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="balanceSheet-input"
-                        />
+                        />}
                         <input
                             type="date"
                             value={dateFrom}

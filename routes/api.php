@@ -39,7 +39,22 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('generate-income-statement', [TransactionController::class, 'generateIncomeStatement']);
     Route::post('generate-cashflow-statement', [TransactionController::class, 'getCashflowData']);
     Route::post('generate-segment-report', [TransactionController::class, 'getSegmentReportData']);
+    Route::get('get-all-admin', [UserController::class, 'getAllAdmin']);
+    Route::post('add-new-access', [UserController::class, 'addNewAccess']);
+    Route::post('update-access', [UserController::class, 'updateAccess']);
+    Route::get('get-modules', [UserController::class, 'getModules']);
+    Route::post('request-access', [UserController::class, 'requestAccess']);
+    route::get('/pending-request-access', [UserController::class, 'getPendingRequestAccess']);
+    route::post('/approve-pending-access-request', [UserController::class, 'approvePendingAccessRequest']);
+    Route::post('/decline-pending-access-request', [UserController::class, 'declinePendingAccessRequest']);
+    route::get('/client-registration-requests/pending', [UserController::class, 'getPendingClientRegistrationRequests']);
+    Route::post('/client-registration-request/respond', [UserController::class, 'respondToClientRequest']);
+    route::get('/client-pending-transaction-requests', [TransactionController::class, 'getClientPendingTransactionRequests']);
+    Route::get('/pending-temporary-transaction-edits', [TransactionController::class, 'getPendingTemporaryTransactionEdits']);
+    Route::post('/transaction-request/respond', [TransactionController::class, 'respondToPendingTransactionRequest']);
+    Route::post('/transaction-edit/respond', [TransactionController::class, 'respondToPendingTransactionEdit']);
 });
 Route::post('register-client', [UserController::class, 'registerClient']);
 Route::post('send-forgot-password-email', [UserController::class, 'sendForgotPasswordEmail']);
 Route::post('login', [AuthController::class, 'login']);
+Route::get('get-access', [UserController::class, 'getAccess']); // Changed to GET
