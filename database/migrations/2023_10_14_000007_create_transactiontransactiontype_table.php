@@ -13,8 +13,8 @@ class CreateTransactionTransactionTypeTable extends Migration
             $table->unsignedBigInteger('transactionTypeID')->nullable();
 
             // Adding created_at and updated_at fields
-            $table->date('created_at')->default(now());
-            $table->date('updated_at')->default(now());
+            //$table->date('created_at')->default(now());
+            //$table->date('updated_at')->default(now());
 
             // Adding foreign keys if needed
             // $table->foreign('transactionID')->references('id')->on('transaction')->onDelete('cascade')->onUpdate('cascade');

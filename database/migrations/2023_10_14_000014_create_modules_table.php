@@ -13,8 +13,9 @@ class CreateModulesTable extends Migration
             $table->string('description', 50);
             
             // Adding created_at and updated_at fields
-            $table->date('created_at')->default(now());
-            $table->date('updated_at')->default(now());
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
+
         });
     }
 

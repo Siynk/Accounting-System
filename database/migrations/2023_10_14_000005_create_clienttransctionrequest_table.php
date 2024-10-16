@@ -14,13 +14,14 @@ class CreateClientTransctionRequestTable extends Migration
             $table->unsignedBigInteger('transactionID');
             $table->string('status', 50);
             $table->string('action', 50);
-            $table->date('requestDate')->default(now());
+            $table->timestamp('requestDate')->nullable()->useCurrent();
             $table->foreign('clientID')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
             $table->foreign('transactionID')->references('id')->on('transaction')->onDelete('no action')->onUpdate('no action');
 
             // Adding created_at and updated_at fields
-            $table->date('created_at')->default(now());
-            $table->date('updated_at')->default(now());
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
+
         });
     }
 

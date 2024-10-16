@@ -20,9 +20,10 @@ class CreateTransactionTable extends Migration
             $table->foreign('clientID')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
 
             // Adding transactionDate, created_at, and updated_at fields
-            $table->date('transactionDate')->default(now());
-            $table->date('created_at')->default(now());
-            $table->date('updated_at')->default(now());
+            $table->timestamp('transactionDate')->nullable()->useCurrent();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent();
+
         });
     }
 

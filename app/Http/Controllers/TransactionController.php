@@ -174,12 +174,13 @@ class TransactionController extends Controller
 
         // Add filters based on inputs 
         if ($fromDate) {
-            $query->where('transaction.transactionDate', '>=', $fromDate);
+            $query->where('transaction.transactionDate', '>=', $fromDate . ' 00:00:00');
         }
-
+        
         if ($toDate) {
-            $query->where('transaction.transactionDate', '<=', $toDate);
+            $query->where('transaction.transactionDate', '<=', $toDate . ' 23:59:59');
         }
+        
 
         if ($transactionType) {
             $query->where('transactiontype.description', $transactionType);
@@ -342,60 +343,65 @@ class TransactionController extends Controller
         $companyName = $request->input('companyName');
         $fromDate = $request->input('dateFrom');
         $toDate = $request->input('dateTo');
-
+    
+        // Adjust to include entire day if fromDate and toDate are the same
+        // Ensure fromDate and toDate are formatted with time
+        $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
+        $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
+    
         // Define asset and liability transaction types
         $assetTypes = ['Asset'];
         $liabilityTypes = ['Liabilities'];
         $equityTypes = ['Equity'];
-
+    
         // Query for assets
         $assets = DB::table('transaction')
             ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
             ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
-            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
             ->where('transaction.isDeleted', 0)
             ->whereIn('transactiontype.description', $assetTypes)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
+            ->where('clienttransctionrequest.status', 'Approved')
             ->where('users.company', 'LIKE', "%$companyName%")
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
             ->select('transaction.description', 'transaction.amount')
             ->get();
-
+    
         // Query for liabilities
         $liabilities = DB::table('transaction')
             ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
             ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
-            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
             ->where('transaction.isDeleted', 0)
             ->whereIn('transactiontype.description', $liabilityTypes)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
+            ->where('clienttransctionrequest.status', 'Approved')
             ->where('users.company', 'LIKE', "%$companyName%")
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
             ->select('transaction.description', 'transaction.amount')
             ->get();
-
+    
         // Query for owner's equity
         $equities = DB::table('transaction')
             ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
             ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
-            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
             ->where('transaction.isDeleted', 0)
             ->whereIn('transactiontype.description', $equityTypes)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
+            ->where('clienttransctionrequest.status', 'Approved')
             ->where('users.company', 'LIKE', "%$companyName%")
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
             ->select('transaction.description', 'transaction.amount')
             ->get();
-
+    
         // Calculate totals
         $totalAssets = $assets->sum('amount');
         $totalLiabilities = $liabilities->sum('amount');
         $ownerEquity = $totalAssets - $totalLiabilities;
         $totalLiabilitiesPlusTotalEquity = $ownerEquity + $totalLiabilities;
-
+    
         // Prepare the data to return
         $balanceSheetData = [
             'assets' => $assets,
@@ -405,10 +411,10 @@ class TransactionController extends Controller
             'ownerEquity' => $ownerEquity,
             'totalLiabilitiesPlusTotalEquity' => $totalLiabilitiesPlusTotalEquity
         ];
-
-        
+    
         return response()->json($balanceSheetData);
     }
+    
 
 
     public function generateIncomeStatement(Request $request)
@@ -417,6 +423,11 @@ class TransactionController extends Controller
             $companyName = $request->input('companyName');
             $fromDate = $request->input('dateFrom');
             $toDate = $request->input('dateTo');
+
+            // Adjust to include entire day if fromDate and toDate are the same
+            if ($fromDate === $toDate) {
+                $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' +1 day -1 second'));
+            }
 
             // Retrieve the list of revenues
             $revenues = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
@@ -510,6 +521,11 @@ class TransactionController extends Controller
         $companyName = $request->input('companyName');
         $fromDate = $request->input('dateFrom');
         $toDate = $request->input('dateTo');
+
+        // Adjust to include entire day if fromDate and toDate are the same
+        // Ensure fromDate and toDate are formatted with time
+        $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
+        $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
 
         // Fetch operating activities
         $operatingActivities = Transaction::join('users', 'transaction.clientID', '=', 'users.id')
@@ -666,6 +682,11 @@ class TransactionController extends Controller
             $companyName = $request->input('companyName');
             $fromDate = $request->input('dateFrom');
             $toDate = $request->input('dateTo');
+
+            // Adjust to include entire day if fromDate and toDate are the same
+            if ($fromDate === $toDate) {
+                $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' +1 day -1 second'));
+            }
 
             // Query for total revenue and expenses per product line
             $segmentReportData = DB::table('transaction')

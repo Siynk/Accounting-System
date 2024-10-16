@@ -89,10 +89,12 @@ function MainLayout() {
             }
         }
         
-        if(accesses.length === 0 && user.userType === 'admin' && !accesses){
+        if(accesses.length === 0 && user.userType === 'admin'){
+            console.log("hello");
           navigate('/no-module');
         }
     }, [currentPath, accesses]);
+
     
     React.useEffect(() => {
         if (user.userType === 'client') {
