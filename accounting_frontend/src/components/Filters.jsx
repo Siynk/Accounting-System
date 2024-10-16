@@ -23,10 +23,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
             fromDate,
             toDate,
             transactionType,
-            paymentMethod,
             category,
-            balance,
-            activity,
             searchText
         };
 
@@ -60,7 +57,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
     // Effect to run the handleFilterChange function whenever any state changes
     useEffect(() => {
         handleFilterChange();
-    }, [fromDate, toDate, transactionType, paymentMethod, category, balance, activity, searchText]);
+    }, [fromDate, toDate, transactionType, category, searchText]);
 
     return (
         <div className="filters-container">
@@ -105,7 +102,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                     </div>
 
                     <div className="grid-item">
-                        <label htmlFor="category">Cash Flow Category</label>
+                        <label htmlFor="category">Category</label>
                         <select
                             id="category"
                             value={category}

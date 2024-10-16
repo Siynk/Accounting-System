@@ -25,8 +25,9 @@ const defaultTheme = createTheme();
 function MainLayout() {
     const { user, token, setUser, setToken } = useStateContext();
     const [error, setError] = React.useState(null);
-    const [accesses, setAccesses] = React.useState([]);
-    const [loading, setLoading] = React.useState(true);
+    const [accesses, setAccesses] = React.useState(false);
+    const [isLoggingOut, setIsLoggingOut] = React.useState(false);
+    const [hasTransactionAccess, setHasTransactionAccess] = React.useState(false);
 
     const moduleRoutes = {
         1: '/add-user',
@@ -46,49 +47,67 @@ function MainLayout() {
 
     // Redirect if token is not available
     if (!token) {
-        navigate('/');
+      return <Navigate to={'/'} />;
     }
 
     React.useEffect(() => {
-        if (token && user && user.userType === 'admin') {
-            const fetchAccess = async () => {
-                try {
-                    await getAccess({ user_id: user.id }, setError, setAccesses);
-                    setLoading(false);
-                } catch (error) {
-                    setError('Failed to fetch access rights.');
-                    setLoading(true)
-                }
-            };
-            fetchAccess();
-        } else {
-            setLoading(true); // If no token, just set loading to false
+        if (isLoggingOut) {
+            navigate('/'); 
         }
-    }, []);
+    }, [isLoggingOut]);
 
     React.useEffect(() => {
-        if (currentPath !== '/account-info') {
-            if (user.userType === 'admin' && !loading) {
-                const hasCurrentPathAccess = accesses.find(access => moduleRoutes[access.module_id] === currentPath);
+      if ((token && user ) && user.userType === 'admin') {
+        const fetchAccess = async () => {
+            try {
+                await getAccess({ user_id: user.id }, setError, setAccesses);
+            } catch (error) {
+                setError('Failed to fetch access rights.');
+            }
+        };
+        fetchAccess();
+    } 
+    }, [token, user]);
 
-                if (!hasCurrentPathAccess || !hasCurrentPathAccess.hasAccess) {
-                    navigate('/no-module');
-                } else {
-                    navigate(currentPath);
+    React.useEffect(() => {
+        if (accesses.length > 0 && accesses) {
+            const excludedPaths = ['/account-info', ];
+            const hasTransactionAccess = accesses.find(access => access.module_description === 'Transactions');
+            if (hasTransactionAccess && hasTransactionAccess.hasAccess) {
+                excludedPaths.push('/add-transaction', '/view-transaction');
+            }
+
+            if (!excludedPaths.includes(currentPath)) {
+                if (user.userType === 'admin') {
+                    const hasCurrentPathAccess = accesses.find(access => moduleRoutes[access.module_id] === currentPath);
+                    if (!hasCurrentPathAccess || !hasCurrentPathAccess.hasAccess) {
+                      navigate('/no-module');
+                    } else {
+                      navigate(currentPath);
+                    }
                 }
             }
         }
-
+        
+        if(accesses.length === 0 && user.userType === 'admin' && !accesses){
+          navigate('/no-module');
+        }
+    }, [currentPath, accesses]);
+    
+    React.useEffect(() => {
+        if (user.userType === 'client') {
+            const excludedPaths = ['/add-user', '/manage-access', '/client-management'];
+            
+            if (excludedPaths.includes(currentPath)) {
+              navigate('/no-module');
+            }
+        }
     }, [currentPath]);
-
-
-
-
-
-    const handleLogout = () => {
-        logout(setUser, setToken);
-    };
-
+  
+  const handleLogout = () => {
+      logout(setUser, setToken);
+      setIsLoggingOut(true);
+  };
     React.useEffect(() => {
         getLoggedInUser(setUser);
     }, []);

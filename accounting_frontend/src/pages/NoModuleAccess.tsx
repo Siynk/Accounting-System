@@ -59,9 +59,9 @@ export default function NoModuleAccess() {
                 <Typography variant="h4" className='noAccessText'>
                     You do not have access to this module.
                 </Typography>
-                <Button variant="contained" color="primary" className='noModuleRequestAccessButton' onClick={() => setOpenDialog(true)}>
+                {user.userType === 'admin' && (<Button variant="contained" color="primary" className='noModuleRequestAccessButton' onClick={() => setOpenDialog(true)}>
                     Request Access
-                </Button>
+                </Button>)}
             </Container>
 
             <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>

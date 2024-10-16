@@ -37,7 +37,7 @@ const Transaction = () => {
         deleteTransaction(setError, { id });
     };
 
-
+console.log(transactions)
 
 
 

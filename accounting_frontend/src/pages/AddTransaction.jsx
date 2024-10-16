@@ -21,9 +21,13 @@ const AddTransaction = () => {
     ];
 
     useEffect(() => {
-        getClients(setError, setClients);
+        const fetchClients = async () => {
+            await getClients(setError, setClients);
+            console.log("Fetched clients:", clients); // This will show the updated clients
+        };
+        fetchClients();
     }, []);
-
+  
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
@@ -78,11 +82,12 @@ const AddTransaction = () => {
                                     {user.userType === 'client' ? (
                                         <option value={user.id}>{user.company}</option>
                                     ) : (
-                                        user.userType === 'admin' || user.userType === 'superadmin' && clients.map(client => (
+                                        (user.userType === 'admin' || user.userType === 'superadmin') && clients.map(client => (
                                             <option key={client.id} value={client.id}>{client.company}</option>
                                         ))
                                     )}
                                 </select>
+
                             </label>
                             {error && <span className="error">{error.clientID}</span>}
                             <label>

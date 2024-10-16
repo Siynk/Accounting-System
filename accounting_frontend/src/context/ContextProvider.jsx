@@ -4,7 +4,7 @@ import React, { useState, createContext, useContext } from "react";
 const StateContext = createContext({
     user: {},
     token: null,
-    singleTransaction: null,
+    singleTransaction: false,
     viewClient: null,
     setUser: () => { },
     setToken: () => { },
@@ -15,7 +15,7 @@ const StateContext = createContext({
 // Define the provider component
 export const ContextProvider = ({ children }) => {
     const [token, _setToken] = useState(localStorage.getItem('ACCESS_TOKEN'));
-    const [singleTransaction, setSingleTransaction] = useState(null);
+    const [singleTransaction, setSingleTransaction] = useState(false);
     const [viewClient, setViewClient] = useState(null);
 
     // Retrieve user data from localStorage or set as empty object initially

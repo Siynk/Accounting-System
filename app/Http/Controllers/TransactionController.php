@@ -39,7 +39,7 @@ class TransactionController extends Controller
         // Save the transaction types
         if (isset($validatedData['transactionTypes'])) {
             foreach ($validatedData['transactionTypes'] as $type) {
-                DB::table('transactionTransactionType')->insert([
+                DB::table('transactiontransactiontype')->insert([
                     'transactionID' => $transaction->id,
                     'transactionTypeID' => $type,
                 ]);
@@ -94,22 +94,22 @@ class TransactionController extends Controller
         $company = $request->input('company', '');
 
         // Count distinct transactions for earnings with approved status
-        $earningsCount = Transaction::join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+        $earningsCount = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id') // Join with users table
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->whereIn('transactionType.description', ['Revenue', 'Sale'])
+            ->whereIn('transactiontype.description', ['Revenue', 'Sale'])
             ->where('users.company', 'like', '%' . $company . '%') // Filter by company
             ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
             ->distinct('transaction.id')
             ->count();
 
         // Count distinct transactions for expenditures with approved status
-        $expendituresCount = Transaction::join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+        $expendituresCount = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id') // Join with users table
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->whereIn('transactionType.description', ['Liabilities', 'Expense', 'Purchase', 'Loan'])
+            ->whereIn('transactiontype.description', ['Liabilities', 'Expense', 'Purchase', 'Loan'])
             ->where('users.company', 'like', '%' . $company . '%') // Filter by company
             ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
             ->distinct('transaction.id')
@@ -166,11 +166,11 @@ class TransactionController extends Controller
 
         // Add joins with related tables 
         $query->join('users', 'transaction.clientID', '=', 'users.id')
-            ->join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID'); // Join with clientTransactionRequest
 
-        $query->select('transaction.*', 'users.company', 'transactionType.description as transactionType');
+        $query->select('transaction.*', 'users.company', 'transactiontype.description as transactionType');
 
         // Add filters based on inputs 
         if ($fromDate) {
@@ -182,7 +182,7 @@ class TransactionController extends Controller
         }
 
         if ($transactionType) {
-            $query->where('transactionType.description', $transactionType);
+            $query->where('transactiontype.description', $transactionType);
         }
 
         if ($category) {
@@ -195,7 +195,7 @@ class TransactionController extends Controller
                     ->orWhere('transaction.amount', 'like', '%' . $searchText . '%')
                     ->orWhere('users.company', 'like', '%' . $searchText . '%')
                     ->orWhere('transaction.productLine', 'like', '%' . $searchText . '%')
-                    ->orWhere('transactionType.description', 'like', '%' . $searchText . '%');
+                    ->orWhere('transactiontype.description', 'like', '%' . $searchText . '%');
             });
         }
 
@@ -272,25 +272,25 @@ class TransactionController extends Controller
             ->select(
                 DB::raw('YEAR(transaction.transactionDate) as year'),
                 DB::raw('MONTH(transaction.transactionDate) as month'),
-                DB::raw('SUM(CASE WHEN transactionType.description IN ("Revenue", "Sale") 
+                DB::raw('SUM(CASE WHEN transactiontype.description IN ("Revenue", "Sale") 
                           AND NOT EXISTS (
-                              SELECT 1 FROM transactionTransactionType ttt 
-                              JOIN transactionType tt ON ttt.transactionTypeID = tt.id
+                              SELECT 1 FROM transactiontransactiontype ttt 
+                              JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
                               WHERE ttt.transactionID = transaction.id 
                               AND tt.description IN ("Liabilities", "Asset", "Equity")
                           ) 
                           THEN transaction.amount ELSE 0 END) as totalRevenue'),
-                DB::raw('SUM(CASE WHEN transactionType.description IN ("Expense", "Purchase", "Loan") 
+                DB::raw('SUM(CASE WHEN transactiontype.description IN ("Expense", "Purchase", "Loan") 
                           AND NOT EXISTS (
-                              SELECT 1 FROM transactionTransactionType ttt 
-                              JOIN transactionType tt ON ttt.transactionTypeID = tt.id
+                              SELECT 1 FROM transactiontransactiontype ttt 
+                              JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
                               WHERE ttt.transactionID = transaction.id 
                               AND tt.description IN ("Liabilities", "Asset", "Equity")
                           ) 
                           THEN transaction.amount ELSE 0 END) as totalExpense')
             )
-            ->join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
             ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
@@ -350,12 +350,12 @@ class TransactionController extends Controller
 
         // Query for assets
         $assets = DB::table('transaction')
-            ->join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
             ->where('transaction.isDeleted', 0)
-            ->whereIn('transactionType.description', $assetTypes)
+            ->whereIn('transactiontype.description', $assetTypes)
             ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
             ->where('users.company', 'LIKE', "%$companyName%")
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
@@ -364,12 +364,12 @@ class TransactionController extends Controller
 
         // Query for liabilities
         $liabilities = DB::table('transaction')
-            ->join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
             ->where('transaction.isDeleted', 0)
-            ->whereIn('transactionType.description', $liabilityTypes)
+            ->whereIn('transactiontype.description', $liabilityTypes)
             ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
             ->where('users.company', 'LIKE', "%$companyName%")
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
@@ -378,12 +378,12 @@ class TransactionController extends Controller
 
         // Query for owner's equity
         $equities = DB::table('transaction')
-            ->join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-            ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->join('users', 'transaction.clientID', '=', 'users.id')
             ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
             ->where('transaction.isDeleted', 0)
-            ->whereIn('transactionType.description', $equityTypes)
+            ->whereIn('transactiontype.description', $equityTypes)
             ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
             ->where('users.company', 'LIKE', "%$companyName%")
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
@@ -406,7 +406,7 @@ class TransactionController extends Controller
             'totalLiabilitiesPlusTotalEquity' => $totalLiabilitiesPlusTotalEquity
         ];
 
-        // Return the balance sheet data as JSON
+        
         return response()->json($balanceSheetData);
     }
 
@@ -419,13 +419,13 @@ class TransactionController extends Controller
             $toDate = $request->input('dateTo');
 
             // Retrieve the list of revenues
-            $revenues = Transaction::join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-                ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            $revenues = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
                 ->join('users', 'transaction.clientID', '=', 'users.id')
                 ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
                 ->where('transaction.isDeleted', 0)
                 ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactionType.description', ['Revenue', 'Sale'])
+                ->whereIn('transactiontype.description', ['Revenue', 'Sale'])
                 ->where('users.company', 'LIKE', "%$companyName%")
                 ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
                 ->select('transaction.description', 'transaction.amount')
@@ -435,13 +435,13 @@ class TransactionController extends Controller
             $totalRevenue = $revenues->sum('amount');
 
             // Retrieve lists and totals for each type of expense
-            $operatingExpenses = Transaction::join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-                ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            $operatingExpenses = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
                 ->join('users', 'transaction.clientID', '=', 'users.id')
                 ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
                 ->where('transaction.isDeleted', 0)
                 ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactionType.description', ['Expense'])
+                ->whereIn('transactiontype.description', ['Expense'])
                 ->where('transaction.category', 'Operating')
                 ->where('users.company', 'LIKE', "%$companyName%")
                 ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
@@ -449,13 +449,13 @@ class TransactionController extends Controller
                 ->get();
             $totalOperatingExpenses = $operatingExpenses->sum('amount');
 
-            $financingExpenses = Transaction::join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-                ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            $financingExpenses = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
                 ->join('users', 'transaction.clientID', '=', 'users.id')
                 ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
                 ->where('transaction.isDeleted', 0)
                 ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactionType.description', ['Expense'])
+                ->whereIn('transactiontype.description', ['Expense'])
                 ->where('transaction.category', 'Financing')
                 ->where('users.company', 'LIKE', "%$companyName%")
                 ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
@@ -463,13 +463,13 @@ class TransactionController extends Controller
                 ->get();
             $totalFinancingExpenses = $financingExpenses->sum('amount');
 
-            $investingExpenses = Transaction::join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-                ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+            $investingExpenses = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
                 ->join('users', 'transaction.clientID', '=', 'users.id')
                 ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
                 ->where('transaction.isDeleted', 0)
                 ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactionType.description', ['Expense'])
+                ->whereIn('transactiontype.description', ['Expense'])
                 ->where('transaction.category', 'Investing')
                 ->where('users.company', 'LIKE', "%$companyName%")
                 ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
@@ -669,8 +669,8 @@ class TransactionController extends Controller
 
             // Query for total revenue and expenses per product line
             $segmentReportData = DB::table('transaction')
-                ->join('transactionTransactionType', 'transaction.id', '=', 'transactionTransactionType.transactionID')
-                ->join('transactionType', 'transactionTransactionType.transactionTypeID', '=', 'transactionType.id')
+                ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
                 ->join('users', 'transaction.clientID', '=', 'users.id')
                 ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
                 ->where('transaction.isDeleted', 0)
@@ -679,18 +679,18 @@ class TransactionController extends Controller
                 ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
                 ->select(
                     'transaction.productLine',
-                    DB::raw('SUM(CASE WHEN transactionType.description IN ("Revenue", "Sale") 
+                    DB::raw('SUM(CASE WHEN transactiontype.description IN ("Revenue", "Sale") 
                           AND NOT EXISTS (
-                              SELECT 1 FROM transactionTransactionType ttt 
-                              JOIN transactionType tt ON ttt.transactionTypeID = tt.id
+                              SELECT 1 FROM transactiontransactiontype ttt 
+                              JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
                               WHERE ttt.transactionID = transaction.id 
                               AND tt.description IN ("Liabilities", "Asset", "Equity")
                           ) 
                           THEN transaction.amount ELSE 0 END) as totalRevenue'),
-                    DB::raw('SUM(CASE WHEN transactionType.description IN ("Expense", "Purchase", "Loan") 
+                    DB::raw('SUM(CASE WHEN transactiontype.description IN ("Expense", "Purchase", "Loan") 
                           AND NOT EXISTS (
-                              SELECT 1 FROM transactionTransactionType ttt 
-                              JOIN transactionType tt ON ttt.transactionTypeID = tt.id
+                              SELECT 1 FROM transactiontransactiontype ttt 
+                              JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
                               WHERE ttt.transactionID = transaction.id 
                               AND tt.description IN ("Liabilities", "Asset", "Equity")
                           ) 
