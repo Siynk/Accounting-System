@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddUserReq;
+use App\Http\Requests\AddProjectReq;
 use App\Http\Requests\RegisterClientReq;
 use App\Http\Requests\UpdateUserReq;
 use App\Http\Services\UserService;
@@ -11,6 +12,7 @@ use App\Models\ModuleAccess;
 use App\Models\Modules;
 use App\Models\RequestAccess;
 use App\Models\User;
+use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -51,6 +53,90 @@ class UserController extends Controller
             return response()->json(['message' => 'Failed to add user'], 422);
         }
     }
+
+    public function addProject(AddProjectReq $request)
+    {
+        $validatedData = $request->validated();
+        $project = Project::create($validatedData);
+
+        // Check if the user was created successfully
+        if ($project) {
+            // User creation was successful
+            return response()->json(['message' => 'Project added successfully'], 201);
+        } else {
+            // User creation failed
+            return response()->json(['message' => 'Failed to add project'], 422);
+        }
+    }
+
+    public function updateProjectStatus(Request $request)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'status' => 'required|string|max:255',
+            'clientID' => 'required|integer',
+            'projectID' => 'required|integer|exists:project,id', // Ensure the project exists
+        ]);
+
+        
+        // Find the project by its ID
+        $project = Project::find($validatedData['projectID']);
+        // Check if the project exists and belongs to the provided client
+        if ($project && $project->clientID == $validatedData['clientID']) {
+            // Update the project status
+            $project->status = $validatedData['status'];
+            $project->save();
+
+            return response()->json(['message' => 'Project status updated successfully'], 200);
+        }
+
+        return response()->json(['message' => 'Project not found or client mismatch'], 404);
+    }
+
+    public function getApprovedProjects(Request $request)
+    {
+        // Validate incoming request data (clientID is optional)
+        $validatedData = $request->validate([
+            'clientID' => 'nullable|integer|exists:users,id', // Ensure clientID exists in users table
+        ]);
+
+        // Start the query builder to get approved projects
+        $query = \DB::table('project')
+            ->leftJoin('users', 'project.clientID', '=', 'users.id') // Join with users table
+            ->where('project.status', 'Approved'); // Filter by status
+
+        // If clientID is provided in the request, add additional filter
+        if (isset($validatedData['clientID'])) {
+            $query->where('project.clientID', $validatedData['clientID']);
+        }
+
+        // Select specific columns and alias the conflicting `id` columns
+        $approvedProjects = $query->select(
+            'project.id as project_id', 'project.projectName', 'project.clientID', 'project.status', // Project columns
+            'users.id as user_id', 'users.name as client_name', 'users.email as client_email'  // User columns
+        )
+        ->get();
+
+        return response()->json($approvedProjects, 200);
+    }
+    
+    public function getPendingProjects()
+    {
+        // Use query builder to join the 'project' table with 'users' table on 'clientID' = 'users.id'
+        $pendingProjects = \DB::table('project')
+            ->leftJoin('users', 'project.clientID', '=', 'users.id')
+            ->where('project.status', 'Pending')
+            ->select(
+                'project.id as project_id', 'project.projectName', 'project.clientID', 'project.status', // Project columns
+                'users.id as user_id', 'users.name as client_name', 'users.email as client_email'  // User columns
+            )  // Select columns from both 'project' and 'users' and alias `id`
+            ->get();
+
+        return response()->json($pendingProjects, 200);
+    }
+
+
+
 
     public function registerClient(RegisterClientReq $request)
     {

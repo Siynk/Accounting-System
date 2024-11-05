@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateTransactionReq;
 use App\Models\Transaction;
 use App\Models\Category;
 use App\Models\Activity;
+use App\Models\Project;
 use App\Models\Account;
 use App\Models\ClientTransactionRequest;
 use App\Models\TemporaryTransactionEdits;
@@ -29,6 +30,7 @@ class TransactionController extends Controller
         // Create a new transaction
         $transaction = new Transaction();
         $transaction->clientID = $validatedData['clientID'];
+        $transaction->projectID = $validatedData['projectID'];
         $transaction->description = $validatedData['description'];
         $transaction->amount = $validatedData['amount'];
         $transaction->category = $validatedData['category'];
@@ -49,6 +51,7 @@ class TransactionController extends Controller
         // Create a new client transaction request
         $clientTransactionRequest = new ClientTransactionRequest();
         $clientTransactionRequest->clientID = $validatedData['clientID'];
+        $clientTransactionRequest->projectID = $validatedData['projectID'];
         $clientTransactionRequest->transactionID = $transaction->id;
         $clientTransactionRequest->status = $validatedData['status'];
         $clientTransactionRequest->action = 'Create'; // Or whatever action you need
@@ -137,6 +140,14 @@ class TransactionController extends Controller
             ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
             ->count();
 
+        $projectCounts = Project::join('transaction', 'project.id', '=', 'transaction.projectID') // Join project with transaction
+        ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
+        ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
+        ->where('transaction.isDeleted', 0) // Ensure that deleted transactions are excluded
+        ->groupBy('project.id', 'project.projectName') // Group by project and project name
+        ->select('project.projectName', DB::raw('count(transaction.id) as transactionCount'))
+        ->get();
+
         // Prepare the counts array 
         $counts = [
             'earnings' => $earningsCount,
@@ -144,6 +155,7 @@ class TransactionController extends Controller
             'operating' => $operatingCount,
             'investing' => $investingCount,
             'financing' => $financingCount,
+            'projects' => $projectCounts, // Add project counts here
         ];
 
         // Return the counts as a JSON response 
@@ -160,19 +172,21 @@ class TransactionController extends Controller
         $category = $request->input('category');
         $searchText = $request->input('searchText');
         $company = $request->input('company');
+        $projectName = $request->input('projectName'); // Adding filter for project name (optional)
 
-        // Start building the query 
+        // Start building the query
         $query = Transaction::query();
 
-        // Add joins with related tables 
+        // Add joins with related tables
         $query->join('users', 'transaction.clientID', '=', 'users.id')
             ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
             ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
-            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID'); // Join with clientTransactionRequest
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+            ->join('project', 'transaction.projectID', '=', 'project.id'); // Join with the project table
 
-        $query->select('transaction.*', 'users.company', 'transactiontype.description as transactionType');
+        $query->select('transaction.*', 'users.company', 'transactiontype.description as transactionType', 'project.projectName'); // Selecting project fields
 
-        // Add filters based on inputs 
+        // Add filters based on inputs
         if ($fromDate) {
             $query->where('transaction.transactionDate', '>=', $fromDate . ' 00:00:00');
         }
@@ -180,7 +194,6 @@ class TransactionController extends Controller
         if ($toDate) {
             $query->where('transaction.transactionDate', '<=', $toDate . ' 23:59:59');
         }
-        
 
         if ($transactionType) {
             $query->where('transactiontype.description', $transactionType);
@@ -196,7 +209,8 @@ class TransactionController extends Controller
                     ->orWhere('transaction.amount', 'like', '%' . $searchText . '%')
                     ->orWhere('users.company', 'like', '%' . $searchText . '%')
                     ->orWhere('transaction.productLine', 'like', '%' . $searchText . '%')
-                    ->orWhere('transactiontype.description', 'like', '%' . $searchText . '%');
+                    ->orWhere('transactiontype.description', 'like', '%' . $searchText . '%')
+                    ->orWhere('project.projectName', 'like', '%' . $searchText . '%'); // Add project name search
             });
         }
 
@@ -209,11 +223,17 @@ class TransactionController extends Controller
 
         $query->where('transaction.isDeleted', 0);
 
-        // Execute the query and return results as JSON 
+        // If you want to filter based on project name or status (optional)
+        if ($projectName) {
+            $query->where('project.projectName', 'like', '%' . $projectName . '%');
+        }
+
+        // Execute the query and return results as JSON
         $filteredTransactions = $query->get();
 
         return response()->json($filteredTransactions);
     }
+
 
 
     public function updateTransaction(UpdateTransactionReq $request)
@@ -425,9 +445,8 @@ class TransactionController extends Controller
             $toDate = $request->input('dateTo');
 
             // Adjust to include entire day if fromDate and toDate are the same
-            if ($fromDate === $toDate) {
-                $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' +1 day -1 second'));
-            }
+            $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
+            $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
 
             // Retrieve the list of revenues
             $revenues = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
@@ -684,9 +703,8 @@ class TransactionController extends Controller
             $toDate = $request->input('dateTo');
 
             // Adjust to include entire day if fromDate and toDate are the same
-            if ($fromDate === $toDate) {
-                $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' +1 day -1 second'));
-            }
+            $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
+            $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
 
             // Query for total revenue and expenses per product line
             $segmentReportData = DB::table('transaction')

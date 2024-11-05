@@ -19,6 +19,7 @@ import SegmentReport from './pages/SegmentReport';
 import ForgotPassword from './pages/ForgotPassword';
 import NoModuleAccess from './pages/NoModuleAccess';
 import ManageAccess from './pages/ManageAccess';
+import ManageProject from './pages/ManageProject';
 
 
 const router = createBrowserRouter([
@@ -105,6 +106,10 @@ const router = createBrowserRouter([
                 path: '/view-client',
                 element: <SingleUser />
             },
+            {
+              path: '/manage-project',
+              element: <ManageProject />
+          },
 
         ]
     }

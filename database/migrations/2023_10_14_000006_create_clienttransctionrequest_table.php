@@ -11,11 +11,13 @@ class CreateClientTransctionRequestTable extends Migration
         Schema::create('clienttransctionrequest', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('clientID');
+            $table->unsignedBigInteger('projectID');
             $table->unsignedBigInteger('transactionID');
             $table->string('status', 50);
             $table->string('action', 50);
             $table->timestamp('requestDate')->nullable()->useCurrent();
             $table->foreign('clientID')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
+            $table->foreign('projectID')->references('id')->on('project')->onDelete('no action')->onUpdate('no action');
             $table->foreign('transactionID')->references('id')->on('transaction')->onDelete('no action')->onUpdate('no action');
 
             // Adding created_at and updated_at fields

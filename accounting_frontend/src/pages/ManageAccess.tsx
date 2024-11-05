@@ -1,11 +1,9 @@
-
-import React, { useEffect, useState }  from 'react';
+import React, { useEffect, useState } from 'react';
 import Box from '@mui/material/Box';
-import { Container} from '@mui/material';
+import { Container } from '@mui/material';
+import TablePagination from '@mui/material/TablePagination'; // Import TablePagination for pagination
 import { getModules, getAllAdmins, getPendingAccess, updateAccess, addNewAccess, getAccess, approvePendingAccessRequest, declinePendingAccessRequest } from "../utils/backend";
-
 import '../css/manageAccess.css';
-
 
 export default function ManageAccess() {
     const [error, setError] = useState(null);
@@ -20,6 +18,9 @@ export default function ManageAccess() {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [selectedAccessAdmin, setSelectedAccessAdmin] = useState('');
 
+    // Pagination States
+    const [page, setPage] = useState(0);  // The current page index
+    const [rowsPerPage, setRowsPerPage] = useState(5);  // Number of items per page
 
     useEffect(() => {
         const fetchModules = async () => {
@@ -36,6 +37,7 @@ export default function ManageAccess() {
 
         fetchAdmins();
     }, []);
+
     useEffect(() => {
         const fetchPendingAccess = async () => {
             await getPendingAccess(setError, setPendingAccess);
@@ -43,8 +45,6 @@ export default function ManageAccess() {
 
         fetchPendingAccess();
     }, []);
-
-    
 
     const handleAction = async (id, action) => {
         const payload = { request_id: id }; // Create payload with request ID
@@ -56,11 +56,10 @@ export default function ManageAccess() {
             }
             // Remove the request from the pending access list after approval or decline
             setPendingAccess(prev => prev.filter(req => req.id !== id));
-        }else{
+        } else {
             setAlert({ open: true, message: error, severity: 'error' });
         }
     };
-    
 
     const handleCloseAlert = () => {
         setAlert({ ...alert, open: false });
@@ -113,6 +112,7 @@ export default function ManageAccess() {
             setAccesses([]);
         }
     };
+
     const handleToggleAccess = async (access) => {
         const payload = {
             user_id: access.user_id,
@@ -124,8 +124,20 @@ export default function ManageAccess() {
             prev.map(item => item.module_id === access.module_id ? { ...item, hasAccess: !item.hasAccess } : item)
         );
     };
-    
-    
+
+    // Handle pagination change
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to first page
+    };
+
+    // Paginate filtered requests
+    const paginatedRequests = filteredRequests.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+
     return (
         <>
             <Box
@@ -141,34 +153,34 @@ export default function ManageAccess() {
                 }}
             >
                 <Container maxWidth="lg" className='manageAccessContainer'>
-                <div className="search-container">
-        <input
-            type="text"
-            placeholder="Search"
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="searchInput"
-        />
-        <button className="manageAccess-addButton" onClick={handleOpenDialog}>
-            Add New Access
-        </button>
-    </div>
-    <h2>Pending Access Requests</h2>
-                    {filteredRequests.length === 0 ? (
+                    <div className="search-container">
+                        <input
+                            type="text"
+                            placeholder="Search"
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="searchInput"
+                        />
+                        <button className="manageAccess-addButton" onClick={handleOpenDialog}>
+                            Add New Access
+                        </button>
+                    </div>
+                    <h2>Pending Access Requests</h2>
+                    {paginatedRequests.length === 0 ? (
                         <table className="accessTable">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Administrator Name</th>
-                                <th>Module</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                                <td colSpan={4} style={{textAlign:'center'}}>No Pending Access Request</td>
-                            </tr>
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Administrator Name</th>
+                                    <th>Module</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colSpan={4} style={{ textAlign: 'center' }}>No Pending Access Request</td>
+                                </tr>
                             </tbody>
-                            </table>
+                        </table>
                     ) : (
                         <table className="accessTable">
                             <thead>
@@ -180,12 +192,12 @@ export default function ManageAccess() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredRequests.map(request => (
+                                {paginatedRequests.map(request => (
                                     <tr key={request.id}>
                                         <td>{request.user_id}</td>
                                         <td>{request.name}</td>
                                         <td>{request.description}</td>
-                                        <td style={{alignItems:'center', justifyContent:'center'}}>
+                                        <td style={{ alignItems: 'center', justifyContent: 'center' }}>
                                             <button className="approve" onClick={() => handleAction(request.id, 'approve')}>Approve</button>
                                             <button className="decline" onClick={() => handleAction(request.id, 'decline')}>Decline</button>
                                         </td>
@@ -195,109 +207,117 @@ export default function ManageAccess() {
                         </table>
                     )}
 
-<h2 style={{marginBottom:'10px'}}>View Admin Access</h2>
-                <label>
-                    Select Admin:
-                    <select value={selectedAccessAdmin} onChange={handleAdminChange}>
-                        <option value="">Select Admin</option>
-                        {admins.map(admin => (
-                            <option key={admin.id} value={admin.id}>{admin.name}</option>
-                        ))}
-                    </select>
-                </label>
+                    <TablePagination
+                        component="div"
+                        count={filteredRequests.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        rowsPerPageOptions={[5, 10, 25]}
+                    />
 
-                {accesses.length > 0 ? (
-                    <table className="accessTable">
-                        <thead>
-                            <tr>
-                                <th>Module</th>
-                                <th>Access Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {accesses.length > 0 && accesses.map(access => (
-                                <tr key={access.module_id}>
-                                    <td>{access.module_description}</td>
-                                    <td>{access.hasAccess ? 'Enabled' : 'Disabled'}</td>
-                                    <td>
-                                        <button className={access.hasAccess ? "disable" : "enable"} onClick={() => handleToggleAccess(access)}>
-                                            {access.hasAccess ? 'Disable' : 'Enable'}
-                                        </button>
-                                    </td>
-                                </tr>
+                    <h2 style={{ marginBottom: '10px' }}>View Admin Access</h2>
+                    <label>
+                        Select Admin:
+                        <select value={selectedAccessAdmin} onChange={handleAdminChange}>
+                            <option value="">Select Admin</option>
+                            {admins.map(admin => (
+                                <option key={admin.id} value={admin.id}>{admin.name}</option>
                             ))}
-                        </tbody>
-                    </table>
-                ):(<table className="accessTable">
-                    <thead>
-                        <tr>
-                            <th>Module</th>
-                            <th>Access Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                            <tr>
-                                <td colSpan={3} style={{textAlign:'center'}}>No Access to any Module</td>
-                            </tr>
-                    </tbody>
-                </table>) }
-                
-                {dialogOpen && (
-                    <div className="manageAccess-dialogOverlay">
-                        <div className="manageAccess-dialog">
-                            <div className="manageAccess-dialogHeader">
-                                <h2>Add New Access</h2>
-                                <button className="manageAccess-closeButton" onClick={handleCloseDialog}>✖</button>
-                            </div>
-                            <div className="manageAccess-dialogContent">
-                                <label className="manageAccess-selectAdmin">
-                                    Select Admin:
-                                    <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)}>
-                                        <option value="">Select Admin</option>
-                                        {admins.map((admin) => (
-                                            <option key={admin.id} value={admin.id}>
-                                                {admin.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-                                <div className="manageAccess-moduleSelection">
-                                    <h3>Select Modules:</h3>
-                                    <div className="manageAccess-moduleGrid">
-                                        {modules.map((module) => (
-                                            <label key={module.id} className="manageAccess-moduleLabel">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedModules.includes(module.id)}
-                                                    onChange={() => handleModuleChange(module.id)}
-                                                />
-                                                {module.description}
-                                            </label>
-                                        ))}
+                        </select>
+                    </label>
+
+                    {accesses.length > 0 ? (
+                        <table className="accessTable">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Access Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {accesses.map(access => (
+                                    <tr key={access.module_id}>
+                                        <td>{access.module_description}</td>
+                                        <td>{access.hasAccess ? 'Enabled' : 'Disabled'}</td>
+                                        <td>
+                                            <button className={access.hasAccess ? "disable" : "enable"} onClick={() => handleToggleAccess(access)}>
+                                                {access.hasAccess ? 'Disable' : 'Enable'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <table className="accessTable">
+                            <thead>
+                                <tr>
+                                    <th>Module</th>
+                                    <th>Access Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colSpan={3} style={{ textAlign: 'center' }}>No Access to any Module</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    )}
+
+                    {dialogOpen && (
+                        <div className="manageAccess-dialogOverlay">
+                            <div className="manageAccess-dialog">
+                                <div className="manageAccess-dialogHeader">
+                                    <h2>Add New Access</h2>
+                                    <button className="manageAccess-closeButton" onClick={handleCloseDialog}>✖</button>
+                                </div>
+                                <div className="manageAccess-dialogContent">
+                                    <label className="manageAccess-selectAdmin">
+                                        Select Admin:
+                                        <select value={selectedAdmin} onChange={(e) => setSelectedAdmin(e.target.value)}>
+                                            <option value="">Select Admin</option>
+                                            {admins.map((admin) => (
+                                                <option key={admin.id} value={admin.id}>
+                                                    {admin.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <div className="manageAccess-moduleSelection">
+                                        <h3>Select Modules:</h3>
+                                        <div className="manageAccess-moduleGrid">
+                                            {modules.map((module) => (
+                                                <label key={module.id} className="manageAccess-moduleLabel">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedModules.includes(module.id)}
+                                                        onChange={() => handleModuleChange(module.id)}
+                                                    />
+                                                    {module.description}
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div className="manageAccess-dialogFooter">
-                                <button className="manageAccess-submitButton" onClick={handleAddAccess}>Submit</button>
+                                <div className="manageAccess-dialogFooter">
+                                    <button className="manageAccess-submitButton" onClick={handleAddAccess}>Submit</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                
-{alert.open && (
-    <div className={`custom-alert ${alert.severity}`}>
-        <div className="alert-content">
-            <span className="alert-message">{alert.message}</span>
-            <button className="alert-close" onClick={handleCloseAlert}>Close</button>
-        </div>
-    </div>
-)}
-
-
+                    {alert.open && (
+                        <div className={`custom-alert ${alert.severity}`}>
+                            <div className="alert-content">
+                                <span className="alert-message">{alert.message}</span>
+                                <button className="alert-close" onClick={handleCloseAlert}>Close</button>
+                            </div>
+                        </div>
+                    )}
                 </Container>
             </Box >
         </>

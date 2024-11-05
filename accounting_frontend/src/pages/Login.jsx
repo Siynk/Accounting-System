@@ -12,6 +12,7 @@ import { login } from "../utils/backend.js";
 import { Grid } from "@mui/material";
 import { Link } from "react-router-dom";
 
+
 export default function Login() {
 
     let { setUser, setToken } = useStateContext();
@@ -34,13 +35,12 @@ export default function Login() {
         <Container component="main" maxWidth="xs">
             <Box
                 sx={{
-                    marginTop: 10,
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                 }}
             >
-                <Typography component="h1" variant="h5" className="headerTitle" sx={{ fontFamily: 'Verdana' }}>
+                <Typography variant="h5" className="headerTitle">
                     LOGIN USER
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>

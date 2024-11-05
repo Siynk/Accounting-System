@@ -44,15 +44,17 @@ const ButtonList = () => {
         { id: 8, description: "Cashflow Statement" },
         { id: 9, description: "Trend Analysis" },
         { id: 10, description: "Segment Report" },
+        { id: 11, description: "Manage Project" },
     ];
 
     // Define sections and map them to modules
     const sections = [
         { name: 'Dashboard', icon: <DashboardIcon />, route: '/dashboard', moduleId: 2 },
-        { name: 'Client Mgt.', icon: <PeopleIcon />, route: '/client-management', moduleId: 3 },
+        { name: 'Client Mgt.', icon: <PeopleIcon />, route: '/client-management', moduleId: 3, excludeForClient: true },
         { name: 'Transactions', icon: <TransactionIcon />, route: '/transactions', moduleId: 4 },
         ...(user.userType === 'superadmin' ? [{ name: 'Manage Access', icon: <AdminPanelSettingsIcon />, route: '/manage-access' }] : []),
-        { name: 'Reports', icon: <ReportsIcon />, route: '#', isDropdown: true, moduleId: 5 },
+        { name: 'Manage Project', icon: <DashboardIcon />, route: '/manage-project', moduleId: 11 }, // New section for clients
+        { name: 'Reports', icon: <ReportsIcon />, route: '#', isDropdown: true, moduleId: 5, excludeForClient: true }, // Exclude for clients
     ];
 
     const reportSubsections = [
@@ -64,13 +66,12 @@ const ButtonList = () => {
     ];
 
     // Filter sections based on user access
-    // Filter sections based on user access
     const accessibleSections = sections.filter(section => {
         if (user.userType === 'superadmin') {
             return true; // Allow superadmins access to all sections
         }
         if (user.userType === 'client') {
-            return section.moduleId !== 3; // Exclude Client Management
+            return section.excludeForClient ? false : true; // Exclude "Reports" for clients
         }
         if (section.moduleId) {
             const access = accesses.find(access => access.module_id === section.moduleId);

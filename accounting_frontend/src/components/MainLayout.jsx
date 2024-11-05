@@ -34,11 +34,12 @@ function MainLayout() {
         2: '/dashboard',
         3: '/client-management',
         4: '/transactions',
-        5: '/reports/balance-sheet',
-        6: '/reports/income-statement',
-        7: '/reports/cashflow-statement',
-        8: '/reports/trend-analysis',
-        9: '/reports/segment-report',
+        6: '/reports/balance-sheet',
+        7: '/reports/income-statement',
+        8: '/reports/cashflow-statement',
+        9: '/reports/trend-analysis',
+        10: '/reports/segment-report',
+        11: '/manage-project',
     };
 
     const location = useLocation();
@@ -90,7 +91,6 @@ function MainLayout() {
         }
         
         if(accesses.length === 0 && user.userType === 'admin'){
-            console.log("hello");
           navigate('/no-module');
         }
     }, [currentPath, accesses]);
@@ -98,7 +98,17 @@ function MainLayout() {
     
     React.useEffect(() => {
         if (user.userType === 'client') {
-            const excludedPaths = ['/add-user', '/manage-access', '/client-management'];
+          const excludedPaths = [
+            '/add-user',
+            '/manage-access',
+            '/client-management',
+            '/reports/balance-sheet',
+            '/reports/income-statement',
+            '/reports/cashflow-statement',
+            '/reports/trend-analysis',
+            '/reports/segment-report'
+        ];
+        
             
             if (excludedPaths.includes(currentPath)) {
               navigate('/no-module');

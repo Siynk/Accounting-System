@@ -20,6 +20,7 @@ class Transaction extends Model
         'description',
         'productLine',
         'clientID',
+        'projectID',
         'amount',
         'category',
         'cashFlow',

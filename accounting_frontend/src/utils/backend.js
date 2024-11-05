@@ -73,6 +73,83 @@ export async function addUser(payload, setError, event) {
       });
 }
 
+export async function addProject(payload, setError, event) {
+  await axiosInstance.post('/add-project', payload)
+    .then(({ data }) => {
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function updateProjectStatus(payload, setError) {
+  await axiosInstance.post('/update-project-status', payload)
+    .then(({ data }) => {
+      setError(null);
+      
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 404) {
+        // Handle project not found or client mismatch error
+        alert('Project not found or client mismatch');
+      } else if (error.response && error.response.status === 422) {
+        // Assuming the backend sends the errors as an object with keys as field names
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function getApprovedProjects(payload, setError, setProjects) {
+  // Construct the query params from the payload (optional clientID)
+  const params = payload.clientID ? { clientID: payload.clientID } : {};
+
+  await axiosInstance.get('/get-approved-projects', { params })
+    .then(({ data }) => {
+      setError(null);
+      setProjects(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Handle validation errors if any (though it's unlikely for a GET request)
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function getPendingProjects(setError, setPendingProjects) {
+  await axiosInstance.get('/get-pending-projects')
+    .then(({ data }) => {
+      setError(null);
+      setPendingProjects(data);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        // Handle validation errors if any (though it's unlikely for a GET request)
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        // Handle other types of errors (network error, error 500, etc.)
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
 export async function addTransaction(payload, setError, event) {
   await axiosInstance.post('/add-transaction', payload)
     .then(({ data }) => {
@@ -145,23 +222,34 @@ export async function getClients(setError, setClients) {
     });
 }
 
-export async function filterTransactions(setError, setTransactions, payload) {
-  await axiosInstance.post('/filter-transactions', payload)
-    .then(({ data }) => {
-      setTransactions(data);
-      setError(null);
-    })
-    .catch(error => {
-      if (error.response && error.response.status === 400) {
-        // Assuming the backend sends the errors as an object with keys as field names
-        const errors = error.response.data.errors;
-        setError(errors);
-      } else {
-        // Handle other types of errors (network error, error 500, etc.)
-        console.log('An unexpected error occurred');
-      }
-    });
+export async function filterTransactions(setError, setTransactions, payload, userType) {
+  try {
+    const { data } = await axiosInstance.post('/filter-transactions', payload);
+    
+    // If the userType is 'client', filter the transactions for 'Inflow' cash flow
+    let filteredTransactions = data;
+    // if (userType === 'client') {
+    //   filteredTransactions = data.filter(transaction => transaction.cashFlow === 'Outflow');
+    // }
+    
+    // Set the filtered transactions to the state
+    setTransactions(filteredTransactions);
+    
+    // Reset any previous errors
+    setError(null);
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      // Assuming the backend sends the errors as an object with keys as field names
+      const errors = error.response.data.errors;
+      setError(errors);
+    } else {
+      // Handle other types of errors (network error, error 500, etc.)
+      console.log('An unexpected error occurred');
+      setError('An unexpected error occurred');
+    }
+  }
 }
+
 
 export async function filterClients(setError, setUsers, payload) {
   await axiosInstance.post('/filter-clients', payload)
@@ -218,7 +306,7 @@ export async function deleteTransaction(setError, transactionID) {
 }
 
 export async function deleteUser(setError, userID) {
-  await axiosInstance.post('/delete-user', userID)
+  await axiosInstance.post('/delete-user', {userID})
     .then(({ data }) => {
       alert(data.message);
       setError(null);
@@ -276,7 +364,6 @@ export async function updateClient(setError, payload) {
 export async function generateTrendAnalysisReport(setError, setTrendAnalysisReport, payload) {
   await axiosInstance.post('/generate-trend-analysis-report', payload)
     .then(({ data }) => {
-      console.log(data, "TREND ANALYSIS REPORT");
       setError(null);
       setTrendAnalysisReport(data);
     })
@@ -295,7 +382,6 @@ export async function generateTrendAnalysisReport(setError, setTrendAnalysisRepo
 export async function generateBalanceSheet(setError, setBalanceSheet, payload) {
   await axiosInstance.post('/generate-balance-sheet', payload)
     .then(({ data }) => {
-      console.log(data, "BALANCE SHEET DATA");
       setError(null);
       setBalanceSheet(data);
     })
@@ -314,7 +400,6 @@ export async function generateBalanceSheet(setError, setBalanceSheet, payload) {
 export async function generateIncomeStatement(setError, setIncomeStatement, payload) {
   await axiosInstance.post('/generate-income-statement', payload)
     .then(({ data }) => {
-      console.log(data, "INCOME STATEMENT");
       setError(null);
       setIncomeStatement(data);
     })
@@ -352,7 +437,6 @@ export async function generateCashflowStatement(setError, setCashflowStatement, 
 export async function generateSegmentReport(setError, setSegmentReport, payload) {
   await axiosInstance.post('/generate-segment-report', payload)
     .then(({ data }) => {
-      console.log(data, "SEGMENT REPORT");
       setError(null);
       setSegmentReport(data);
     })

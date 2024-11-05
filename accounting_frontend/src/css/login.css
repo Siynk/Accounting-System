@@ -1,13 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+
 .headerTitle {
     color: rgb(65, 195, 102);
     font-weight: bold;
 }
+
 .error {
     color: red;
 }
 .login-outlet {
     margin-right: 100px;
     margin-top: -100px;
+    margin: auto;
 }
 .starter-layout {
     display: flex;
@@ -15,21 +20,100 @@
     align-items: center;
     background-size: cover;
     background-position: center;
-    height: 97vh; /* Adjust the height as needed */
+    height: 100vh;
 }
 
 .starter-layout-content {
     display: flex;
-    justify-content: space-between;
+    margin: auto;
     align-items: center;
-    width: 100%; /* Adjust the width as needed */
+    justify-content: space-between;
 }
 
 .logo-container {
-    /* Adjust the size of the logo as needed */
-    width: 150px;
-    height: auto;
-    margin-left: 5%; /* Adjust the margin as needed */
+  background-color: rgb(8, 65, 18);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+  color: #ffffff;
+}
+
+/* Logo Image */
+.logo-image {
+  width: 120px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* Main Heading */
+.logo-heading {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: #ffffff;
+}
+
+/* Tagline */
+.logo-tagline {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #d0d0d0;
+  margin-top: 10px;
+}
+
+/* Sign-Up Button */
+.sign-up-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-transform: none;
+  font-weight: 600;
+}
+
+/* Decorative Line */
+.decorative-line {
+  margin-top: 20px;
+  width: 60%;
+  height: 2px;
+  background-color: #fff;
+  opacity: 0.2;
+}
+
+/* Decorative Circle or Element */
+.decorative-element {
+  margin-top: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  opacity: 0.3;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  animation: pulse 1.5s infinite; /* Apply pulse animation */
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% {
+      transform: scale(1);
+      opacity: 0.3;
+  }
+  50% {
+      transform: scale(1.1);
+      opacity: 0.6;
+  }
+  100% {
+      transform: scale(1);
+      opacity: 0.3;
+  }
 }
 
 /* Additional styles for the Outlet (login form) */

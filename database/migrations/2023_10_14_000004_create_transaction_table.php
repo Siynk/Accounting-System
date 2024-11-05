@@ -13,11 +13,13 @@ class CreateTransactionTable extends Migration
             $table->string('description');
             $table->string('productLine', 50);
             $table->unsignedBigInteger('clientID')->default(0);
+            $table->unsignedBigInteger('projectID')->default(0);
             $table->decimal('amount', 10, 0);
             $table->string('category', 50);
             $table->string('cashFlow', 50);
             $table->boolean('isDeleted')->default(0);
             $table->foreign('clientID')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
+            $table->foreign('projectID')->references('id')->on('project')->onDelete('no action')->onUpdate('no action');
 
             // Adding transactionDate, created_at, and updated_at fields
             $table->timestamp('transactionDate')->nullable()->useCurrent();

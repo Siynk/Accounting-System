@@ -6,6 +6,9 @@ import router from './router';
 import { ContextProvider } from './context/ContextProvider.jsx';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import 'typeface-roboto';
+import 'typeface-open-sans';
+import 'typeface-lato';
 
 
 ReactDOM.createRoot(document.getElementById('root')).render(

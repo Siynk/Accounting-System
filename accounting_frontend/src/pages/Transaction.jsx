@@ -1,9 +1,9 @@
-import { Table, TableBody, TableCell, TableHead, TableRow, Box, Toolbar, Container, CircularProgress } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow, Box, Toolbar, Container, CircularProgress, TablePagination, Dialog, DialogActions, DialogContent, DialogTitle, Button } from '@mui/material';
 import ViewIcon from '@mui/icons-material/Visibility';
 import UpdateIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import '../css/transaction.css';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Filters from '../components/Filters';
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
@@ -14,12 +14,20 @@ import { deleteTransaction } from '../utils/backend';
 
 const Transaction = () => {
     // Add your logic to handle view, update, and delete actions
-    let { setSingleTransaction } = useStateContext();
+    let { setSingleTransaction, user } = useStateContext();
 
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [transactions, setTransactions] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    // Pagination state
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    // State for managing confirmation dialog
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState(null);
 
     const handleView = (transaction) => {
         setSingleTransaction(transaction);
@@ -33,13 +41,38 @@ const Transaction = () => {
         setSelectedTransaction(null);
     };
 
-    const handleDelete = (id) => {
-        deleteTransaction(setError, { id });
+    // Open the delete confirmation dialog
+    const handleDeleteDialogOpen = (transaction) => {
+        setTransactionToDelete(transaction);
+        setOpenDeleteDialog(true);
     };
 
-console.log(transactions)
+    // Close the delete confirmation dialog
+    const handleDeleteDialogClose = () => {
+        setTransactionToDelete(null);
+        setOpenDeleteDialog(false);
+    };
 
+    // Handle the actual delete action after confirmation
+    const handleDelete = async () => {
+        if (transactionToDelete) {
+            await deleteTransaction(setError, { id: transactionToDelete.id });
+        }
+        handleDeleteDialogClose();
+        location.reload();
+    };
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0); // Reset to the first page when rows per page is changed
+    };
+
+    // Slice the transactions for the current page
+    const currentPageTransactions = transactions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     return (
         <Box
@@ -55,19 +88,30 @@ console.log(transactions)
             }}
         >
             <Toolbar />
-            {<Container maxWidth="lg" className='tableContainer'>
+            <Container maxWidth="lg" className='tableContainer'>
                 <Filters setTransactions={setTransactions} setError={setError} setLoading={setLoading} />
                 <Table className="transaction-table" aria-label="simple table">
                     <TableHead>
                         <TableRow>
                             <TableCell><span className='transaction-header'>DATE</span></TableCell>
-                            <TableCell><span className='transaction-header'>TYPE</span></TableCell>
+                            {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-header'>TYPE</span></TableCell>
+                            )}
+                            <TableCell><span className='transaction-header'>PROJECT</span></TableCell>
                             <TableCell><span className='transaction-header'>DESCRIPTION</span></TableCell>
-                            <TableCell><span className='transaction-header'>PRODUCT LINE</span></TableCell>
-                            <TableCell><span className='transaction-header'>CLIENT</span></TableCell>
-                            <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>
+                            {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-header'>PRODUCT LINE</span></TableCell>
+                            )}
+                            {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-header'>CLIENT</span></TableCell>
+                            )}
+                            {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>
+                            )}
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
-                            <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
+                            {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
+                            )}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -81,36 +125,74 @@ console.log(transactions)
                                     <TableCell colSpan={10} align="center">No Records Found</TableCell>
                                 </TableRow>
                             ) : (
-                                transactions.map((transaction) => (
+                                currentPageTransactions.map((transaction) => (
                                     <TableRow key={transaction.id}>
                                         <TableCell><span className='transaction-content'>{dayjs(transaction.transactionDate).format('MM-DD-YYYY')}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>
+                                        {user.userType !== 'client' && (
+                                            <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>
+                                        )}
+                                        <TableCell><span className='transaction-content'>{transaction.projectName}</span></TableCell>
                                         <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.company}</span></TableCell>
-                                        <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
+                                        {user.userType !== 'client' && (
+                                            <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
+                                        )}
+                                        {user.userType !== 'client' && (
+                                            <TableCell><span className='transaction-content'>{transaction.company}</span></TableCell>
+                                        )}
+                                        {user.userType !== 'client' && (
+                                            <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
+                                        )}
                                         <TableCell><span className='transaction-content'>{formatMoney(transaction.amount)}</span></TableCell>
-                                        <TableCell>
-                                            <div className='actions-container'>
-                                                <span onClick={() => handleView(transaction)}><Link className='actions view' to="/view-transaction"><ViewIcon /></Link></span>
-                                                <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span>
-                                                <span className='actions delete' onClick={() => handleDelete(transaction.id)}><DeleteIcon /></span>
-                                            </div>
-                                        </TableCell>
+                                        {user.userType !== 'client' && (
+                                            <TableCell>
+                                                <div className='actions-container'>
+                                                    <span onClick={() => handleView(transaction)}>
+                                                        <Link className='actions view' to="/view-transaction"><ViewIcon /></Link>
+                                                    </span>
+                                                    {/* <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span> */}
+                                                    <span className='actions delete' onClick={() => handleDeleteDialogOpen(transaction)}><DeleteIcon /></span>
+                                                </div>
+                                            </TableCell>
+                                        )}
                                     </TableRow>
                                 ))
                             )
                         )}
                     </TableBody>
                 </Table>
-            </Container>}
+                <TablePagination
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    component="div"
+                    count={transactions.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                />
+            </Container>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={openDeleteDialog}
+                onClose={handleDeleteDialogClose}
+            >
+                <DialogTitle>Confirm Deletion</DialogTitle>
+                <DialogContent>
+                    <p>Are you sure you want to delete this transaction?</p>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteDialogClose} color="primary">Cancel</Button>
+                    <Button onClick={handleDelete} color="secondary">Delete</Button>
+                </DialogActions>
+            </Dialog>
+
             {selectedTransaction && (
                 <EditTransactionModal
                     transaction={selectedTransaction}
                     onClose={handleCloseModal}
                 />
             )}
-        </Box >
+        </Box>
     );
 }
 

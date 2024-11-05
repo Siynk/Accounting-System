@@ -25,10 +25,14 @@
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
     "react-query": "^3.39.3",
     "react-router-dom": "^6.23.1",
     "react-toastify": "^10.0.5",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "typeface-lato": "^1.1.13",
+    "typeface-open-sans": "^1.1.13",
+    "typeface-roboto": "^1.1.13"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

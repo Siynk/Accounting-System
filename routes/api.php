@@ -25,6 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::post('update-user', [UserController::class, 'updateUser']);
     Route::post('add-user', [UserController::class, 'addUser']);
+    Route::post('add-project', [UserController::class, 'addProject']);
+    Route::post('update-project-status', [UserController::class, 'updateProjectStatus']);
+    Route::get('get-approved-projects', [UserController::class, 'getApprovedProjects']);
+    Route::get('get-pending-projects', [UserController::class, 'getPendingProjects']);
     Route::post('add-transaction', [TransactionController::class, 'addTransaction']);
     Route::get('get-all-transactions', [TransactionController::class, 'getAllTransactions']);
     Route::get('get-counts', [TransactionController::class, 'getCounts']);

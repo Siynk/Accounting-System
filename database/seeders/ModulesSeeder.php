@@ -20,6 +20,7 @@ class ModulesSeeder extends Seeder
             ['id' => 8, 'description' => 'Cashflow Statement', 'created_at' => '2024-10-11', 'updated_at' => '2024-10-11'],
             ['id' => 9, 'description' => 'Trend Analysis', 'created_at' => '2024-10-11', 'updated_at' => '2024-10-11'],
             ['id' => 10, 'description' => 'Segment Report', 'created_at' => '2024-10-11', 'updated_at' => '2024-10-11'],
+            ['id' => 11, 'description' => 'Manage Project', 'created_at' => '2024-10-11', 'updated_at' => '2024-10-11'],
         ]);
     }
 }

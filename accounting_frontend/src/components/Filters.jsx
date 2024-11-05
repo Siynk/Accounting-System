@@ -2,19 +2,18 @@ import { useCallback, useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import '../css/transaction.css';
 import { Link } from 'react-router-dom';
-import { filterTransactions } from '../utils/backend';
+import { filterTransactions, getApprovedProjects } from '../utils/backend';
 import { useStateContext } from '../context/ContextProvider';
 
 const Filters = ({ setError, setTransactions, setLoading }) => {
     // State for each filter
     const [transactionType, setTransactionType] = useState('');
-    const [paymentMethod, setPaymentMethod] = useState('');
     const [category, setCategory] = useState('');
-    const [balance, setBalance] = useState('');
-    const [activity, setActivity] = useState('');
     const [fromDate, setFromDate] = useState(dayjs().format('YYYY-MM-DD'));
     const [toDate, setToDate] = useState(dayjs().format('YYYY-MM-DD'));
     const [searchText, setSearchText] = useState('');
+    const [selectedProject, setSelectedProject] = useState(''); // New state for selected project
+    const [projects, setProjects] = useState([]); // State to hold projects
     const { user } = useStateContext();
 
     // Function to log the current state of filters
@@ -24,7 +23,8 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
             toDate,
             transactionType,
             category,
-            searchText
+            searchText,
+            projectName: selectedProject, // Add the selected project to the payload
         };
 
         if (user.userType === 'client') {
@@ -32,8 +32,15 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
         }
 
         fetchTransactions(payload);
-
     };
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            const payload = user.userType === 'client' ? { clientID: user.id } : {};
+            await getApprovedProjects(payload, setError, setProjects);
+        };
+        fetchProjects();
+    }, [user.id, user.userType]);
 
     const debounce = (func, wait) => {
         let timeout;
@@ -49,15 +56,16 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
 
     const fetchTransactions = useCallback(debounce((payload) => {
         setLoading(true);
-        filterTransactions(setError, setTransactions, payload)
+        filterTransactions(setError, setTransactions, payload, user.userType)
             .finally(() => setLoading(false));
     }, 500), []);
+    
 
 
     // Effect to run the handleFilterChange function whenever any state changes
     useEffect(() => {
-        handleFilterChange();
-    }, [fromDate, toDate, transactionType, category, searchText]);
+      handleFilterChange();
+  }, [fromDate, toDate, transactionType, category, searchText, selectedProject]);
 
     return (
         <div className="filters-container">
@@ -81,7 +89,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                             onChange={(e) => setToDate(e.target.value)}
                         />
                     </div>
-                    <div className="grid-item">
+                    {user.userType !== 'client' && <div className="grid-item">
                         <label htmlFor="transaction-type">Transaction Type</label>
                         <select
                             id="transaction-type"
@@ -99,9 +107,9 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                             <option value="Loan">Loan</option>
                             <option value="Dividends">Dividends</option>
                         </select>
-                    </div>
+                    </div>}
 
-                    <div className="grid-item">
+                    {user.userType !== 'client' && <div className="grid-item">
                         <label htmlFor="category">Category</label>
                         <select
                             id="category"
@@ -113,7 +121,24 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                             <option value="Investing">Investing</option>
                             <option value="Financing">Financing</option>
                         </select>
-                    </div>
+                    </div>}
+                    {/* New Project Filter */}
+                    {user.userType !== 'client' && <div className="grid-item">
+                        <label htmlFor="project">Project</label>
+                        <select
+                            id="project"
+                            value={selectedProject}
+                            onChange={(e) => setSelectedProject(e.target.value)}
+                        >
+                            <option value="">Select Project</option>
+                            {projects.map((project) => (
+                                <option key={project.id || `${project.projectName}-${project.clientID}`} value={project.projectName}>
+                                    {project.projectName}
+                                </option>
+                            ))}
+
+                        </select>
+                    </div>}
                 </div>
             </div>
             <div className="search-container">
@@ -125,7 +150,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                 />
-                <Link to="/add-transaction" className="new-transaction-btn">New Transaction</Link>
+                {user.userType !== 'client' && <Link to="/add-transaction" className="new-transaction-btn">New Transaction</Link>}
             </div>
         </div>
     );

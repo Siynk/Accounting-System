@@ -1,7 +1,7 @@
 import { Box, Container, Toolbar } from "@mui/material";
 import React, { useState, useEffect } from 'react';
 import '../css/addTransaction.css';
-import { addTransaction, getClients } from "../utils/backend";
+import { addTransaction, getClients, getApprovedProjects } from "../utils/backend";
 import { useStateContext } from "../context/ContextProvider";
 
 const AddTransaction = () => {
@@ -19,6 +19,21 @@ const AddTransaction = () => {
         { id: 8, name: 'Loan' },
         { id: 9, name: 'Dividends' }
     ];
+    const [projects, setProjects] = useState([]);
+    const [selectedClient, setSelectedClient] = useState(false);
+
+    useEffect(() => {
+        const fetchProjects = async () => {
+            if (selectedClient) {
+                await getApprovedProjects({ clientID: selectedClient }, setError, setProjects);
+            }
+        };
+        fetchProjects();
+    }, [selectedClient]);
+    
+  const handleClientChange = (e) => {
+      setSelectedClient(e.target.value);
+  };
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -45,7 +60,7 @@ const AddTransaction = () => {
 
         // Set status based on userType
         data.status = user.userType === 'client' ? 'Pending' : 'Approved';
-
+        
         // Perform other validations as needed
         // If all validations pass, submit the form
         addTransaction(data, setError, e);
@@ -78,7 +93,8 @@ const AddTransaction = () => {
                             {error && <span className="error">{error.description}</span>}
                             <label>
                                 Client:
-                                <select name="clientID">
+                                <select name="clientID" onChange={handleClientChange}>
+                                    <option value="">Select client</option> {/* Default option */}
                                     {user.userType === 'client' ? (
                                         <option value={user.id}>{user.company}</option>
                                     ) : (
@@ -87,9 +103,24 @@ const AddTransaction = () => {
                                         ))
                                     )}
                                 </select>
-
                             </label>
+
                             {error && <span className="error">{error.clientID}</span>}
+
+                            {/* New select for approved projects */}
+                            <label>
+                                Approved Project:
+                                <select name="projectID">
+                                    {projects.length > 0 ? (
+                                        projects.map(project => (
+                                            <option key={project.id} value={project.project_id}>{project.projectName}</option>
+                                        ))
+                                    ) : (
+                                        <option>No projects available</option>
+                                    )}
+                                </select>
+                            </label>
+                            {error && <span className="error">{error.projectID}</span>}
                             <label>
                                 Transaction Types:
                                 <div className="ttypeContainer">

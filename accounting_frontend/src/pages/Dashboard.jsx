@@ -80,6 +80,22 @@ export default function Dashboard() {
         };
     };
 
+    const getRandomColor = () => {
+      const colors = [
+        '#e3f2fd', // Light Blue
+        '#ffe0b2', // Light Orange
+        '#c8e6c9', // Light Green
+        '#d1c4e9', // Light Purple
+        '#ffccbc', // Light Red
+        '#f8bbd0', // Light Pink
+        '#ffecb3', // Light Yellow
+      ];
+      return colors[Math.floor(Math.random() * colors.length)];
+    };
+
+    const combinedTotalProjects = counts.projects && counts.projects.reduce((total, project) => total + (project.transactionCount || 0), 0);
+    
+
     // Fetch counts with debounce to avoid too many requests
     const fetchCounts = useCallback(
         debounce(() => {
@@ -147,6 +163,7 @@ export default function Dashboard() {
         revenue: segment.totalRevenue,
         expenses: segment.totalExpenses,
     }));
+    console.log(segmentReport, "@@@@@@@@@@")
 
     const trendData = trendAnalysisReport.map(trend => ({
         month: trend.month,
@@ -154,7 +171,7 @@ export default function Dashboard() {
         expenses: trend.totalExpense,
     }));
 
-    const combinedTotal = Object.values(counts).reduce((acc, value) => acc + (value || 0), 0);
+    
 
     // Total values for percentage calculations
     const totalCounts = {
@@ -165,13 +182,15 @@ export default function Dashboard() {
         financing: counts.financing || 0,
     };
 
+    const combinedTotal = totalCounts.earnings + totalCounts.expenditures + totalCounts.operating + totalCounts.investing + totalCounts.financing;
+
     // Function to calculate percentage
     const calculatePercentage = (value, total) => {
         return total > 0 ? ((value / total) * 100).toFixed(2) : 0;
     };
 
 
-    return (
+    return user.userType !== 'client' ? (
         <>
             <Box
                 component="main"
@@ -364,13 +383,13 @@ export default function Dashboard() {
                         </Grid>
 
                         {/* KPI Section */}
-                        <Grid item xs={12}>
-                            <Typography variant="h5" color="primary" sx={{ textAlign: 'center', marginBottom: '16px' }}>
+                        {/* <Grid item xs={12}> */}
+                            {/* <Typography variant="h5" color="primary" sx={{ textAlign: 'center', marginBottom: '16px' }}>
                                 Key Performance Indicators (KPIs)
-                            </Typography>
-                            <Grid container spacing={2} justifyContent="center">
+                            </Typography> */}
+                            {/* <Grid container spacing={2} justifyContent="center"> */}
                                 {/* Gross Profit Margin */}
-                                <Grid item xs={12} sm={6} md={4}>
+                                {/* <Grid item xs={12} sm={6} md={4}>
                                     <Card sx={{ padding: '16px', borderRadius: '8px', backgroundColor: '#1976d2', boxShadow: 3 }}>
                                         <CardContent>
                                             <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#ffffff' }}>Gross Profit Margin</Typography>
@@ -379,9 +398,9 @@ export default function Dashboard() {
                                             </Typography>
                                         </CardContent>
                                     </Card>
-                                </Grid>
+                                </Grid> */}
                                 {/* Operating Margin */}
-                                <Grid item xs={12} sm={6} md={4}>
+                                {/* <Grid item xs={12} sm={6} md={4}>
                                     <Card sx={{ padding: '16px', borderRadius: '8px', backgroundColor: '#ff9800', boxShadow: 3 }}>
                                         <CardContent>
                                             <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#ffffff' }}>Operating Margin</Typography>
@@ -390,9 +409,9 @@ export default function Dashboard() {
                                             </Typography>
                                         </CardContent>
                                     </Card>
-                                </Grid>
+                                </Grid> */}
                                 {/* Return on Equity (ROE) */}
-                                <Grid item xs={12} sm={6} md={4}>
+                                {/* <Grid item xs={12} sm={6} md={4}>
                                     <Card sx={{ padding: '16px', borderRadius: '8px', backgroundColor: '#6a1b9a', boxShadow: 3 }}>
                                         <CardContent>
                                             <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#ffffff' }}>Return on Equity (ROE)</Typography>
@@ -401,9 +420,9 @@ export default function Dashboard() {
                                             </Typography>
                                         </CardContent>
                                     </Card>
-                                </Grid>
-                            </Grid>
-                        </Grid>
+                                </Grid> */}
+                            {/* </Grid>
+                        </Grid> */}
 
                         {/* Balance Sheet Chart */}
                         <Grid item xs={12} sm={6}>
@@ -517,5 +536,76 @@ export default function Dashboard() {
                 </Container>
             </Box >
         </>
+    ) : (
+      <><Toolbar />
+        <Container maxWidth="lg" className='dashboardContainer' sx={{marginTop:10}}>
+          <Box
+              component="main"
+              sx={{
+                  backgroundColor: (theme) =>
+                      theme.palette.mode === 'light'
+                          ? theme.palette.grey[100]
+                          : theme.palette.grey[900],
+                  flexGrow: 1,
+                  height: 'auto',
+                  overflow: 'auto',
+              }}
+          >
+              <Grid container spacing={3}>
+                  {/* Check if there are projects */}
+                  {counts.projects && counts.projects.length > 0 ? (
+                      counts.projects.map((project) => {
+                          // Extract values for the current project
+                          const { projectName, transactionCount } = project;
+                          
+                          // Get a random background color for the card
+                          const cardColor = getRandomColor();
+
+                          return (
+                              <Grid item xs={12} sm={6} md={4} key={project.projectName}>
+                                  <Card sx={{ backgroundColor: cardColor, padding: '16px', borderRadius: '8px' }}>
+                                      <CardContent>
+                                          <Box display="flex" justifyContent="space-between" alignItems="center">
+                                              <Box>
+                                                  <Typography variant="h6">{projectName}</Typography>
+                                                  <Typography color="textSecondary">
+                                                      {loading ? <CircularProgress size={15} /> : transactionCount}
+                                                  </Typography>
+                                              </Box>
+                                              <Box position="relative" display="inline-flex">
+                                                  <CircularProgress
+                                                      variant="determinate"
+                                                      value={calculatePercentage(transactionCount, combinedTotalProjects)}
+                                                      size={60}
+                                                  />
+                                                  <Box
+                                                      position="absolute"
+                                                      top="50%"
+                                                      left="50%"
+                                                      sx={{
+                                                          transform: 'translate(-50%, -50%)',
+                                                          fontWeight: 'bold',
+                                                      }}
+                                                  >
+                                                      {loading ? <CircularProgress size={15} /> : `${Math.round(calculatePercentage(transactionCount, combinedTotalProjects))}%`}
+                                                  </Box>
+                                              </Box>
+                                          </Box>
+                                      </CardContent>
+                                  </Card>
+                              </Grid>
+                          );
+                      })
+                  ) : (
+                      <Grid item xs={12}>
+                          <Typography variant="h6" color="textSecondary" align="center">
+                              No Projects Available
+                          </Typography>
+                      </Grid>
+                  )}
+              </Grid>
+          </Box>
+      </Container></>
+
     );
 }

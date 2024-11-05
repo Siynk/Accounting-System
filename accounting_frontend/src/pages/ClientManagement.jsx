@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableHead, TableRow, Box, Toolbar, Container, CircularProgress } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow, Box, Toolbar, Container, CircularProgress, Dialog, DialogTitle, DialogContent, DialogActions, Button, Pagination } from '@mui/material';
 import ViewIcon from '@mui/icons-material/Visibility';
 import UpdateIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -32,13 +32,15 @@ const ClientManagement = () => {
     const [pendingRequests, setPendingRequests] = useState([]);
     const [pendingTransactionRequests, setPendingTransactionRequests] = useState([]);
     const [pendingTemporaryEdits, setPendingTemporaryEdits] = useState([]);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1); // Manage current page
+    const [itemsPerPage, setItemsPerPage] = useState(10); // Number of items per page
 
+    // Handle user search
     const handleUserSearch = () => {
-        const payload = {
-            searchText
-        };
+        const payload = { searchText, page: currentPage, limit: itemsPerPage };
         fetchUsers(payload);
-
     };
 
     const handleView = (user) => {
@@ -53,8 +55,20 @@ const ClientManagement = () => {
         setSelectedUser(null);
     };
 
-    const handleDelete = (id) => {
-        deleteUser(setError, { id });
+    const handleDelete = () => {
+        if (userToDelete) {
+            deleteUser(setError, userToDelete)
+                .then(() => {
+                    toast.success('Client successfully deleted');
+                    setDeleteDialogOpen(false);
+                    setUserToDelete(null);
+                    // Optionally refresh the list or reload the page after deletion
+                    fetchUsers({ searchText, page: currentPage, limit: itemsPerPage });
+                })
+                .catch(err => {
+                    toast.error(err.message);
+                });
+        }
     };
 
     const debounce = (func, wait) => {
@@ -77,7 +91,7 @@ const ClientManagement = () => {
 
     useEffect(() => {
         handleUserSearch();
-    }, [searchText]);
+    }, [searchText, currentPage, itemsPerPage]);
 
     const fetchPendingRequests = useCallback(() => {
         setLoading(true);
@@ -113,7 +127,7 @@ const ClientManagement = () => {
         respondToClientRequest({ userID: id, status: 'Approved' }, setError)
             .then(response => {
                 toast.success("Successfully Approved");
-                fetchPendingRequests(); // Refresh the pending requests
+                fetchPendingRequests();
             })
             .catch(err => {
                 toast.error(err.message);
@@ -124,7 +138,7 @@ const ClientManagement = () => {
         respondToClientRequest({ userID: id, status: 'Declined' }, setError)
             .then(response => {
                 toast.success('Declined Request');
-                fetchPendingRequests(); // Refresh the pending requests
+                fetchPendingRequests();
             })
             .catch(err => {
                 toast.error(err.message);
@@ -135,7 +149,7 @@ const ClientManagement = () => {
         respondToPendingTransactionRequest({ requestID: id, status: 'Approved' }, setError)
             .then(response => {
                 toast.success("Transaction Request Approved");
-                fetchPendingTransactionRequests(); // Refresh the pending requests
+                fetchPendingTransactionRequests();
             })
             .catch(err => {
                 toast.error(err.message);
@@ -146,7 +160,7 @@ const ClientManagement = () => {
         respondToPendingTransactionRequest({ requestID: id, status: 'Declined' }, setError)
             .then(response => {
                 toast.success("Transaction Request Declined");
-                fetchPendingTransactionRequests(); // Refresh the pending requests
+                fetchPendingTransactionRequests();
             })
             .catch(err => {
                 toast.error(err.message);
@@ -157,7 +171,7 @@ const ClientManagement = () => {
         respondToPendingTransactionEdit({ editID: id, status: 'Approved' }, setError)
             .then(response => {
                 toast.success("Edit Request Approved");
-                fetchPendingTemporaryEdits(); // Refresh the pending edits
+                fetchPendingTemporaryEdits();
             })
             .catch(err => {
                 toast.error(err.message);
@@ -168,11 +182,25 @@ const ClientManagement = () => {
         respondToPendingTransactionEdit({ editID: id, status: 'Declined' }, setError)
             .then(response => {
                 toast.success("Edit Request Declined");
-                fetchPendingTemporaryEdits(); // Refresh the pending edits
+                fetchPendingTemporaryEdits();
             })
             .catch(err => {
                 toast.error(err.message);
             });
+    };
+
+    const handleDeleteDialogOpen = (userId) => {
+        setUserToDelete(userId);
+        setDeleteDialogOpen(true);
+    };
+
+    const handleDeleteDialogClose = () => {
+        setDeleteDialogOpen(false);
+        setUserToDelete(null);
+    };
+
+    const handlePageChange = (event, value) => {
+        setCurrentPage(value); // Update the current page when the user changes pages
     };
 
     return (
@@ -189,7 +217,7 @@ const ClientManagement = () => {
             }}
         >
             <Toolbar />
-            {<Container maxWidth="lg" className='tableContainer'>
+            <Container maxWidth="lg" className='tableContainer'>
                 <div className="search-container-client">
                     <input
                         type="text"
@@ -240,8 +268,8 @@ const ClientManagement = () => {
                 )}
 
                 {/* New Section: Pending Transaction Requests */}
-                <h2 className="pending-transaction-title">Pending Transaction Requests</h2>
-                {loading ? (
+                {/* <h2 className="pending-transaction-title">Pending Transaction Requests</h2> */}
+                {/* {loading ? (
                     <CircularProgress />
                 ) : (
                     <Table className="pending-transaction-table" aria-label="pending transaction requests table">
@@ -279,11 +307,11 @@ const ClientManagement = () => {
                             )}
                         </TableBody>
                     </Table>
-                )}
+                )} */}
 
                 {/* New Section: Pending Temporary Transaction Edits */}
-                <h2 className="pending-edit-title">Pending Temporary Edits</h2>
-                {loading ? (
+                {/* <h2 className="pending-edit-title">Pending Temporary Edits</h2> */}
+                {/* {loading ? (
                     <CircularProgress />
                 ) : (
                     <Table className="pending-edit-table" aria-label="pending temporary edits table">
@@ -325,8 +353,16 @@ const ClientManagement = () => {
                             )}
                         </TableBody>
                     </Table>
-                )}
+                )} */}
 
+                <Pagination
+                    count={Math.ceil(pendingRequests.length / itemsPerPage)} // Calculate number of pages
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
+
+                {/* User Table */}
                 <Table className="user-table" aria-label="simple table">
                     <TableHead>
                         <TableRow>
@@ -363,8 +399,8 @@ const ClientManagement = () => {
                                         <TableCell>
                                             <div className='actions-container'>
                                                 <span onClick={() => handleView(user)}><Link className='actions view' to="/view-client"><ViewIcon /></Link></span>
-                                                <span className='actions update' onClick={() => handleUpdatePopup(user)}><UpdateIcon /></span>
-                                                <span className='actions delete' onClick={() => handleDelete(user.id)}><DeleteIcon /></span>
+                                                {/* <span className='actions update' onClick={() => handleUpdatePopup(user)}><UpdateIcon /></span> */}
+                                                <span className='actions delete' onClick={() => handleDeleteDialogOpen(user.id)}><DeleteIcon /></span>
                                             </div>
                                         </TableCell>
                                     </TableRow>
@@ -373,7 +409,37 @@ const ClientManagement = () => {
                         )}
                     </TableBody>
                 </Table>
-            </Container>}
+
+                {/* Pagination controls */}
+                <Pagination
+                    count={Math.ceil(users.length / itemsPerPage)} // Calculate pages based on the number of users
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
+            </Container>
+
+            {/* Delete Confirmation Dialog */}
+            <Dialog
+                open={deleteDialogOpen}
+                onClose={handleDeleteDialogClose}
+                aria-labelledby="delete-dialog-title"
+            >
+                <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+                <DialogContent>
+                    <p>Are you sure you want to delete this client?</p>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleDeleteDialogClose} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleDelete} color="secondary">
+                        Delete
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit User Modal */}
             {selectedUser && (
                 <EditUserModal
                     user={selectedUser}

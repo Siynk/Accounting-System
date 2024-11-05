@@ -1,0 +1,45 @@
+/* manageProject.css */
+
+/* Centering content and setting max width */
+.history-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background-color: transparent;
+}
+
+/* Styling for the Add New Project button */
+.MuiButton-contained {
+  background-color: #4caf50;
+  color: white;
+  padding: 8px 16px;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+
+/* Custom styling for the search field */
+.MuiInputBase-root {
+  background-color: white;
+  border-radius: 4px;
+  padding-right: 10px;
+}
+
+table {
+  width: 100%;
+  margin-top: 20px;
+}
+
+button {
+  margin-right: 10px;
+}
+
+button.success {
+  background-color: #4caf50; /* Green */
+}
+
+button.error {
+  background-color: #f44336; /* Red */
+}
