@@ -226,29 +226,35 @@ export async function filterTransactions(setError, setTransactions, payload, use
   try {
     const { data } = await axiosInstance.post('/filter-transactions', payload);
     
-    // If the userType is 'client', filter the transactions for 'Inflow' cash flow
     let filteredTransactions = data;
     // if (userType === 'client') {
-    //   filteredTransactions = data.filter(transaction => transaction.cashFlow === 'Outflow');
+    //   let seen = new Set();
+    //   let uniqueTransactions = filteredTransactions.filter(transaction => {
+    //     if (seen.has(transaction.id)) {
+    //       return false;
+    //     }
+    //     seen.add(transaction.id);
+    //     return true;
+    //   });
+      
+    //   setTransactions(uniqueTransactions);
+    // } else {
+    //   setTransactions(filteredTransactions);
     // }
-    
-    // Set the filtered transactions to the state
     setTransactions(filteredTransactions);
-    
-    // Reset any previous errors
+
     setError(null);
   } catch (error) {
     if (error.response && error.response.status === 400) {
-      // Assuming the backend sends the errors as an object with keys as field names
       const errors = error.response.data.errors;
       setError(errors);
     } else {
-      // Handle other types of errors (network error, error 500, etc.)
       console.log('An unexpected error occurred');
       setError('An unexpected error occurred');
     }
   }
 }
+
 
 
 export async function filterClients(setError, setUsers, payload) {

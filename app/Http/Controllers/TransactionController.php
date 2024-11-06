@@ -140,13 +140,16 @@ class TransactionController extends Controller
             ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
             ->count();
 
-        $projectCounts = Project::join('transaction', 'project.id', '=', 'transaction.projectID') // Join project with transaction
-        ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
+        $projectCounts = Project::join('transaction', 'project.id', '=', 'transaction.projectID')
+        ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('users', 'transaction.clientID', '=', 'users.id') // Join with users table
         ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
         ->where('transaction.isDeleted', 0) // Ensure that deleted transactions are excluded
+        ->where('users.company', 'like', '%' . $company . '%') // Filter by company
         ->groupBy('project.id', 'project.projectName') // Group by project and project name
         ->select('project.projectName', DB::raw('count(transaction.id) as transactionCount'))
         ->get();
+        
 
         // Prepare the counts array 
         $counts = [

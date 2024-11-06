@@ -3,29 +3,29 @@ import { Box, Container, Button, TextField, Grid, Table, TableBody, TableCell, T
 import { useTheme } from '@mui/material/styles';
 import { addProject, getApprovedProjects, updateProjectStatus, getPendingProjects, getClients } from '../utils/backend';
 import { useStateContext } from '../context/ContextProvider';
-import '../css/manageProject.css';  // Importing the custom CSS
+import '../css/manageProject.css';
 
 const ManageProject = () => {
-  const [projects, setProjects] = useState([]);  // Stores the list of projects (approved)
-  const [pendingProjects, setPendingProjects] = useState([]);  // Stores the list of pending projects
+  const [projects, setProjects] = useState([]);
+  const [pendingProjects, setPendingProjects] = useState([]);
   const [search, setSearch] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [error, setError] = useState(false);
   const [selectedClient, setSelectedClient] = useState('');
   const [clients, setClients] = useState([]);
   
-  const { user } = useStateContext();  // Getting user from context
+  const [approvedProjectsPage, setApprovedProjectsPage] = useState(0); // Separate page state for approved projects
+  const [pendingProjectsPage, setPendingProjectsPage] = useState(0); // Separate page state for pending projects
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const { user } = useStateContext();
   const theme = useTheme();
 
-  // Fetch Approved Projects on mount
   useEffect(() => {
     const fetchApprovedProjects = async () => {
       await getApprovedProjects({ clientID: user.userType === 'client' ? user.id : null }, setError, setProjects);
     };
-
     fetchApprovedProjects();
   }, [user.id]);
 
@@ -79,23 +79,26 @@ const ManageProject = () => {
     }
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
+  const handleChangeApprovedProjectsPage = (event, newPage) => {
+    setApprovedProjectsPage(newPage);
+  };
+
+  const handleChangePendingProjectsPage = (event, newPage) => {
+    setPendingProjectsPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
+    setApprovedProjectsPage(0);
+    setPendingProjectsPage(0);
   };
 
-  // Function to handle the approval/decline action for pending projects
   const handleProjectStatusChange = async (projectID, clientID, status) => {
     const payload = {
       status,
       clientID,
       projectID
     };
-    console.log(projectID, clientID, status);
     await updateProjectStatus(payload, setError);
     location.reload();
   };
@@ -145,7 +148,7 @@ const ManageProject = () => {
                       <TableCell colSpan={3} align="center">Currently No Pending Projects</TableCell>
                     </TableRow>
                   ) : (
-                    pendingProjects.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((project) => (
+                    pendingProjects.slice(pendingProjectsPage * rowsPerPage, pendingProjectsPage * rowsPerPage + rowsPerPage).map((project) => (
                       <TableRow key={project.project_id}>
                         <TableCell>{project.client_name}</TableCell>
                         <TableCell>{project.projectName}</TableCell>
@@ -164,8 +167,8 @@ const ManageProject = () => {
               component="div"
               count={pendingProjects.length}
               rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
+              page={pendingProjectsPage}
+              onPageChange={handleChangePendingProjectsPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </Grid>}
@@ -187,7 +190,7 @@ const ManageProject = () => {
                       <TableCell colSpan={1} align="center">Currently No Approved Projects</TableCell>
                     </TableRow>
                   ) : (
-                    filteredProjects.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((project) => (
+                    filteredProjects.slice(approvedProjectsPage * rowsPerPage, approvedProjectsPage * rowsPerPage + rowsPerPage).map((project) => (
                       <TableRow key={project.project_id}>
                         <TableCell>{project.projectName}</TableCell>
                         {user.userType !== 'client' &&<TableCell>{project.client_name}</TableCell>}
@@ -202,8 +205,8 @@ const ManageProject = () => {
               component="div"
               count={filteredProjects.length}
               rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handleChangePage}
+              page={approvedProjectsPage}
+              onPageChange={handleChangeApprovedProjectsPage}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </Grid>

@@ -79,7 +79,7 @@ export default function Dashboard() {
             timeout = setTimeout(later, wait);
         };
     };
-
+    
     const getRandomColor = () => {
       const colors = [
         '#e3f2fd', // Light Blue

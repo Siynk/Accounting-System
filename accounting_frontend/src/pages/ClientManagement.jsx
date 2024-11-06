@@ -34,12 +34,16 @@ const ClientManagement = () => {
     const [pendingTemporaryEdits, setPendingTemporaryEdits] = useState([]);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [userToDelete, setUserToDelete] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1); // Manage current page
-    const [itemsPerPage, setItemsPerPage] = useState(10); // Number of items per page
+    
+    // Separate current page states for each table
+    const [currentPageUsers, setCurrentPageUsers] = useState(1); 
+    const [currentPageRequests, setCurrentPageRequests] = useState(1);
+
+    const [itemsPerPage, setItemsPerPage] = useState(5); // Number of items per page
 
     // Handle user search
     const handleUserSearch = () => {
-        const payload = { searchText, page: currentPage, limit: itemsPerPage };
+        const payload = { searchText, page: currentPageUsers, limit: itemsPerPage };
         fetchUsers(payload);
     };
 
@@ -63,7 +67,7 @@ const ClientManagement = () => {
                     setDeleteDialogOpen(false);
                     setUserToDelete(null);
                     // Optionally refresh the list or reload the page after deletion
-                    fetchUsers({ searchText, page: currentPage, limit: itemsPerPage });
+                    fetchUsers({ searchText, page: currentPageUsers, limit: itemsPerPage });
                 })
                 .catch(err => {
                     toast.error(err.message);
@@ -91,7 +95,7 @@ const ClientManagement = () => {
 
     useEffect(() => {
         handleUserSearch();
-    }, [searchText, currentPage, itemsPerPage]);
+    }, [searchText, currentPageUsers, itemsPerPage]);
 
     const fetchPendingRequests = useCallback(() => {
         setLoading(true);
@@ -199,9 +203,21 @@ const ClientManagement = () => {
         setUserToDelete(null);
     };
 
-    const handlePageChange = (event, value) => {
-        setCurrentPage(value); // Update the current page when the user changes pages
+    // Handle page change for the users table
+    const handlePageChangeUsers = (event, value) => {
+        setCurrentPageUsers(value); // Update the current page for the user table
     };
+
+    // Handle page change for the pending client registration requests table
+    const handlePageChangeRequests = (event, value) => {
+        setCurrentPageRequests(value); // Update the current page for the requests table
+    };
+
+    const paginatedUsers = users.slice((currentPageUsers - 1) * itemsPerPage, currentPageUsers * itemsPerPage);
+    const totalPagesUsers = Math.ceil(users.length / itemsPerPage);
+
+    const paginatedRequests = pendingRequests.slice((currentPageRequests - 1) * itemsPerPage, currentPageRequests * itemsPerPage);
+    const totalRequestsPages = Math.ceil(pendingRequests.length / itemsPerPage);
 
     return (
         <Box
@@ -241,12 +257,12 @@ const ClientManagement = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {pendingRequests.length === 0 ? (
+                            {paginatedRequests.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={3} align="center">No Pending Registration Requests</TableCell>
                                 </TableRow>
                             ) : (
-                                pendingRequests.map((request) => (
+                              paginatedRequests.map((request) => (
                                     <TableRow key={request.id}>
                                         <TableCell><span className='user-content'>{request.user.name}</span></TableCell>
                                         <TableCell><span className='user-content'>{request.user.email}</span></TableCell>
@@ -260,6 +276,7 @@ const ClientManagement = () => {
                                                 </span>
                                             </div>
                                         </TableCell>
+
                                     </TableRow>
                                 ))
                             )}
@@ -356,14 +373,20 @@ const ClientManagement = () => {
                 )} */}
 
                 <Pagination
-                    count={Math.ceil(pendingRequests.length / itemsPerPage)} // Calculate number of pages
-                    page={currentPage}
-                    onChange={handlePageChange}
+                    count={totalRequestsPages} // Calculate number of pages for pending requests
+                    page={currentPageRequests}
+                    onChange={handlePageChangeRequests}
                     color="primary"
+                    sx={{
+                        position: 'relative', 
+                        marginTop: 2,
+                        display: 'flex', 
+                        justifyContent: 'center', // Center pagination horizontally
+                    }}
                 />
 
                 {/* User Table */}
-                <Table className="user-table" aria-label="simple table">
+                <Table className="user-table" aria-label="simple table" >
                     <TableHead>
                         <TableRow>
                             <TableCell><span className='user-header'>NAME</span></TableCell>
@@ -382,12 +405,12 @@ const ClientManagement = () => {
                                 <TableCell colSpan={10} align="center"><CircularProgress /></TableCell>
                             </TableRow>
                         ) : (
-                            users.length === 0 ? (
+                            paginatedUsers.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={10} align="center">No Records Found</TableCell>
                                 </TableRow>
                             ) : (
-                                users.map((user) => (
+                                paginatedUsers.map((user) => (
                                     <TableRow key={user.id}>
                                         <TableCell><span className='user-content'>{user.name}</span></TableCell>
                                         <TableCell><span className='user-content'>{user.username}</span></TableCell>
@@ -412,10 +435,17 @@ const ClientManagement = () => {
 
                 {/* Pagination controls */}
                 <Pagination
-                    count={Math.ceil(users.length / itemsPerPage)} // Calculate pages based on the number of users
-                    page={currentPage}
-                    onChange={handlePageChange}
+                    count={totalPagesUsers} // Calculate number of pages based on user data
+                    page={currentPageUsers}
+                    onChange={handlePageChangeUsers}
                     color="primary"
+                    sx={{
+                        position: 'relative', 
+                        display: 'flex', 
+                        marginTop: 2,
+                        marginBottom: 10,
+                        justifyContent: 'center', // Center pagination horizontally
+                    }}
                 />
             </Container>
 
@@ -446,7 +476,7 @@ const ClientManagement = () => {
                     onClose={handleCloseModal}
                 />
             )}
-        </Box >
+        </Box>
     );
 }
 

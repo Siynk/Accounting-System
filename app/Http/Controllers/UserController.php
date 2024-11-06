@@ -401,11 +401,8 @@ class UserController extends Controller
                 ->first();
 
             if ($existingAccess) {
-                // If the admin already has access, you can either skip or return an error message
-                return response()->json([
-                    'message' => "Admin already has access to module ID {$moduleId}.",
-                    'module_id' => $moduleId
-                ], 400);
+                // If the user already has access, skip this module
+                continue;
             }
 
             // If no existing access, prepare the request data
@@ -423,6 +420,7 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Access requests submitted successfully'], 201);
     }
+
 
 
     public function getPendingRequestAccess()
