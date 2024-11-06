@@ -227,21 +227,20 @@ export async function filterTransactions(setError, setTransactions, payload, use
     const { data } = await axiosInstance.post('/filter-transactions', payload);
     
     let filteredTransactions = data;
-    // if (userType === 'client') {
-    //   let seen = new Set();
-    //   let uniqueTransactions = filteredTransactions.filter(transaction => {
-    //     if (seen.has(transaction.id)) {
-    //       return false;
-    //     }
-    //     seen.add(transaction.id);
-    //     return true;
-    //   });
+    if (userType === 'client') {
+      let seen = new Set();
+      let uniqueTransactions = filteredTransactions.filter(transaction => {
+        if (seen.has(transaction.id)) {
+          return false;
+        }
+        seen.add(transaction.id);
+        return true;
+      });
       
-    //   setTransactions(uniqueTransactions);
-    // } else {
-    //   setTransactions(filteredTransactions);
-    // }
-    setTransactions(filteredTransactions);
+      setTransactions(uniqueTransactions);
+    } else {
+      setTransactions(filteredTransactions);
+    }
 
     setError(null);
   } catch (error) {
