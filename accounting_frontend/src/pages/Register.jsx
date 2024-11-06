@@ -42,7 +42,8 @@ const Register = () => {
             userType: 'client'
         };
 
-        await registerClient(payload, setErrors, e);
+        await registerClient(payload, setErrors, e, navigate);
+        
         
     };
 

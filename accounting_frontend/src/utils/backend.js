@@ -328,7 +328,7 @@ export async function deleteUser(setError, userID) {
     });
 }
 
-export async function registerClient(payload, setError, event) {
+export async function registerClient(payload, setError, event, navigate) {
   
   await axiosInstance.post('/register-client', payload)
     .then(({ data }) => {
