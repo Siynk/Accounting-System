@@ -43,16 +43,6 @@ const Register = () => {
         };
 
         await registerClient(payload, setErrors, e);
-        // Clear the form data
-        setFormData({
-            name: '',
-            username: '',
-            password: '',
-            email: '',
-            address: '',
-            contact: '',
-            company: '',
-        });
         
     };
 
