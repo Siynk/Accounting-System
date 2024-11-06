@@ -24,12 +24,9 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
             transactionType,
             category,
             searchText,
-            projectName: selectedProject, // Add the selected project to the payload
+            projectName: selectedProject,
+            company: user.userType === 'client' ? user.company : ''
         };
-
-        if (user.userType === 'client') {
-            payload.company = user.company;
-        }
 
         fetchTransactions(payload);
     };

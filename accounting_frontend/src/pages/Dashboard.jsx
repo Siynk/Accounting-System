@@ -163,7 +163,6 @@ export default function Dashboard() {
         revenue: segment.totalRevenue,
         expenses: segment.totalExpenses,
     }));
-    console.log(segmentReport, "@@@@@@@@@@")
 
     const trendData = trendAnalysisReport.map(trend => ({
         month: trend.month,

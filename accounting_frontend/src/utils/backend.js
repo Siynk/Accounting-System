@@ -424,7 +424,6 @@ export async function generateIncomeStatement(setError, setIncomeStatement, payl
 export async function generateCashflowStatement(setError, setCashflowStatement, payload) {
   await axiosInstance.post('/generate-cashflow-statement', payload)
     .then(({ data }) => {
-      console.log(data, "CASHFLOW");
       setError(null);
       setCashflowStatement(data);
     })
