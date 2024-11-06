@@ -219,10 +219,20 @@ class UserController extends Controller
 
     public function getAllClients()
     {
-        $clients = User::where('userType', 'client')->get();
+        // Join the `users` table with `clientregistrationrequest` on the `userID`
+        $clients = User::join('clientregistrationrequest', 'users.id', '=', 'clientregistrationrequest.userID')
+            // Filter only 'Approved' clients
+            ->where('clientregistrationrequest.status', 'Approved')
+            // Make sure you're only selecting users with the 'client' userType
+            ->where('users.userType', 'client')
+            // Select the necessary columns (optional, you can select all or specific columns)
+            ->select('users.*', 'clientregistrationrequest.status')
+            ->get();
 
+        // Return the response as JSON
         return response()->json($clients);
     }
+
 
     public function deleteUser(Request $request)
     {
