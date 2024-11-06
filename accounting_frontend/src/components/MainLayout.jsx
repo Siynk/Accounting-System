@@ -74,8 +74,12 @@ function MainLayout() {
         if (accesses.length > 0 && accesses) {
             const excludedPaths = ['/account-info', ];
             const hasTransactionAccess = accesses.find(access => access.module_description === 'Transactions');
+            const hasClientManagementAccess = accesses.find(access => access.module_description === 'Client Management');
             if (hasTransactionAccess && hasTransactionAccess.hasAccess) {
                 excludedPaths.push('/add-transaction', '/view-transaction');
+            }
+            if (hasClientManagementAccess && hasClientManagementAccess.hasAccess) {
+                excludedPaths.push('/view-client');
             }
 
             if (!excludedPaths.includes(currentPath)) {

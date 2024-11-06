@@ -335,6 +335,7 @@ export async function registerClient(payload, setError, event) {
       alert(data.message);
       event.target.reset();
       setError(null);
+      navigate('/');
     })
     .catch(error => {
       if (error.response && error.response.status === 422) {

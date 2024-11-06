@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Button } from '@mui/material';
+import { Container, Button, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import '../css/registration.scss';
 import Username from '@mui/icons-material/Person';
@@ -22,9 +22,8 @@ const Register = () => {
         contact: '',
         company: '',
     });
-    const [errors, setErrors] = useState({});
+    const [error, setErrors] = useState({});
     const [confirmError, setConfirmError] = useState('');
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -43,23 +42,18 @@ const Register = () => {
             userType: 'client'
         };
 
-        try {
-            await registerClient(payload, setErrors, e);
-            // Clear the form data
-            setFormData({
-                name: '',
-                username: '',
-                password: '',
-                email: '',
-                address: '',
-                contact: '',
-                company: '',
-            });
-            // Redirect to home
-            navigate('/');
-        } catch (error) {
-            console.error("Registration failed:", error);
-        }
+        await registerClient(payload, setErrors, e);
+        // Clear the form data
+        setFormData({
+            name: '',
+            username: '',
+            password: '',
+            email: '',
+            address: '',
+            contact: '',
+            company: '',
+        });
+        
     };
 
     return (
@@ -85,7 +79,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.name}</p>}
+                                    {error && error.name && error.name.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Username /></span>
@@ -97,7 +93,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.username}</p>}
+                                    {error && error.username && error.username.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Password /></span>
@@ -109,7 +107,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.password}</p>}
+                                    {error && error.password && error.password.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Email /></span>
@@ -121,7 +121,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.email}</p>}
+                                    {error && error.email && error.email.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Password /></span>
@@ -133,7 +135,7 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {confirmError && <p className="error-message">{confirmError}</p>}
+                                    {confirmError && <p className="registerErrorColor">{confirmError}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Address /></span>
@@ -145,7 +147,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.address}</p>}
+                                    {error && error.address && error.address.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Contact /></span>
@@ -157,7 +161,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.contact}</p>}
+                                    {error && error.contact && error.contact.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Company /></span>
@@ -169,7 +175,9 @@ const Register = () => {
                                         onChange={handleChange}
                                         required
                                     />
-                                    {errors && <p className="error-message">{errors.company}</p>}
+                                    {error && error.company && error.company.map((errorMessage, index) => (
+                                        <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
+                                    ))}
                                 </div>
                                 <input className="button-register" type="submit" value="Register" />
                             </form>

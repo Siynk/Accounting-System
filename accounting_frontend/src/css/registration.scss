@@ -2,7 +2,12 @@ $light-green: #8da58f;
 $dark-green: #568d2e;
 $black: #000000;
 $grey: #cccccc;
-
+.registerErrorColor{
+  position: relative;
+  left: 10%;
+  color: rgb(230, 58, 58);
+  font-weight: bold;
+}
 body {
   font-family: Verdana, Geneva, sans-serif;
   font-size: 14px;
