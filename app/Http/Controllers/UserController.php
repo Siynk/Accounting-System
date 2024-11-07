@@ -300,25 +300,30 @@ class UserController extends Controller
         $query = User::query();
         $query->select('users.*');
 
+        // Join with ClientRegistrationRequest and filter for 'Approved' status
+        $query->join('clientregistrationrequest', 'clientregistrationrequest.userID', '=', 'users.id')
+              ->where('clientregistrationrequest.status', 'Approved');
+
         if ($searchText) {
             $query->where(function ($q) use ($searchText) {
                 $q->where('company', 'like', '%' . $searchText . '%')
-                    ->orWhere('name', 'like', '%' . $searchText . '%')
-                    ->orWhere('userType', 'like', '%' . $searchText . '%')
-                    ->orWhere('address', 'like', '%' . $searchText . '%')
-                    ->orWhere('email', 'like', '%' . $searchText . '%')
-                    ->orWhere('contact', 'like', '%' . $searchText . '%');
+                  ->orWhere('name', 'like', '%' . $searchText . '%')
+                  ->orWhere('userType', 'like', '%' . $searchText . '%')
+                  ->orWhere('address', 'like', '%' . $searchText . '%')
+                  ->orWhere('email', 'like', '%' . $searchText . '%')
+                  ->orWhere('contact', 'like', '%' . $searchText . '%');
             });
         }
 
-        $query->where('isDeleted', 0);
-        $query->where('userType', 'client');
+        $query->where('users.isDeleted', 0);
+        $query->where('users.userType', 'client');
 
         // Execute the query and return results as JSON
         $filteredClients = $query->get();
 
         return response()->json($filteredClients);
     }
+
 
     public function sendForgotPasswordEmail(Request $request)
     {
