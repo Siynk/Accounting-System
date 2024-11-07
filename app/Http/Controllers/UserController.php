@@ -16,6 +16,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Twilio\Rest\Client;
 
 class UserController extends Controller
 {
@@ -213,7 +214,50 @@ class UserController extends Controller
         $clientRequest->status = $validatedData['status'];
         $clientRequest->save();
 
+        // Get the user data for email and SMS notifications
+        $user = User::find($validatedData['userID']);
+
+        // Check if the status is 'Approved'
+        if ($validatedData['status'] === 'Approved') {
+            // Send email notification
+            Mail::send('emails.registration-approved', ['user' => $user], function ($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Your Client Registration Request Has Been Approved');
+            });
+
+            // Send SMS notification using Twilio (SMS for approved status)
+            $this->sendSms($user->contact, 'Congratulations! Your client registration has been approved.');
+
+            return response()->json(['message' => 'Client registration request processed successfully, and notification sent.']);
+        }
+
+        // If the status is Declined, no email or SMS is needed, just return success message
         return response()->json(['message' => 'Client registration request processed successfully.']);
+    }
+
+    private function sendSms($contact, $message)
+    {
+        // Your Twilio credentials (stored in .env)
+        $sid = env('TWILIO_SID');
+        $authToken = env('TWILIO_AUTH_TOKEN');
+        $twilioPhoneNumber = env('TWILIO_PHONE_NUMBER');
+
+        // Initialize Twilio client
+        $client = new Client($sid, $authToken);
+
+        // Send SMS
+        try {
+            $client->messages->create(
+                $contact, // User's contact number
+                [
+                    'from' => $twilioPhoneNumber, // Twilio phone number
+                    'body' => $message // The message content
+                ]
+            );
+        } catch (\Exception $e) {
+            // Handle any error that occurs during SMS sending
+            return response()->json(['error' => 'Failed to send SMS: ' . $e->getMessage()], 500);
+        }
     }
 
 
