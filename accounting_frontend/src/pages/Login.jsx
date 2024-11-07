@@ -139,13 +139,13 @@ export default function Login() {
                     >
                         Log In
                     </Button>
-                    {/* <Grid container spacing={2}>
+                    <Grid container spacing={2}>
                         <Grid item>
                             <Link to="/register" variant="body2" style={{ color: 'rgb(154, 150, 240)' }}>
                                 {"Don't have an account? Sign Up"}
                             </Link>
                         </Grid>
-                    </Grid> */}
+                    </Grid>
                 </Box>
             </Box>
         </Container>
