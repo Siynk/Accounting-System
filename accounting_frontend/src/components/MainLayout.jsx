@@ -28,7 +28,8 @@ function MainLayout() {
     const [accesses, setAccesses] = React.useState(false);
     const [isLoggingOut, setIsLoggingOut] = React.useState(false);
     const [hasTransactionAccess, setHasTransactionAccess] = React.useState(false);
-
+    const excludedPaths = ['/account-info', ];
+    
     const moduleRoutes = {
         1: '/add-user',
         2: '/dashboard',
@@ -70,10 +71,10 @@ function MainLayout() {
         fetchAccess();
     } 
     }, [token, user]);
+    console.log(accesses)
 
     React.useEffect(() => {
         if (accesses.length > 0 && accesses) {
-            const excludedPaths = ['/account-info', ];
             const hasTransactionAccess = accesses.find(access => access.module_description === 'Transactions');
             const hasClientManagementAccess = accesses.find(access => access.module_description === 'Client Management');
             if (hasTransactionAccess && hasTransactionAccess.hasAccess) {
@@ -95,7 +96,7 @@ function MainLayout() {
             }
         }
         
-        if(accesses.length === 0 && user.userType === 'admin'){
+        if(accesses.length === 0 && !excludedPaths.includes(currentPath) && user.userType === 'admin'){
           navigate('/no-module');
         }
     }, [currentPath, accesses]);
