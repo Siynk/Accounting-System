@@ -25,6 +25,8 @@ const Payment = () => {
     fetchPayments();
   }, []);
 
+  console.log(payments)
+
   // Handle Approve button click
   const handleApprove = async (payment) => {
     try {
@@ -45,7 +47,7 @@ const Payment = () => {
       await addTransaction(transactionData, setError);
 
       // After approving, update payment status
-      await handlePaymentStatusChange('Approved', payment.transactionID, 'Approve');
+      await handlePaymentStatusChange('Approved', payment.id, 'Approve');
       
       // Optionally, refetch payments
       await getAllPayments(setError, setPayments);
@@ -60,17 +62,17 @@ const Payment = () => {
     setOpenDeclineModal(true);
   };
 
-  const handlePaymentStatusChange = async (status, transactionID, updateType) => {
+  const handlePaymentStatusChange = async (status, paymentID, updateType) => {
     console.log(typeof reason)
     const payload = {
       status: status,
-      transactionID: transactionID,
+      paymentID: paymentID,
     };
 
     if(updateType === 'Decline'){
       payload.decline_reason = declineReason;
     }
-    
+
     await updatePaymentStatus(payload, setError);
     setOpenDeclineModal(false); // Close modal after submitting
   };
@@ -84,7 +86,7 @@ const Payment = () => {
       setError('Decline reason is required');
       return;
     }
-    handlePaymentStatusChange('Declined', selectedPayment.transactionID, 'Decline');
+    handlePaymentStatusChange('Declined', selectedPayment.id, 'Decline');
     await getAllPayments(setError, setPayments);
   };
 

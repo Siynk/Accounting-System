@@ -99,7 +99,7 @@ class TransactionController extends Controller
 
     public function getCounts(Request $request)
     {
-
+      $company = $request->input('company', '');
         // Count distinct transactions for earnings with approved status
         $earningsCount = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
             ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
@@ -134,13 +134,15 @@ class TransactionController extends Controller
             ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
             ->count();
 
-        $projectCounts = Project::join('transaction', 'project.id', '=', 'transaction.projectID')
-        ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
-        ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
-        ->where('transaction.isDeleted', 0) // Ensure that deleted transactions are excluded
-        ->groupBy('project.id', 'project.projectName') // Group by project and project name
-        ->select('project.projectName', DB::raw('count(transaction.id) as transactionCount'))
-        ->get();
+            $projectCounts = Project::join('transaction', 'project.id', '=', 'transaction.projectID')
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+            ->leftJoin('users', 'transaction.clientID', '=', 'users.id') // Join with users table
+            ->where('clienttransctionrequest.status', 'Approved') // Filter by approved status
+            ->where('transaction.isDeleted', 0) // Ensure that deleted transactions are excluded
+            ->where('users.company', 'like', '%' . $company . '%') // Filter by company
+            ->groupBy('project.id', 'project.projectName') // Group by project and project name
+            ->select('project.projectName', DB::raw('count(transaction.id) as transactionCount'))
+            ->get();
         
 
         // Prepare the counts array 
@@ -794,11 +796,11 @@ class TransactionController extends Controller
         $validated = $request->validate([
             'status' => 'required|in:Approved,Declined',  // Only Approved or Declined are allowed
             'decline_reason' => 'required_if:status,Declined|string|max:255',  // Reason is required if status is Declined
-            'transactionID' => 'required',
+            'paymentID' => 'required',
         ]);
 
         // Find the payment record by transactionID
-        $payment = Payment::where('transactionID', $validated['transactionID'])->first();
+        $payment = Payment::where('id', $validated['paymentID'])->first();
 
         if (!$payment) {
             return response()->json(['message' => 'Payment not found'], 404);

@@ -273,12 +273,12 @@ export async function getClients(setError, setClients) {
 export async function filterTransactions(setError, setTransactions, payload, userType) {
   try {
     const { data } = await axiosInstance.post('/filter-transactions', payload);
-    console.log(data);
     
     // Exclude transactions where the transactionType is 'Payment'
-    let filteredTransactions = data.filter(transaction => transaction.transactionType !== 'Payment');
+    
 
     if (userType === 'client') {
+      let filteredTransactions = data.filter(transaction => transaction.transactionType !== 'Payment');
       let seen = new Set();
       let uniqueTransactions = filteredTransactions.filter(transaction => {
         if (seen.has(transaction.id)) {
@@ -290,7 +290,7 @@ export async function filterTransactions(setError, setTransactions, payload, use
 
       setTransactions(uniqueTransactions);
     } else {
-      setTransactions(filteredTransactions);
+      setTransactions(data);
     }
 
     setError(null);

@@ -186,7 +186,7 @@ const Transaction = () => {
                               {user.userType === 'client' && (
                                 <TableCell>
                                 {
-                                  paymentStatus === 'Paid' ? (
+                                  paymentStatus === 'Approved' ? (
                                     <span className="paid-status">PAID</span>
                                   ) : paymentStatus === 'Pending' ? (
                                     <span className="pending-status">PENDING</span>
