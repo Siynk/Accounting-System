@@ -149,7 +149,7 @@ const Transaction = () => {
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CLIENT</span></TableCell>}
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>}
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
-                            {user.userType === 'client' && <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>}
+                            <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -207,6 +207,19 @@ const Transaction = () => {
                               </TableCell>
                               
                               )}
+
+                            {user.userType !== 'client' && (
+                              <TableCell>
+                                <div className='actions-container'>
+                                  <span onClick={() => handleView(transaction)}>
+                                    <Link className='actions view' to="/view-transaction"><ViewIcon /></Link>
+                                  </span>
+                                  {/* Uncomment and Implement Update feature if needed */}
+                                  {/* <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span> */}
+                                  <span className='actions delete' onClick={() => handleDeleteDialogOpen(transaction)}><DeleteIcon /></span>
+                                </div>
+                              </TableCell>
+                            )}
                             </TableRow>
                           );
                         })
