@@ -23,6 +23,7 @@ const AddTransaction = () => {
         { id: 7, name: 'Purchase' },
         { id: 8, name: 'Loan' },
         { id: 9, name: 'Dividends' }
+        { id: 10, name: 'Payment' }
     ];
 
     useEffect(() => {
