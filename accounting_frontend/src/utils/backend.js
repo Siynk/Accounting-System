@@ -274,7 +274,10 @@ export async function filterTransactions(setError, setTransactions, payload, use
   try {
     const { data } = await axiosInstance.post('/filter-transactions', payload);
     console.log(data);
-    let filteredTransactions = data;
+    
+    // Exclude transactions where the transactionType is 'Payment'
+    let filteredTransactions = data.filter(transaction => transaction.transactionType !== 'Payment');
+
     if (userType === 'client') {
       let seen = new Set();
       let uniqueTransactions = filteredTransactions.filter(transaction => {
@@ -284,7 +287,7 @@ export async function filterTransactions(setError, setTransactions, payload, use
         seen.add(transaction.id);
         return true;
       });
-      
+
       setTransactions(uniqueTransactions);
     } else {
       setTransactions(filteredTransactions);
