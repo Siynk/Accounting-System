@@ -12,20 +12,21 @@ class CreateTransactionTable extends Migration
             $table->id();
             $table->string('description');
             $table->string('productLine', 50);
-            $table->unsignedBigInteger('clientID')->default(0);
-            $table->unsignedBigInteger('projectID')->default(0);
+            // Gawing nullable ang clientID at projectID at gawing default 0
+            $table->unsignedBigInteger('clientID')->nullable()->default(0);
+            $table->unsignedBigInteger('projectID')->nullable()->default(0);
             $table->decimal('amount', 10, 0);
             $table->string('category', 50);
             $table->string('cashFlow', 50);
             $table->boolean('isDeleted')->default(0);
-            $table->foreign('clientID')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
-            $table->foreign('projectID')->references('id')->on('project')->onDelete('no action')->onUpdate('no action');
+            // Alisin ang foreign key constraints
+            // $table->foreign('clientID')->references('id')->on('users')->onDelete('no action')->onUpdate('no action');
+            // $table->foreign('projectID')->references('id')->on('project')->onDelete('no action')->onUpdate('no action');
 
             // Adding transactionDate, created_at, and updated_at fields
             $table->timestamp('transactionDate')->nullable()->useCurrent();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent();
-
         });
     }
 

@@ -26,8 +26,8 @@ class AddTransactionReq extends FormRequest
             'transactionTypes' => 'required', // Optional, must be a string if provided
             'description'     => 'required|string|max:255',
             'productLine'   => 'required|string|max:255',
-            'clientID'        => 'required',
-            'projectID'        => 'required',
+            'clientID'        => 'nullable',
+            'projectID'        => 'nullable',
             'amount'          => 'required|numeric|min:0', // Assuming amount cannot be negative
             'category'   => 'required|string|max:255',
             'cashFlow'   => 'required|string|max:255',

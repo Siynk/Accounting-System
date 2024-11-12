@@ -65,7 +65,7 @@ const CashflowStatement = () => {
     <div className="cashflowStatement-header">
         <h1>Generate Cashflow Statement</h1>
         <div className="cashflowStatement-inputs">
-            {(user.userType === 'admin' || user.userType === 'superadmin') && (
+            {/* {(user.userType === 'admin' || user.userType === 'superadmin') && (
                 <input
                     type="text"
                     placeholder="Enter Company Name"
@@ -73,7 +73,7 @@ const CashflowStatement = () => {
                     onChange={(e) => setCompanyName(e.target.value)}
                     className="cashflowStatement-input"
                 />
-            )}
+            )} */}
             <input
                 type="date"
                 value={dateFrom}

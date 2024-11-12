@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useStateContext } from '../context/ContextProvider';
 import { formatMoney } from '../utils/helper';
 import EditTransactionModal from '../components/EditTransactionModal';
-import { deleteTransaction } from '../utils/backend';
+import { deleteTransaction, getAllPayments, createPayment } from '../utils/backend';
 
 const Transaction = () => {
     const { setSingleTransaction, user } = useStateContext();
@@ -18,6 +18,7 @@ const Transaction = () => {
     const [transactions, setTransactions] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [payments, setPayments] = useState([]); // To store fetched payments
     const navigate = useNavigate();
 
     // Pagination states
@@ -27,6 +28,18 @@ const Transaction = () => {
     // State for managing confirmation dialog
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState(null);
+
+    // Fetch payments when component mounts or when transactions change
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const data = await getAllPayments(setError,setPayments);
+            } catch (error) {
+                setError("Failed to fetch payments.");
+            }
+        };
+        fetchPayments();
+    }, []); // Empty dependency array ensures this runs once on mount
 
     const handleView = (transaction, path) => {
         setSingleTransaction(transaction);
@@ -80,6 +93,38 @@ const Transaction = () => {
         setPage(0); // Reset to the first page when rows per page changes
     };
 
+    // Handle Pay button click and create payment
+    const handlePayButtonClick = async (transaction) => {
+        try {
+            await createPayment({ transactionID: transaction.id, clientID:transaction.clientID, projectID:transaction.projectID, amount: parseFloat(transaction.amount) + (parseFloat(transaction.amount) * 0.15), status: 'Pending' }, setError, (message) => alert(message));
+            window.location.reload();
+        } catch (error) {
+            setError("Failed to create payment.");
+        }
+    };
+
+    // Determine payment status for a given transaction
+    const getPaymentStatus = (transactionId) => {
+        // Ensure payments array is not undefined or empty
+        if (!payments || payments.length === 0) {
+            return null; // No payments exist for this transaction
+        }
+        console.log(payments)
+        const matchingPayments = payments.filter(payment => payment.transactionID === transactionId);
+        
+        if (matchingPayments.length === 0) {
+            return null; // No payment data found for this transaction
+        }
+
+        // Sort payments by created_at to get the most recent payment
+        matchingPayments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        // Get the most recent payment
+        const latestPayment = matchingPayments[0];
+
+        return latestPayment.status; // Return the status of the latest payment
+    };
+
     return (
         <Box
             component="main"
@@ -104,7 +149,7 @@ const Transaction = () => {
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CLIENT</span></TableCell>}
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>}
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
-                            {user.userType !== 'client' && <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>}
+                            {user.userType === 'client' && <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>}
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -117,39 +162,54 @@ const Transaction = () => {
                           <TableCell colSpan={user.userType === 'client' ? 4 : 10} align="center">No Records Found</TableCell>
                         </TableRow>
                       ) : (
-                        // Paginate transactions
-                        transactions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((transaction, index) => (
-                          <TableRow key={index}>
-                            <TableCell><span className='transaction-content'>{dayjs(transaction.transactionDate).format('MM-DD-YYYY')}</span></TableCell>
-                            {user.userType !== 'client' && (
-                              <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>
-                            )}
-                            <TableCell><span className='transaction-content'>{transaction.projectName}</span></TableCell>
-                            <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
-                            {user.userType !== 'client' && (
-                              <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
-                            )}
-                            {user.userType !== 'client' && (
-                              <TableCell><span className='transaction-content'>{transaction.company}</span></TableCell>
-                            )}
-                            {user.userType !== 'client' && (
-                              <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
-                            )}
-                            <TableCell><span className='transaction-content'>{formatMoney(transaction.amount)}</span></TableCell>
-                            {user.userType !== 'client' && (
-                              <TableCell>
-                                <div className='actions-container'>
-                                  <span onClick={() => handleView(transaction)}>
-                                    <Link className='actions view' to="/view-transaction"><ViewIcon /></Link>
-                                  </span>
-                                  {/* Uncomment and Implement Update feature if needed */}
-                                  {/* <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span> */}
-                                  <span className='actions delete' onClick={() => handleDeleteDialogOpen(transaction)}><DeleteIcon /></span>
-                                </div>
+                        transactions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((transaction, index) => {
+                          const paymentStatus = getPaymentStatus(transaction.id);
+                          
+                          return (
+                            <TableRow key={index}>
+                              <TableCell><span className='transaction-content'>{dayjs(transaction.transactionDate).format('MM-DD-YYYY')}</span></TableCell>
+                              {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>
+                              )}
+                              <TableCell><span className='transaction-content'>{transaction.projectName || 'N/A'}</span></TableCell>
+                              <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
+                              {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
+                              )}
+                              {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-content'>{transaction.company || 'N/A'}</span></TableCell>
+                              )}
+                              {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
+                              )}
+                              <TableCell><span className='transaction-content'>{formatMoney(parseFloat(transaction.amount) + (parseFloat(transaction.amount) * 0.15))}</span></TableCell>
+                              {user.userType === 'client' && (
+                                <TableCell>
+                                {
+                                  paymentStatus === 'Paid' ? (
+                                    <span className="paid-status">PAID</span>
+                                  ) : paymentStatus === 'Pending' ? (
+                                    <span className="pending-status">PENDING</span>
+                                  ) : (
+                                    <Button
+                                      variant="contained"
+                                      color="primary"
+                                      style={{
+                                        backgroundColor: 'yellow',
+                                        color: 'black',
+                                      }}
+                                      onClick={() => handlePayButtonClick(transaction)}
+                                    >
+                                      Pay
+                                    </Button>
+                                  )
+                                }
                               </TableCell>
-                            )}
-                          </TableRow>
-                        ))
+                              
+                              )}
+                            </TableRow>
+                          );
+                        })
                       )}
                     </TableBody>
                 </Table>

@@ -28,4 +28,9 @@ class User extends Authenticatable
         'company',
         'userType'
     ];
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, 'clientID');
+    }
 }

@@ -44,6 +44,12 @@ export default function getHeaderTitle(pathname){
         case '/manage-access':
             pageTitle = 'ACCESS PRIVELEGE MANAGEMENT';
             break;
+        case '/manage-project':
+            pageTitle = 'MANAGE PROJECT';
+            break;
+        case '/payment':
+          pageTitle = 'PAYMENT';
+          break;
         case '/view-transaction':
             pageTitle = singleTransaction.company ? singleTransaction.company.toUpperCase() + ' TRANSACTION DETAILS' : 'Invalid Path Access';
             break;

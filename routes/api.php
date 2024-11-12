@@ -57,6 +57,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/pending-temporary-transaction-edits', [TransactionController::class, 'getPendingTemporaryTransactionEdits']);
     Route::post('/transaction-request/respond', [TransactionController::class, 'respondToPendingTransactionRequest']);
     Route::post('/transaction-edit/respond', [TransactionController::class, 'respondToPendingTransactionEdit']);
+    Route::post('/pay-transaction', [TransactionController::class, 'createPayment']);
+    Route::get('/get-all-payments', [TransactionController::class, 'getAllPayments']);
+    Route::post('/update-payment', [TransactionController::class, 'updatePaymentStatus']);
 });
 Route::post('register-client', [UserController::class, 'registerClient']);
 Route::post('send-forgot-password-email', [UserController::class, 'sendForgotPasswordEmail']);

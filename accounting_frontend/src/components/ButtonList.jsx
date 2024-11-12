@@ -45,6 +45,7 @@ const ButtonList = () => {
         { id: 9, description: "Trend Analysis" },
         { id: 10, description: "Segment Report" },
         { id: 11, description: "Manage Project" },
+        { id: 12, description: "Payments" },
     ];
 
     // Define sections and map them to modules
@@ -54,6 +55,7 @@ const ButtonList = () => {
         { name: 'Transactions', icon: <TransactionIcon />, route: '/transactions', moduleId: 4 },
         ...(user.userType === 'superadmin' ? [{ name: 'Manage Access', icon: <AdminPanelSettingsIcon />, route: '/manage-access' }] : []),
         { name: 'Manage Project', icon: <DashboardIcon />, route: '/manage-project', moduleId: 11 }, // New section for clients
+        { name: 'Payment', icon: <DashboardIcon />, route: '/payment', moduleId: 12, excludeForClient: true },
         { name: 'Reports', icon: <ReportsIcon />, route: '#', isDropdown: true, moduleId: 5, excludeForClient: true }, // Exclude for clients
     ];
 

@@ -64,13 +64,13 @@ const BalanceSheet = () => {
                 <div className="balanceSheet-header">
                     <h1>Generate Balance Sheet</h1>
                     <div className="balanceSheet-inputs">
-                    {user.userType !== 'client' && <input
+                    {/* {user.userType !== 'client' && <input
                             type="text"
                             placeholder="Enter Company Name"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="balanceSheet-input"
-                        />}
+                        />} */}
                         <input
                             type="date"
                             value={dateFrom}

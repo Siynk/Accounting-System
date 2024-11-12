@@ -20,6 +20,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import NoModuleAccess from './pages/NoModuleAccess';
 import ManageAccess from './pages/ManageAccess';
 import ManageProject from './pages/ManageProject';
+import Payment from './pages/Payment';
 
 
 const router = createBrowserRouter([
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
             {
                 path: '/add-transaction',
                 element: <AddTransaction />
+            },
+            {
+                path: '/payment',
+                element: <Payment />
             },
             {
                 path: '/reports/trend-analysis',

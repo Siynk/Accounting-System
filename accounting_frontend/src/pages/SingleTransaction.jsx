@@ -63,15 +63,20 @@ const SingleTransaction = () => {
                             <span className="dots"></span>
                             <span className="amount">{singleTransaction.productLine}</span>
                         </div>
-                        <div className="account-balance">
+                        {singleTransaction.company && <div className="account-balance">
                             <span className="label">Client</span>
                             <span className="dots"></span>
                             <span className="amount">{singleTransaction.company}</span>
-                        </div>
+                        </div>}
+                        {singleTransaction.projectName && <div className="account-balance">
+                            <span className="label">Client</span>
+                            <span className="dots"></span>
+                            <span className="amount">{singleTransaction.projectName}</span>
+                        </div>}
                         <div className="account-balance">
                             <span className="label">Cash Flow Category</span>
                             <span className="dots"></span>
-                            <span className="amount">{singleTransaction.cashFlowCategory}</span>
+                            <span className="amount">{singleTransaction.cashFlow}</span>
                         </div>
                         <div className="account-balance">
                             <span className="label">Amount</span>

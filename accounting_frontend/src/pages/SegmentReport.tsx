@@ -63,13 +63,13 @@ const SegmentReport = () => {
                 <div className="segmentReport-header">
                     <h1>Generate Segment Report</h1>
                     <div className="segmentReport-inputs">
-                    {user.userType !== 'client' && <input
+                    {/* {user.userType !== 'client' && <input
                             type="text"
                             placeholder="Enter Company Name"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="segmentReport-input"
-                        />}
+                        />} */}
                         <input
                             type="date"
                             value={dateFrom}

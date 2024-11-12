@@ -91,13 +91,13 @@ const IncomeStatement = () => {
                 <div className="incomeStatement-header">
                     <h1>Generate Income Statement</h1>
                     <div className="incomeStatement-inputs">
-                    {user.userType !== 'client' && <input
+                    {/* {user.userType !== 'client' && <input
                             type="text"
                             placeholder="Enter Company Name"
                             value={companyName}
                             onChange={(e) => setCompanyName(e.target.value)}
                             className="incomeStatement-input"
-                        />}
+                        />} */}
                         <input
                             type="date"
                             value={dateFrom}

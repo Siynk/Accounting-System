@@ -40,6 +40,7 @@ function MainLayout() {
         9: '/reports/trend-analysis',
         10: '/reports/segment-report',
         11: '/manage-project',
+        11: '/payment',
     };
 
     const location = useLocation();
@@ -110,10 +111,9 @@ function MainLayout() {
             '/reports/income-statement',
             '/reports/cashflow-statement',
             '/reports/trend-analysis',
-            '/reports/segment-report'
+            '/reports/segment-report',
+            '/payment',
         ];
-        
-            
             if (excludedPaths.includes(currentPath)) {
               navigate('/no-module');
             }

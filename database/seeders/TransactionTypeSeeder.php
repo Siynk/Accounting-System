@@ -19,6 +19,7 @@ class TransactionTypeSeeder extends Seeder
             ['id' => 7, 'description' => 'Purchase', 'isDeleted' => 0],
             ['id' => 8, 'description' => 'Loan', 'isDeleted' => 0],
             ['id' => 9, 'description' => 'Dividends', 'isDeleted' => 0],
+            ['id' => 10, 'description' => 'Payment', 'isDeleted' => 0],
         ]);
     }
 }

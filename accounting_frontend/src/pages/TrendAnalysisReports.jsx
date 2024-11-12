@@ -70,14 +70,14 @@ const TrendAnalysisReports = () => {
         >
             <Container maxWidth="md" style={{ marginTop: '100px' }}>
                 <div className="trendAnalysis-search-container-report">
-                    {user.userType !== 'client' && <input
+                    {/* {user.userType !== 'client' && <input
                         type="text"
                         id="search-field"
                         placeholder="Search Client"
                         className="trendAnalysis-filter"
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
-                    />}
+                    />} */}
                     <span className='trendAnalysis-generate-report-button-container'>
                         <Button variant="contained" onClick={handleGenerateTrendAnalysisReport}>Generate</Button>
                     </span>

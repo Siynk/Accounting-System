@@ -73,6 +73,54 @@ export async function addUser(payload, setError, event) {
       });
 }
 
+export async function createPayment(payload, setError, notify) {
+  await axiosInstance.post('/pay-transaction', payload)
+    .then(({ data }) => {
+      notify("Payment created successfully");
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        alert('An unexpected error occurred');
+      }
+    });
+}
+
+export async function getAllPayments(setError, setPayments) {
+  await axiosInstance.get('/get-all-payments')
+    .then(({ data }) => {
+      setPayments(data);
+      setError(null);
+    })
+    .catch(error => {
+      if (error.response && error.response.status === 400) {
+        const errors = error.response.data.errors;
+        setError(errors);
+      } else {
+        console.log('An unexpected error occurred');
+      }
+    });
+}
+
+export async function updatePaymentStatus(payload, setError, notify = false) {
+  await axiosInstance.post('/update-payment', payload)
+    .then(({ data }) => {
+      notify("Payment status updated successfully");
+      setError(null);
+    })
+    .catch(error => {
+      console.log(error.response)
+      if (error.response && error.response.status === 422) {
+        const errors = error.response.data.errors;
+        setError(errors);
+      }
+    });
+}
+
+
 export async function addProject(payload, setError, event) {
   await axiosInstance.post('/add-project', payload)
     .then(({ data }) => {
@@ -150,7 +198,7 @@ export async function getPendingProjects(setError, setPendingProjects) {
     });
 }
 
-export async function addTransaction(payload, setError, event) {
+export async function addTransaction(payload, setError, event=false) {
   await axiosInstance.post('/add-transaction', payload)
     .then(({ data }) => {
       alert(data.message);
@@ -164,7 +212,7 @@ export async function addTransaction(payload, setError, event) {
         setError(errors);
       } else {
         // Handle other types of errors (network error, error 500, etc.)
-        alert('An unexpected error occurred');
+        console.log('An unexpected error occurred');
       }
     });
 }
@@ -225,7 +273,7 @@ export async function getClients(setError, setClients) {
 export async function filterTransactions(setError, setTransactions, payload, userType) {
   try {
     const { data } = await axiosInstance.post('/filter-transactions', payload);
-    
+    console.log(data);
     let filteredTransactions = data;
     if (userType === 'client') {
       let seen = new Set();
@@ -287,7 +335,7 @@ export async function updateTransaction(setError, payload) {
         setError(errors);
       } else {
         // Handle other types of errors (network error, error 500, etc.)
-        alert('An unexpected error occurred');
+        console.log('An unexpected error occurred');
       }
     });
 }
@@ -589,7 +637,7 @@ export async function getPendingAccess(setError, setPendingAccess) {
       });
 }
 
-export async function approvePendingAccessRequest(payload, setError,notify) {
+export async function approvePendingAccessRequest(payload, setError, notify) {
   await axiosInstance.post('/approve-pending-access-request', payload)
       .then(({ data }) => {
 notify("Successfully Approved");
