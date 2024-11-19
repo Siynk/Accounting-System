@@ -109,13 +109,13 @@ const Payment = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{background:'darkgreen',color:'yellow'}}>
-                <TableCell><strong>Client</strong></TableCell>
-                <TableCell><strong>Project</strong></TableCell>
-                <TableCell><strong>Amount</strong></TableCell>
-                <TableCell><strong>Status</strong></TableCell>
-                <TableCell><strong>Decline Reason</strong></TableCell>
-                <TableCell><strong>Actions</strong></TableCell>
+              <TableRow sx={{background:'darkgreen'}}>
+                <TableCell sx={{color:"white"}}><strong>Client</strong></TableCell>
+                <TableCell sx={{color:"white"}}><strong>Project</strong></TableCell>
+                <TableCell sx={{color:"white"}}><strong>Amount</strong></TableCell>
+                <TableCell sx={{color:"white"}}><strong>Status</strong></TableCell>
+                <TableCell sx={{color:"white"}}><strong>Decline Reason</strong></TableCell>
+                <TableCell sx={{color:"white"}}><strong>Actions</strong></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
