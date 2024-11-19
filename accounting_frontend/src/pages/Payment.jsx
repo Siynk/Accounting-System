@@ -24,6 +24,7 @@ const Payment = () => {
     };
     fetchPayments();
   }, []);
+  console.log(payments)
 
   // Handle Approve button click
   const handleApprove = async (payment) => {
@@ -43,7 +44,7 @@ const Payment = () => {
 
       // Call the addTransaction function
       await addTransaction(transactionData, setError);
-      
+
       // After approving, update payment status
       await handlePaymentStatusChange('Approved', payment.id, 'Approve', payment.client.id);
       
@@ -113,6 +114,7 @@ const Payment = () => {
                 <TableCell><strong>Project</strong></TableCell>
                 <TableCell><strong>Amount</strong></TableCell>
                 <TableCell><strong>Status</strong></TableCell>
+                <TableCell><strong>Decline Reason</strong></TableCell>
                 <TableCell><strong>Actions</strong></TableCell>
               </TableRow>
             </TableHead>
@@ -124,6 +126,7 @@ const Payment = () => {
                     <TableCell>{payment.project.projectName}</TableCell>
                     <TableCell>{payment.amount}</TableCell>
                     <TableCell>{payment.status}</TableCell>
+                    <TableCell>{payment.declineReason || "N/A"}</TableCell>
                     <TableCell>
                       {payment.status === 'Pending' ? (
                         <div>

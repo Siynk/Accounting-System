@@ -789,10 +789,15 @@ class TransactionController extends Controller
     public function getAllPayments()
     {
         // Fetch all payments with their related information (client, project, transaction)
-        $payments = Payment::with(['client', 'project', 'transaction'])->get();
+        // And join with the paymentDeclineReason table to get the decline reason
+        $payments = Payment::select('payment.*', 'paymentDeclineReason.reason as declineReason')
+            ->leftJoin('paymentDeclineReason', 'payment.id', '=', 'paymentDeclineReason.paymentID')
+            ->with(['client', 'project', 'transaction'])
+            ->get();
 
         return response()->json($payments);
     }
+
 
     public function updatePaymentStatus(Request $request)
     {
