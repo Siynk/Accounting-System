@@ -109,7 +109,7 @@ const Payment = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{background:'darkgreen',color:'white'}}>
+              <TableRow sx={{background:'darkgreen',color:'yellow'}}>
                 <TableCell><strong>Client</strong></TableCell>
                 <TableCell><strong>Project</strong></TableCell>
                 <TableCell><strong>Amount</strong></TableCell>
