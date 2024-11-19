@@ -109,7 +109,7 @@ const Payment = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow>
+              <TableRow sx={{background:'darkgreen',color:'white'}}>
                 <TableCell><strong>Client</strong></TableCell>
                 <TableCell><strong>Project</strong></TableCell>
                 <TableCell><strong>Amount</strong></TableCell>
@@ -125,7 +125,7 @@ const Payment = () => {
                     <TableCell>{payment.client.name}</TableCell>
                     <TableCell>{payment.project.projectName}</TableCell>
                     <TableCell>{payment.amount}</TableCell>
-                    <TableCell>{payment.status}</TableCell>
+                    <TableCell sx={{color:payment.status === 'Approved' ? "green" : 'red'}}>{payment.status}</TableCell>
                     <TableCell>{payment.declineReason || "N/A"}</TableCell>
                     <TableCell>
                       {payment.status === 'Pending' ? (
