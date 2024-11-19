@@ -812,7 +812,7 @@ class TransactionController extends Controller
 
         // If the status is 'Declined', insert the decline reason
         if ($validated['status'] === 'Declined') {
-          $user = User::find($validatedData['clientID']);
+          $user = User::find($validated['clientID']);
           Mail::send('emails.decline-payment', ['user' => $user], function ($message) use ($user) {
               $message->to($user->email);
               $message->subject('Your Payment Request Has Been Declined');
@@ -832,7 +832,7 @@ class TransactionController extends Controller
             ]);
         }
         if($validated['status'] === 'Approved'){
-          $user = User::find($validatedData['clientID']);
+          $user = User::find($validated['clientID']);
           Mail::send('emails.approve-payment', ['user' => $user], function ($message) use ($user) {
               $message->to($user->email);
               $message->subject('Your Payment Request Has Been Approved');

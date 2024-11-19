@@ -79,7 +79,7 @@ class UserController extends Controller
             'projectID' => 'required|integer|exists:project,id', // Ensure the project exists
         ]);
 
-        if($validated['status'] === 'Approved'){
+        if($validatedData['status'] === 'Approved'){
           $user = User::find($validatedData['clientID']);
           Mail::send('emails.approve-project', ['user' => $user], function ($message) use ($user) {
               $message->to($user->email);
@@ -89,7 +89,7 @@ class UserController extends Controller
           // Send SMS notification using Twilio (SMS for approved status)
           $this->sendSms($user->contact, 'Congratulations! Your Project Request has been approved.');
         }
-        if($validated['status'] === 'Declined'){
+        if($validatedData['status'] === 'Declined'){
           $user = User::find($validatedData['clientID']);
           Mail::send('emails.decline-project', ['user' => $user], function ($message) use ($user) {
               $message->to($user->email);
