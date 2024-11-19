@@ -69,9 +69,9 @@ const ManageProject = () => {
     };
     
     await addProject(payload, setError, event);
-    if(user.userType !== 'client'){
-      location.reload();
-    }
+    // if(user.userType !== 'client'){
+    //   location.reload();
+    // }
 
     if (!error) {
       setNewProjectName('');
@@ -100,7 +100,7 @@ const ManageProject = () => {
       projectID
     };
     await updateProjectStatus(payload, setError);
-    location.reload();
+    //location.reload();
   };
 
   return (
