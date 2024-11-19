@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
+use Twilio\Rest\Client;
 
 // Import your models for Category, Activity, and Account
 
@@ -794,6 +797,7 @@ class TransactionController extends Controller
     {
         // Validate the request data
         $validated = $request->validate([
+            'clientID' => 'required|exists:users,id',
             'status' => 'required|in:Approved,Declined',  // Only Approved or Declined are allowed
             'decline_reason' => 'required_if:status,Declined|string|max:255',  // Reason is required if status is Declined
             'paymentID' => 'required',
@@ -808,6 +812,14 @@ class TransactionController extends Controller
 
         // If the status is 'Declined', insert the decline reason
         if ($validated['status'] === 'Declined') {
+          $user = User::find($validatedData['clientID']);
+          Mail::send('emails.decline-payment', ['user' => $user], function ($message) use ($user) {
+              $message->to($user->email);
+              $message->subject('Your Payment Request Has Been Declined');
+          });
+
+          // Send SMS notification using Twilio (SMS for approved status)
+          $this->sendSms($user->contact, 'Your Payment Request has been declined.');
             // Insert the reason into the paymentDeclineReason table
             $declineReason = $validated['decline_reason'];
 
@@ -819,7 +831,16 @@ class TransactionController extends Controller
                 'updated_at' => now(),
             ]);
         }
+        if($validated['status'] === 'Approved'){
+          $user = User::find($validatedData['clientID']);
+          Mail::send('emails.approve-payment', ['user' => $user], function ($message) use ($user) {
+              $message->to($user->email);
+              $message->subject('Your Payment Request Has Been Approved');
+          });
 
+          // Send SMS notification using Twilio (SMS for approved status)
+          $this->sendSms($user->contact, 'Congratulations! Your Payment Request has been approved.');
+        }
         // Update the payment status
         $payment->status = $validated['status'];
         $payment->save();
@@ -851,5 +872,29 @@ class TransactionController extends Controller
         ]);
 
         return response()->json(['message' => 'Payment created successfully', 'payment' => $payment]);
+    }
+    private function sendSms($contact, $message)
+    {
+        // Your Twilio credentials (stored in .env)
+        $sid = env('TWILIO_SID');
+        $authToken = env('TWILIO_AUTH_TOKEN');
+        $twilioPhoneNumber = env('TWILIO_PHONE_NUMBER');
+
+        // Initialize Twilio client
+        $client = new Client($sid, $authToken);
+
+        // Send SMS
+        try {
+            $client->messages->create(
+                $contact, // User's contact number
+                [
+                    'from' => $twilioPhoneNumber, // Twilio phone number
+                    'body' => $message // The message content
+                ]
+            );
+        } catch (\Exception $e) {
+            // Handle any error that occurs during SMS sending
+            return response()->json(['error' => 'Failed to send SMS: ' . $e->getMessage()], 500);
+        }
     }
 }

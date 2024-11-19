@@ -79,6 +79,26 @@ class UserController extends Controller
             'projectID' => 'required|integer|exists:project,id', // Ensure the project exists
         ]);
 
+        if($validated['status'] === 'Approved'){
+          $user = User::find($validatedData['clientID']);
+          Mail::send('emails.approve-project', ['user' => $user], function ($message) use ($user) {
+              $message->to($user->email);
+              $message->subject('Your Project Request Has Been Approved');
+          });
+
+          // Send SMS notification using Twilio (SMS for approved status)
+          $this->sendSms($user->contact, 'Congratulations! Your Project Request has been approved.');
+        }
+        if($validated['status'] === 'Declined'){
+          $user = User::find($validatedData['clientID']);
+          Mail::send('emails.decline-project', ['user' => $user], function ($message) use ($user) {
+              $message->to($user->email);
+              $message->subject('Your Project Request Has Been Declined');
+          });
+
+          // Send SMS notification using Twilio (SMS for approved status)
+          $this->sendSms($user->contact, 'Your Project Request has been declined.');
+        }
         
         // Find the project by its ID
         $project = Project::find($validatedData['projectID']);
