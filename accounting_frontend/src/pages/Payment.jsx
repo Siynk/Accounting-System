@@ -61,7 +61,7 @@ const Payment = () => {
   };
 
   const handlePaymentStatusChange = async (status, paymentID, updateType, clientID) => {
-    console.log(typeof reason)
+    
     const payload = {
       status: status,
       paymentID: paymentID,
