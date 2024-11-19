@@ -96,7 +96,7 @@ const Transaction = () => {
     // Handle Pay button click and create payment
     const handlePayButtonClick = async (transaction) => {
         try {
-            await createPayment({ transactionID: transaction.id, clientID:transaction.clientID, projectID:transaction.projectID, amount: parseFloat(transaction.amount) + (parseFloat(transaction.amount) * 0.15), status: 'Pending' }, setError, (message) => alert(message));
+            await createPayment({ transactionID: transaction.id, clientID:transaction.clientID, projectID:transaction.projectID, amount: parseFloat(transaction.amount), status: 'Pending' }, setError, (message) => alert(message));
             window.location.reload();
         } catch (error) {
             setError("Failed to create payment.");
@@ -182,7 +182,7 @@ const Transaction = () => {
                               {user.userType !== 'client' && (
                                 <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
                               )}
-                              <TableCell><span className='transaction-content'>{formatMoney(parseFloat(transaction.amount) + (parseFloat(transaction.amount) * 0.15))}</span></TableCell>
+                              <TableCell><span className='transaction-content'>{formatMoney(parseFloat(transaction.amount))}</span></TableCell>
                               {user.userType === 'client' && (
                                 <TableCell>
                                 {
