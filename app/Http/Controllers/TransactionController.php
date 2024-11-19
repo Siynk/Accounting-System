@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Twilio\Rest\Client;
+use App\Models\User;
 
 // Import your models for Category, Activity, and Account
 

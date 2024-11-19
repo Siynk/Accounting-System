@@ -43,7 +43,7 @@ const Payment = () => {
 
       // Call the addTransaction function
       await addTransaction(transactionData, setError);
-
+      
       // After approving, update payment status
       await handlePaymentStatusChange('Approved', payment.id, 'Approve', payment.client.id);
       
