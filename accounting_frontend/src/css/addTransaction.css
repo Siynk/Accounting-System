@@ -90,3 +90,25 @@
     display: inline-block;
     font-size: 12px;
 }
+.feeInputWrapper {
+  display: flex;
+  align-items: center;
+  width: 106%;
+  gap: 5px; /* Adjust the gap between the input and the % symbol */
+}
+
+.feeInputWrapper input {
+  width: 80%; /* Ensure the input takes most of the space */
+  padding: 8px;
+  border-radius: 4px;
+  width: 100%;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.feeInputWrapper .percentSign {
+  position: relative;
+  left: -15%;
+  font-size: 14px;
+  color: #333;
+}

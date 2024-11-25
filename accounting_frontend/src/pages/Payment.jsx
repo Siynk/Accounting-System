@@ -36,9 +36,10 @@ const Payment = () => {
         description: 'Payment for ' + payment.project.projectName,
         amount: payment.amount,
         category: 'Operating',
-        cashFlow: 'Inflow', // Assuming outflow for payments
-        productLine: 'General',
+        cashFlow: 'Inflow', 
+        productLine: payment.transaction.productLine,
         status: 'Approved',
+        fee:0,
         transactionTypes: [10] // Collect only the IDs
       };
 

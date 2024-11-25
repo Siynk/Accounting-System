@@ -16,6 +16,7 @@ class CreateTransactionTable extends Migration
             $table->unsignedBigInteger('clientID')->nullable()->default(0);
             $table->unsignedBigInteger('projectID')->nullable()->default(0);
             $table->decimal('amount', 10, 0);
+            $table->decimal('fee', 10, 0);
             $table->string('category', 50);
             $table->string('cashFlow', 50);
             $table->boolean('isDeleted')->default(0);

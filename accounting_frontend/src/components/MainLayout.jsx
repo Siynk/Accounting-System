@@ -41,7 +41,7 @@ function MainLayout() {
         9: '/reports/trend-analysis',
         10: '/reports/segment-report',
         11: '/manage-project',
-        11: '/payment',
+        12: '/payment',
     };
 
     const location = useLocation();
@@ -71,7 +71,6 @@ function MainLayout() {
         fetchAccess();
     } 
     }, [token, user]);
-    console.log(accesses)
 
     React.useEffect(() => {
         if (accesses.length > 0 && accesses) {

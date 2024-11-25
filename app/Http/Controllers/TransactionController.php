@@ -38,6 +38,9 @@ class TransactionController extends Controller
           $transaction->clientID = $validatedData['clientID'];
           $transaction->projectID = $validatedData['projectID'];
         }
+        if(isset($validatedData['fee'])){
+          $transaction->fee = $validatedData['fee'];
+        }
         $transaction->description = $validatedData['description'];
         $transaction->amount = $validatedData['amount'];
         $transaction->category = $validatedData['category'];
@@ -60,6 +63,9 @@ class TransactionController extends Controller
         if(isset($validatedData['clientID']) && isset($validatedData['projectID'])){
           $clientTransactionRequest->clientID = $validatedData['clientID'];
           $clientTransactionRequest->projectID = $validatedData['projectID'];
+        }
+        if(isset($validatedData['fee'])){
+          $transaction->fee = $validatedData['fee'];
         }
         $clientTransactionRequest->transactionID = $transaction->id;
         $clientTransactionRequest->status = $validatedData['status'];

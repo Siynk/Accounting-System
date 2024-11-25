@@ -55,8 +55,11 @@ const AddTransaction = () => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = {};
+    
+        // Loop through the form data entries
         for (let [key, value] of formData.entries()) {
             if (key === 'transactionTypes[]') {
+                // If it's a checkbox field (transaction types), collect all selected values
                 if (!data.transactionTypes) {
                     data.transactionTypes = [];
                 }
@@ -65,12 +68,28 @@ const AddTransaction = () => {
                 data[key] = value;
             }
         }
-
+        console.log(data.fee)
+        if(data.fee){
+          // Calculate fee as a percentage of the amount if the fee field exists
+          const feePercentage = parseFloat(data.fee);  // Fee is entered as a percentage (e.g., 10)
+          const amount = parseFloat(data.amount); // Amount entered by the user
+      
+          if (!isNaN(feePercentage) && !isNaN(amount)) {
+              const calculatedFee = (feePercentage / 100) * amount; // Calculate fee based on amount
+              data.fee = calculatedFee.toFixed(2); // Update fee with the calculated value (2 decimal places)
+          }
+        }else{
+          data.fee = 0;
+        }
+        
+    
         // Set status based on userType
         data.status = user.userType === 'client' ? 'Pending' : 'Approved';
-        
+    
+        // Call the addTransaction function to submit the data
         addTransaction(data, setError, e);
     };
+  
 
     return (
         <Box
@@ -99,7 +118,7 @@ const AddTransaction = () => {
                             {user.userType !== 'client' && (
                                 <button
                                     type="button"
-                                    style={{background:'lightblue'}}
+                                    style={{background:'lightblue', width:'100%'}}
                                     onClick={() => setShowClientProjectFields(!showClientProjectFields)}
                                 >
                                     For Client Transaction
@@ -139,8 +158,25 @@ const AddTransaction = () => {
                                         </select>
                                     </label>
                                     {error && <span className="error">{error.projectID}</span>}
+
+                                    {/* Add Fee Field */}
+                                    <label>
+                                        Fee:
+                                        <div className="feeInputWrapper">
+                                            <input
+                                                type="number"
+                                                name="fee"
+                                                placeholder="Enter percentage"
+                                                min="0"
+                                                step="0.01"
+                                            />
+                                            <span className="percentSign">%</span>
+                                        </div>
+                                    </label>
+                                    {error && <span className="error">{error.fee}</span>}
+
                                 </>
-                            )}
+                              )}
 
                             <label>
                                 Transaction Types:
@@ -178,7 +214,7 @@ const AddTransaction = () => {
                             </label>
                             {error && <span className="error">{error.cashFlowCategory}</span>}
                             <label>
-                                Product Line:
+                                Service Line:
                                 <input type="text" name="productLine" />
                             </label>
                             {error && <span className="error">{error.productLine}</span>}

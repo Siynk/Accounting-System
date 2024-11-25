@@ -22,6 +22,7 @@ class Transaction extends Model
         'clientID',
         'projectID',
         'amount',
+        'fee',
         'category',
         'cashFlow',
         'isDeleted'

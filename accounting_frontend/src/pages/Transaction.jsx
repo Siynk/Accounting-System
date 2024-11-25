@@ -45,7 +45,6 @@ const Transaction = () => {
         setSingleTransaction(transaction);
         navigate(path);
     };
-
     const handleUpdatePopup = (transaction) => {
         setSelectedTransaction(transaction);
     };
@@ -96,7 +95,7 @@ const Transaction = () => {
     // Handle Pay button click and create payment
     const handlePayButtonClick = async (transaction) => {
         try {
-            await createPayment({ transactionID: transaction.id, clientID:transaction.clientID, projectID:transaction.projectID, amount: parseFloat(transaction.amount), status: 'Pending' }, setError, (message) => alert(message));
+            await createPayment({ transactionID: transaction.id, clientID:transaction.clientID, projectID:transaction.projectID, amount: parseFloat(transaction.amount)+parseFloat(transaction.fee), status: 'Pending' }, setError, (message) => alert(message));
             window.location.reload();
         } catch (error) {
             setError("Failed to create payment.");
@@ -109,7 +108,6 @@ const Transaction = () => {
         if (!payments || payments.length === 0) {
             return null; // No payments exist for this transaction
         }
-        console.log(payments)
         const matchingPayments = payments.filter(payment => payment.transactionID === transactionId);
         
         if (matchingPayments.length === 0) {
@@ -149,6 +147,7 @@ const Transaction = () => {
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CLIENT</span></TableCell>}
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>}
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
+                            {user.userType !== 'client' && <TableCell><span className='transaction-header'>SERVICE FEE</span></TableCell>}
                             <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
                         </TableRow>
                     </TableHead>
@@ -182,7 +181,10 @@ const Transaction = () => {
                               {user.userType !== 'client' && (
                                 <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
                               )}
-                              <TableCell><span className='transaction-content'>{formatMoney(parseFloat(transaction.amount))}</span></TableCell>
+                              <TableCell><span className='transaction-content'>{formatMoney(user.userType === 'client' ? (parseFloat(transaction.amount)+parseFloat(transaction.fee)): parseFloat(transaction.amount))}</span></TableCell>
+                              {user.userType !== 'client' && (
+                                <TableCell><span className='transaction-content'>{transaction.fee}</span></TableCell>
+                              )}
                               {user.userType === 'client' && (
                                 <TableCell>
                                 {
