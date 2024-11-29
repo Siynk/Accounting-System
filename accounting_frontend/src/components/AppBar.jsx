@@ -9,7 +9,7 @@ let AppBar = styled(MuiAppBar, {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.leavingScreen,
     }),
-    backgroundColor: '#262626', // Set background color here
+    backgroundColor: '#045706', // Set background color here
     ...(open && {
         marginLeft: 240,
         width: `calc(100% - ${240}px)`,

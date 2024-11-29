@@ -59,7 +59,7 @@ const SegmentReport = () => {
                 margin: 'auto',
             }}
         >
-            <Container maxWidth="md" className="segmentReport-container">
+            <Container maxWidth="xl" className="segmentReport-container">
                 <div className="segmentReport-header">
                     <h1>Generate Segment Report</h1>
                     <div className="segmentReport-inputs">

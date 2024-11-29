@@ -68,7 +68,7 @@ const TrendAnalysisReports = () => {
                 margin: "auto"
             }}
         >
-            <Container maxWidth="md" style={{ marginTop: '100px' }}>
+            <Container maxWidth="xl" style={{ marginTop: '100px' }}>
                 <div className="trendAnalysis-search-container-report">
                     {/* {user.userType !== 'client' && <input
                         type="text"

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddTransactionReq;
 use App\Http\Requests\UpdateTransactionReq;
 use App\Models\Transaction;
+use App\Models\Materials;
 use App\Models\Category;
 use App\Models\Activity;
 use App\Models\Payment;
@@ -27,55 +28,68 @@ use App\Models\User;
 
 class TransactionController extends Controller
 {
-    public function addTransaction(AddTransactionReq $request)
-    {
-        // Retrieve validated data from the request
-        $validatedData = $request->validated();
-
-        // Create a new transaction
-        $transaction = new Transaction();
-        if(isset($validatedData['clientID']) && isset($validatedData['projectID'])){
+  public function addTransaction(AddTransactionReq $request)
+  {
+      // Retrieve validated data from the request
+      $validatedData = $request->validated();
+  
+      // Create a new transaction
+      $transaction = new Transaction();
+      if (isset($validatedData['clientID']) && isset($validatedData['projectID'])) {
           $transaction->clientID = $validatedData['clientID'];
           $transaction->projectID = $validatedData['projectID'];
-        }
-        if(isset($validatedData['fee'])){
-          $transaction->fee = $validatedData['fee'];
-        }
-        $transaction->description = $validatedData['description'];
-        $transaction->amount = $validatedData['amount'];
-        $transaction->category = $validatedData['category'];
-        $transaction->cashFlow = $validatedData['cashFlow'];
-        $transaction->productLine = $validatedData['productLine'];
-        $transaction->save();
-
-        // Save the transaction types
-        if (isset($validatedData['transactionTypes'])) {
-            foreach ($validatedData['transactionTypes'] as $type) {
-                DB::table('transactiontransactiontype')->insert([
-                    'transactionID' => $transaction->id,
-                    'transactionTypeID' => $type,
-                ]);
-            }
-        }
-
-        // Create a new client transaction request
-        $clientTransactionRequest = new ClientTransactionRequest();
-        if(isset($validatedData['clientID']) && isset($validatedData['projectID'])){
+      }
+      $transaction->status = $validatedData['transactionStatus'];
+      $transaction->description = $validatedData['description'];
+      $transaction->amount = $validatedData['amount'];
+      $transaction->category = $validatedData['category'];
+      $transaction->cashFlow = $validatedData['cashFlow'];
+      $transaction->productLine = $validatedData['productLine'];
+      $transaction->save();
+  
+      // Check if transactionStatus is "To Settle"
+      if ($validatedData['transactionStatus'] === 'To Settle') {
+          // Find all "Unsettled" transactions for the same clientID and update them
+          Transaction::where('clientID', $validatedData['clientID'])
+              ->where('status', 'Unsettled')
+              ->update(['status' => 'To Settle']);
+      }
+  
+      // Handle material creation if provided
+      if (isset($validatedData['materialName'])) {
+          $material = new Materials();
+          $material->transaction_id = $transaction->id;
+          $material->name = $validatedData['materialName'];
+          $material->price = $validatedData['materialPrice'];
+          $material->quantity = $validatedData['materialQuantity'];
+          $material->save();
+      }
+  
+      // Save the transaction types
+      if (isset($validatedData['transactionTypes'])) {
+          foreach ($validatedData['transactionTypes'] as $type) {
+              DB::table('transactiontransactiontype')->insert([
+                  'transactionID' => $transaction->id,
+                  'transactionTypeID' => $type,
+              ]);
+          }
+      }
+  
+      // Create a new client transaction request
+      $clientTransactionRequest = new ClientTransactionRequest();
+      if (isset($validatedData['clientID']) && isset($validatedData['projectID'])) {
           $clientTransactionRequest->clientID = $validatedData['clientID'];
           $clientTransactionRequest->projectID = $validatedData['projectID'];
-        }
-        if(isset($validatedData['fee'])){
-          $transaction->fee = $validatedData['fee'];
-        }
-        $clientTransactionRequest->transactionID = $transaction->id;
-        $clientTransactionRequest->status = $validatedData['status'];
-        $clientTransactionRequest->action = 'Create'; // Or whatever action you need
-        $clientTransactionRequest->requestDate = now(); // Use current date/time
-        $clientTransactionRequest->save();
-
-        // Optionally, return a response
-        return response()->json(['message' => 'Transaction added successfully'], 200);
-    }
+      }
+      $clientTransactionRequest->transactionID = $transaction->id;
+      $clientTransactionRequest->status = $validatedData['status'];
+      $clientTransactionRequest->action = 'Create'; // Or whatever action you need
+      $clientTransactionRequest->requestDate = now(); // Use current date/time
+      $clientTransactionRequest->save();
+  
+      // Optionally, return a response
+      return response()->json(['message' => 'Transaction added successfully'], 200);
+  }
 
 
     public function getAllTransactions()
@@ -235,11 +249,15 @@ class TransactionController extends Controller
             $query->where('project.projectName', 'like', '%' . $projectName . '%');
         }
 
+        // Order by transaction status in descending order
+        $query->orderByDesc('transaction.status'); // Order by status in descending order
+
         // Execute the query and return results as JSON
         $filteredTransactions = $query->get();
 
         return response()->json($filteredTransactions);
     }
+
 
 
 
@@ -373,7 +391,7 @@ class TransactionController extends Controller
         $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
     
         // Define asset and liability transaction types
-        $assetTypes = ['Asset'];
+        $assetTypes = ['Asset', 'Receivable'];
         $liabilityTypes = ['Liabilities'];
         $equityTypes = ['Equity'];
     
@@ -386,7 +404,7 @@ class TransactionController extends Controller
             ->whereIn('transactiontype.description', $assetTypes)
             ->where('clienttransctionrequest.status', 'Approved')
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->select('transaction.description', 'transaction.amount')
+            ->select('transaction.description', 'transaction.amount', 'transactiontype.description as transactionType')
             ->get();
     
         // Query for liabilities
@@ -524,143 +542,181 @@ class TransactionController extends Controller
 
 
     public function getCashflowData(Request $request)
-    {
-        $fromDate = $request->input('dateFrom');
-        $toDate = $request->input('dateTo');
+{
+    $fromDate = $request->input('dateFrom');
+    $toDate = $request->input('dateTo');
 
-        // Adjust to include entire day if fromDate and toDate are the same
-        // Ensure fromDate and toDate are formatted with time
-        $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
-        $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
+    // Adjust to include entire day if fromDate and toDate are the same
+    // Ensure fromDate and toDate are formatted with time
+    $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
+    $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
 
-        // Fetch operating activities
-        $operatingActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Operating')
-            ->select('transaction.*')
-            ->get();
+    // Fetch operating activities excluding 'Receivable' transaction type
+    $operatingActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Operating')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
 
-        // Calculate operating income activities
-        $operatingIncomeActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Operating')
-            ->where('transaction.cashFlow', 'Inflow')
-            ->select('transaction.*')
-            ->get();
-        $operatingIncome = $operatingIncomeActivities->sum('amount');
+    // Calculate operating income activities excluding 'Receivable' transaction type
+    $operatingIncomeActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Operating')
+        ->where('transaction.cashFlow', 'Inflow')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
+    $operatingIncome = $operatingIncomeActivities->sum('amount');
 
-        // Calculate operating expenses activities
-        $operatingExpenseActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Operating')
-            ->where('transaction.cashFlow', 'Outflow')
-            ->select('transaction.*')
-            ->get();
-        $operatingExpenses = $operatingExpenseActivities->sum('amount');
+    // Calculate operating expenses activities excluding 'Receivable' transaction type
+    $operatingExpenseActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Operating')
+        ->where('transaction.cashFlow', 'Outflow')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
+    $operatingExpenses = $operatingExpenseActivities->sum('amount');
 
-        $operatingNetCashflow = $operatingIncome - $operatingExpenses;
+    $operatingNetCashflow = $operatingIncome - $operatingExpenses;
 
-        // Fetch investing activities
-        $investingActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Investing')
-            ->select('transaction.*')
-            ->get();
+    // Fetch investing activities excluding 'Receivable' transaction type
+    $investingActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Investing')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
 
-        // Calculate investing income activities
-        $investingIncomeActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') 
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Investing')
-            ->where('transaction.cashFlow', 'Inflow')
-            ->select('transaction.*')
-            ->get();
-        $investingIncome = $investingIncomeActivities->sum('amount');
+    // Calculate investing income activities excluding 'Receivable' transaction type
+    $investingIncomeActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Investing')
+        ->where('transaction.cashFlow', 'Inflow')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
+    $investingIncome = $investingIncomeActivities->sum('amount');
 
-        // Calculate investing expenses activities
-        $investingExpenseActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') 
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Investing')
-            ->where('transaction.cashFlow', 'Outflow')
-            ->select('transaction.*')
-            ->get();
-        $investingExpenses = $investingExpenseActivities->sum('amount');
+    // Calculate investing expenses activities excluding 'Receivable' transaction type
+    $investingExpenseActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Investing')
+        ->where('transaction.cashFlow', 'Outflow')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
+    $investingExpenses = $investingExpenseActivities->sum('amount');
 
-        $investingNetCashflow = $investingIncome - $investingExpenses;
+    $investingNetCashflow = $investingIncome - $investingExpenses;
 
-        // Fetch financing activities
-        $financingActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') 
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Financing')
-            ->select('transaction.*')
-            ->get();
+    // Fetch financing activities excluding 'Receivable' transaction type
+    $financingActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Financing')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
 
-        // Calculate financing income activities
-        $financingIncomeActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Financing')
-            ->where('transaction.cashFlow', 'Inflow')
-            ->select('transaction.*')
-            ->get();
-        $financingIncome = $financingIncomeActivities->sum('amount');
+    // Calculate financing income activities excluding 'Receivable' transaction type
+    $financingIncomeActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Financing')
+        ->where('transaction.cashFlow', 'Inflow')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
+    $financingIncome = $financingIncomeActivities->sum('amount');
 
-        // Calculate financing expenses activities
-        $financingExpenseActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
-            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->where('transaction.isDeleted', 0)
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.category', 'Financing')
-            ->where('transaction.cashFlow', 'Outflow')
-            ->select('transaction.*')
-            ->get();
-        $financingExpenses = $financingExpenseActivities->sum('amount');
+    // Calculate financing expenses activities excluding 'Receivable' transaction type
+    $financingExpenseActivities = Transaction::join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+        ->join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+        ->where('transaction.isDeleted', 0)
+        ->where('clienttransctionrequest.status', 'Approved')
+        ->where('transaction.category', 'Financing')
+        ->where('transaction.cashFlow', 'Outflow')
+        ->whereNotIn('transactiontype.description', ['Receivable']) // Exclude 'Receivable'
+        ->select('transaction.*')
+        ->distinct()  // Ensure distinct transactions
+        ->get();
+    $financingExpenses = $financingExpenseActivities->sum('amount');
 
-        $financingNetCashflow = $financingIncome - $financingExpenses;
+    $financingNetCashflow = $financingIncome - $financingExpenses;
 
-        // Calculate total net cash flow
-        $totalNetCashflow = $operatingNetCashflow + $investingNetCashflow + $financingNetCashflow;
+    // Calculate total net cash flow
+    $totalNetCashflow = $operatingNetCashflow + $investingNetCashflow + $financingNetCashflow;
 
-        // Prepare the response data
-        $responseData = [
-            'operatingActivities' => $operatingActivities,
-            'operatingIncomeActivities' => $operatingIncomeActivities,
-            'operatingIncome' => $operatingIncome,
-            'operatingExpenseActivities' => $operatingExpenseActivities,
-            'operatingExpenses' => $operatingExpenses,
-            'operatingNetCashflow' => $operatingNetCashflow,
-            'investingActivities' => $investingActivities,
-            'investingIncomeActivities' => $investingIncomeActivities,
-            'investingIncome' => $investingIncome,
-            'investingExpenseActivities' => $investingExpenseActivities,
-            'investingExpenses' => $investingExpenses,
-            'investingNetCashflow' => $investingNetCashflow,
-            'financingActivities' => $financingActivities,
-            'financingIncomeActivities' => $financingIncomeActivities,
-            'financingIncome' => $financingIncome,
-            'financingExpenseActivities' => $financingExpenseActivities,
-            'financingExpenses' => $financingExpenses,
-            'financingNetCashflow' => $financingNetCashflow,
-            'totalNetCashflow' => $totalNetCashflow,
-        ];
+    // Prepare the response data
+    $responseData = [
+        'operatingActivities' => $operatingActivities,
+        'operatingIncomeActivities' => $operatingIncomeActivities,
+        'operatingIncome' => $operatingIncome,
+        'operatingExpenseActivities' => $operatingExpenseActivities,
+        'operatingExpenses' => $operatingExpenses,
+        'operatingNetCashflow' => $operatingNetCashflow,
+        'investingActivities' => $investingActivities,
+        'investingIncomeActivities' => $investingIncomeActivities,
+        'investingIncome' => $investingIncome,
+        'investingExpenseActivities' => $investingExpenseActivities,
+        'investingExpenses' => $investingExpenses,
+        'investingNetCashflow' => $investingNetCashflow,
+        'financingActivities' => $financingActivities,
+        'financingIncomeActivities' => $financingIncomeActivities,
+        'financingIncome' => $financingIncome,
+        'financingExpenseActivities' => $financingExpenseActivities,
+        'financingExpenses' => $financingExpenses,
+        'financingNetCashflow' => $financingNetCashflow,
+        'totalNetCashflow' => $totalNetCashflow,
+    ];
 
-        // Return the response as JSON
-        return response()->json($responseData);
-    }
+    // Return the response as JSON
+    return response()->json($responseData);
+}
+
+
 
 
     public function getSegmentReportData(Request $request)

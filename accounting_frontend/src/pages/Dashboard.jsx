@@ -204,15 +204,15 @@ export default function Dashboard() {
                 }}
             >
                 <Toolbar />
-                <Container maxWidth="lg" className='dashboardContainer'>
+                <Container maxWidth="xl" className='dashboardContainer'>
                     <Grid container spacing={3} >
                         {/* Earnings */}
                         <Grid item xs={12} sm={6}>
-                            <Card sx={{ backgroundColor: '#e3f2fd', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #A5D6A7, #66bb6a)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                         <Box>
-                                            <Typography variant="h6" color="primary">Earnings</Typography>
+                                            <Typography variant="h6" color="white">Earnings</Typography>
                                             <Typography color="textSecondary">
                                                 {loading ? <CircularProgress size={15} /> : counts.earnings}
                                             </Typography>
@@ -226,6 +226,7 @@ export default function Dashboard() {
                                                 sx={{
                                                     transform: 'translate(-50%, -50%)',
                                                     fontWeight: 'bold',
+                                                    color: 'white',
                                                 }}
                                             >
                                                 {loading ? <CircularProgress size={15} /> : `${calculatePercentage(counts.earnings, combinedTotal)}%`}
@@ -238,11 +239,11 @@ export default function Dashboard() {
 
                         {/* Expenditures */}
                         <Grid item xs={12} sm={6}>
-                            <Card sx={{ backgroundColor: '#ffe0b2', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #FFB74D, #FF7043)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                         <Box>
-                                            <Typography variant="h6" color="secondary">Expenditures</Typography>
+                                            <Typography variant="h6" color="white">Expenditures</Typography>
                                             <Typography color="textSecondary">
                                                 {loading ? <CircularProgress size={15} /> : counts.expenditures}
                                             </Typography>
@@ -256,6 +257,7 @@ export default function Dashboard() {
                                                 sx={{
                                                     transform: 'translate(-50%, -50%)',
                                                     fontWeight: 'bold',
+                                                    color: 'white',
                                                 }}
                                             >
                                                 {loading ? <CircularProgress size={15} /> : `${calculatePercentage(counts.expenditures, combinedTotal)}%`}
@@ -268,11 +270,11 @@ export default function Dashboard() {
 
                         {/* Operating */}
                         <Grid item xs={12} sm={6} md={4}>
-                            <Card sx={{ backgroundColor: '#c8e6c9', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #81C784, #66bb6a)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                         <Box>
-                                            <Typography variant="h6" color="success.main">Operating</Typography>
+                                            <Typography variant="h6" color="white">Operating</Typography>
                                             <Typography color="textSecondary">
                                                 {loading ? <CircularProgress size={15} /> : counts.operating}
                                             </Typography>
@@ -286,6 +288,7 @@ export default function Dashboard() {
                                                 sx={{
                                                     transform: 'translate(-50%, -50%)',
                                                     fontWeight: 'bold',
+                                                    color: 'white',
                                                 }}
                                             >
                                                 {loading ? <CircularProgress size={15} /> : `${calculatePercentage(counts.operating, combinedTotal)}%`}
@@ -298,11 +301,11 @@ export default function Dashboard() {
 
                         {/* Investing */}
                         <Grid item xs={12} sm={6} md={4}>
-                            <Card sx={{ backgroundColor: '#d1c4e9', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #D1C4E9, #9575CD)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                         <Box>
-                                            <Typography variant="h6" color="purple">Investing</Typography>
+                                            <Typography variant="h6" color="white">Investing</Typography>
                                             <Typography color="textSecondary">
                                                 {loading ? <CircularProgress size={15} /> : counts.investing}
                                             </Typography>
@@ -316,6 +319,7 @@ export default function Dashboard() {
                                                 sx={{
                                                     transform: 'translate(-50%, -50%)',
                                                     fontWeight: 'bold',
+                                                    color: 'white',
                                                 }}
                                             >
                                                 {loading ? <CircularProgress size={15} /> : `${calculatePercentage(counts.investing, combinedTotal)}%`}
@@ -328,11 +332,11 @@ export default function Dashboard() {
 
                         {/* Financing */}
                         <Grid item xs={12} sm={6} md={4}>
-                            <Card sx={{ backgroundColor: '#ffccbc', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #FFCCBC, #FF7043)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
                                     <Box display="flex" justifyContent="space-between" alignItems="center">
                                         <Box>
-                                            <Typography variant="h6" color="error.main">Financing</Typography>
+                                            <Typography variant="h6" color="white">Financing</Typography>
                                             <Typography color="textSecondary">
                                                 {loading ? <CircularProgress size={15} /> : counts.financing}
                                             </Typography>
@@ -346,6 +350,7 @@ export default function Dashboard() {
                                                 sx={{
                                                     transform: 'translate(-50%, -50%)',
                                                     fontWeight: 'bold',
+                                                    color: 'white',
                                                 }}
                                             >
                                                 {loading ? <CircularProgress size={15} /> : `${calculatePercentage(counts.financing, combinedTotal)}%`}
@@ -356,12 +361,11 @@ export default function Dashboard() {
                             </Card>
                         </Grid>
 
-
                         {/* Total Revenue */}
                         <Grid item xs={12} sm={6}>
-                            <Card sx={{ backgroundColor: '#bbdefb', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #B2DFDB, #80CBC4)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
-                                    <Typography variant="h6" color="primary">Total Revenue</Typography>
+                                    <Typography variant="h6" color="white">Total Revenue</Typography>
                                     <Typography color="textSecondary">
                                         {loading ? <CircularProgress size={15} /> : `₱${parseFloat(incomeStatement.totalRevenue).toLocaleString()}`}
                                     </Typography>
@@ -371,15 +375,17 @@ export default function Dashboard() {
 
                         {/* Net Income */}
                         <Grid item xs={12} sm={6}>
-                            <Card sx={{ backgroundColor: '#ffe0b2', padding: '16px', borderRadius: '8px' }}>
+                            <Card sx={{ background: 'linear-gradient(45deg, #F1E0B1, #FFB74D)', padding: '16px', borderRadius: '8px' }}>
                                 <CardContent>
-                                    <Typography variant="h6" color="secondary">Net Income</Typography>
+                                    <Typography variant="h6" color="white">Net Income</Typography>
                                     <Typography color="textSecondary">
                                         {loading ? <CircularProgress size={15} /> : `₱${parseFloat(incomeStatement.netIncome).toLocaleString()}`}
                                     </Typography>
                                 </CardContent>
                             </Card>
                         </Grid>
+
+
 
                         {/* KPI Section */}
                         {/* <Grid item xs={12}> */}

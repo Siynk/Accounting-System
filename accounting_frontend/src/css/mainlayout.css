@@ -2,8 +2,8 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    background-color: #262626;
-    color: rgb(190, 197, 192);
+    background-color: #045706;
+    color: white;
     font-weight: bold;
     padding-left: 8px;
     padding-right: 8px;
@@ -31,7 +31,7 @@
 }
 
 .typographyLogout:hover {
-    background-color: #262626; /* Darker blue background color on hover */
+    background-color: rgb(3, 71, 3); /* Darker blue background color on hover */
 }
 
 .typographyLogout:active {

@@ -264,5 +264,12 @@ button.decline:hover {
 }
 
 .accessTable th {
-    background-color: #0c6c2f;
+  background: linear-gradient(45deg, #4caf50, #1b5e20); /* Soft gradient from light to dark green */
+  color: white;
+  font-weight: bold;
+  padding: 12px;
+  text-align: center;
+  border-bottom: 3px solid #2c6e1f; /* Subtle dark border for separation */
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); 
 }
+

@@ -21,7 +21,9 @@ class Payment extends Model
     protected $fillable = [
         'clientID', 
         'projectID', 
-        'transactionID', 
+        'transactionID',
+        'payment_method',
+        'approver_id',
         'amount', 
         'status'
     ];

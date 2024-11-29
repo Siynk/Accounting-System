@@ -233,7 +233,7 @@ const ClientManagement = () => {
             }}
         >
             <Toolbar />
-            <Container maxWidth="lg" className='tableContainer'>
+            <Container maxWidth="xl" className='tableContainer'>
                 <div className="search-container-client">
                     <input
                         type="text"

@@ -152,7 +152,7 @@ export default function ManageAccess() {
                     overflow: 'auto',
                 }}
             >
-                <Container maxWidth="lg" className='manageAccessContainer'>
+                <Container maxWidth="xl" className='manageAccessContainer'>
                     <div className="search-container">
                         <input
                             type="text"

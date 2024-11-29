@@ -20,15 +20,20 @@
     width: 100%;
     border-collapse: collapse;
 }
-
-.trendAnalysis-user-header {
-    font-weight: bold;
-    background-color: #f4f4f4;
+.trendAnalysis-user-table .MuiTableCell-head {
+  font-weight: bold;
+  background: linear-gradient(45deg, #66bb6a, #2e7d32); /* Gradient from light green to dark green */
+  color: white;
+  padding: 10px;
+  text-align: center;
+  border-bottom: 2px solid #4caf50; /* Adds a subtle border for separation */
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow to make the header pop */
 }
 
 .trendAnalysis-user-content {
     padding: 8px;
     text-align: center;
+    font-family:  system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .balanceSheet-container {
@@ -104,26 +109,36 @@
 }
 
 .balanceSheet-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+  background: linear-gradient(45deg, #4caf50, #1b5e20); /* Green gradient background */
+  color: white; /* White text for contrast */
+  font-weight: bold; /* Bold text */
+  padding: 12px; /* Increased padding for better spacing */
+  text-align: center; /* Center align the text */
+  border-bottom: 3px solid #2c6e1f; /* Dark green border */
 }
 
 .balanceSheet-subheader-asset {
-    background-color: rgba(0, 128, 0, 0.1); /* Light gray for subheader */
+    background-color: #eaeeea; /* Light gray for subheader */
     font-weight: bold;
 }
 .balanceSheet-subheader-liability {
-    background-color: rgba(255, 0, 0, 0.1);
+    background-color: #eaeeea;
     font-weight: bold;
 }
 .balanceSheet-subheader-equity {
     background-color: rgba(0, 0, 255, 0.1);
     font-weight: bold;
 }
+.balanceSheet-subheader-equity td:first-child{
+  text-align: right;
+}
 
 .balanceSheet-total {
     background-color: #f5f5f5; /* Light gray for totals */
     font-weight: bold;
+}
+.balanceSheet-total td:first-child{
+  text-align: right;
 }
 
 .balanceSheet-table td:nth-child(2) {
@@ -221,21 +236,32 @@
 }
 
 .income-statement-table th {
-    background-color: #f0f0f0;
+  background: linear-gradient(45deg, #4caf50, #1b5e20); /* Green gradient background */
+  color: white; /* White text for contrast */
+  font-weight: bold; /* Bold text */
+  padding: 12px; /* Increased padding for better spacing */
+  text-align: center; /* Center align the text */
+  border-bottom: 3px solid #2c6e1f; /* Dark green border */
 }
 
 .sub-header {
     font-weight: bold;
-    background-color: #e0f7fa; /* Light cyan for revenues */
+    background-color: #eeeeea; /* Light cyan for revenues */
 }
 
 .total-header {
     font-weight: bold;
-    background-color: #ffe0b2; /* Light orange for totals */
+    background-color: #eeeeea; /* Light orange for totals */
+}
+.total-header td:first-child {
+  text-align: right;
 }
 .total-header-net {
     font-weight: bold;
-    background-color: #959afd; /* Light orange for totals */
+    background-color: #eeeeea; /* Light orange for totals */
+}
+.total-header-net td:first-child {
+  text-align: right;
 }
 
 .cashflowStatement-container {
@@ -316,9 +342,14 @@
 }
 
 .cashflowStatement-table th {
-    background-color: #f2f2f2;
-    color: #333;
+  background: linear-gradient(45deg, #4caf50, #1b5e20); /* Green gradient background */
+  color: white; /* White text for contrast */
+  font-weight: bold; /* Bold text */
+  padding: 12px; /* Increased padding for better spacing */
+  text-align: center; /* Center align the text */
+  border-bottom: 3px solid #2c6e1f; /* Dark green border */
 }
+
 
 .cashflowStatement-subheader-operatingActivities,
 .cashflowStatement-subheader-investingActivities,
@@ -328,20 +359,30 @@
 }
 
 .cashflowStatement-total {
-    background-color: #d9ffd9; /* Light Green */
+    background-color: #eaeeea; /* Light Green */
     font-weight: bold;
 }
+.cashflowStatement-total td:first-child {
+  text-align: right;
+}
+
 
 .cashflowStatement-total-net {
-    background-color: #ffe0b2; /* Light Green */
+    background-color: #eaeeea; /* Light Green */
     color: black;
     font-weight: bold;
+}
+.cashflowStatement-total-net td:first-child {
+  text-align: right;
 }
 
 .cashflowStatement-total-cashflow {
-    background-color: #959afd; /* Light Green */
+    background-color: #eaeeea; /* Light Green */
     color: black;
     font-weight: bold;
+}
+.cashflowStatement-total-cashflow td:first-child {
+  text-align: right;
 }
 
 .cashflowStatement-operatingActivity,
@@ -443,6 +484,7 @@
     padding: 12px;
     text-align: left;
     border: 1px solid #ddd;
+    font-family:  system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 .segmentReport-table th {
@@ -450,6 +492,14 @@
     color: white;
 }
 
+.segmentReport-table th {
+  background: linear-gradient(45deg, #4caf50, #1b5e20); /* Green gradient background */
+  color: white; /* White text for contrast */
+  font-weight: bold; /* Bold text */
+  padding: 12px; /* Increased padding for better spacing */
+  text-align: center; /* Center align the text */
+  border-bottom: 3px solid #2c6e1f; /* Dark green border */
+}
 .segmentReport-table tr:nth-child(even) {
     background-color: #f2f2f2;
 }

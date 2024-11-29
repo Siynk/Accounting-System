@@ -61,7 +61,7 @@ const CashflowStatement = () => {
                 margin: 'auto',
             }}
         >
-            <Container maxWidth="md" className="cashflowStatement-container">
+            <Container maxWidth="xl" className="cashflowStatement-container">
     <div className="cashflowStatement-header">
         <h1>Generate Cashflow Statement</h1>
         <div className="cashflowStatement-inputs">

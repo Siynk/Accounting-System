@@ -102,10 +102,20 @@ const ManageProject = () => {
     await updateProjectStatus(payload, setError);
     location.reload();
   };
+  
+  const cellStyle = {
+    background: 'linear-gradient(45deg, #4caf50, #1b5e20)', // Green gradient background
+    color: 'white',  // White text for contrast
+    fontWeight: 'bold',  // Bold text to make it stand out
+    padding: '12px',  // Increased padding for better spacing
+    textAlign: 'center',  // Center-align text
+    borderBottom: '3px solid #2c6e1f',  // Dark green border at the bottom
+    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)', // Box shadow for slight depth
+  };
 
   return (
     <Box component="main" sx={{ flexGrow: 1, height: '100vh', overflow: 'auto', margin: "auto", paddingTop: 4 }}>
-      <Container maxWidth="lg" className="history-container" sx={{marginBottom:10}}>
+      <Container maxWidth="xl" className="history-container" sx={{marginBottom:10}}>
         <Grid container justifyContent="center" spacing={2}>
           {/* Search Input */}
           <Grid item xs={12} sm={8} md={6}>
@@ -135,13 +145,13 @@ const ManageProject = () => {
             <Typography variant="h6" sx={{ marginBottom: 2 }}>Pending Projects</Typography>
             <TableContainer>
               <Table sx={{ minWidth: 650 }} aria-label="pending projects table">
-                <TableHead sx={{background:'#0c6c2f'}}>
-                  <TableRow>
-                    <TableCell sx={{color:'white',fontWeight:'bold'}}>CLIENT NAME</TableCell>
-                    <TableCell sx={{color:'white',fontWeight:'bold'}}>PROJECT NAME</TableCell>
-                    <TableCell sx={{color:'white',fontWeight:'bold'}}>ACTIONS</TableCell>
-                  </TableRow>
-                </TableHead>
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={cellStyle}>CLIENT NAME</TableCell>
+                  <TableCell sx={cellStyle}>PROJECT NAME</TableCell>
+                  <TableCell sx={cellStyle}>ACTIONS</TableCell>
+                </TableRow>
+              </TableHead>
                 <TableBody>
                   {pendingProjects.length === 0 ? (
                     <TableRow>
@@ -180,8 +190,8 @@ const ManageProject = () => {
               <Table sx={{ minWidth: 650 }} aria-label="approved projects table">
                 <TableHead sx={{background:'#0c6c2f'}}>
                   <TableRow>
-                    <TableCell sx={{color:'white',fontWeight:'bold'}}>PROJECT NAME</TableCell>
-                    {user.userType !== 'client' &&<TableCell sx={{color:'white',fontWeight:'bold'}}>CLIENT NAME</TableCell>}
+                    <TableCell sx={cellStyle}>PROJECT NAME</TableCell>
+                    {user.userType !== 'client' &&<TableCell sx={cellStyle}>CLIENT NAME</TableCell>}
                   </TableRow>
                 </TableHead>
                 <TableBody>

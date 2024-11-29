@@ -276,19 +276,9 @@ export async function filterTransactions(setError, setTransactions, payload, use
     
     // Exclude transactions where the transactionType is 'Payment'
     
-
     if (userType === 'client') {
-      let filteredTransactions = data.filter(transaction => transaction.transactionType !== 'Payment');
-      let seen = new Set();
-      let uniqueTransactions = filteredTransactions.filter(transaction => {
-        if (seen.has(transaction.id)) {
-          return false;
-        }
-        seen.add(transaction.id);
-        return true;
-      });
-
-      setTransactions(uniqueTransactions);
+      let filteredTransactions = data.filter(transaction => transaction.transactionType === 'Receivable');
+      setTransactions(filteredTransactions);
     } else {
       setTransactions(data);
     }

@@ -17,14 +17,13 @@ const BalanceSheet = () => {
             setCompanyName(user.company);
         }
     }, [user]);
-
+    console.log(balanceSheet)
     const handleGenerate = useCallback(() => {
         const params = {
             companyName,
             dateFrom,
             dateTo
         };
-        console.log(params);
         generateBalanceSheet(setError, setBalanceSheet, params);
     }, [companyName, dateFrom, dateTo]);
 
@@ -60,7 +59,7 @@ const BalanceSheet = () => {
                 margin: 'auto',
             }}
         >
-            <Container maxWidth="md" className="balanceSheet-container">
+            <Container maxWidth="xl" className="balanceSheet-container">
                 <div className="balanceSheet-header">
                     <h1>Generate Balance Sheet</h1>
                     <div className="balanceSheet-inputs">
@@ -110,7 +109,7 @@ const BalanceSheet = () => {
                             {balanceSheet.assets && balanceSheet.assets.length > 0 ? (
                                 balanceSheet.assets.map((asset, index) => (
                                     <tr key={index} className="balanceSheet-asset">
-                                        <td>{asset.description}</td>
+                                        <td>{asset.description}{asset.transactionType === 'Receivable' && ' (Accounts Receivable)'}</td>
                                         <td>₱{parseFloat(asset.amount).toLocaleString()}</td>
                                     </tr>
                                 ))
@@ -148,7 +147,7 @@ const BalanceSheet = () => {
 
                             {/* Equity */}
                             <tr className="balanceSheet-subheader-equity">
-                                <td>TOTAL OWNER'S EQUITY = <span style={{color:'green'}}>ASSETS</span> - <span style={{color:'red'}}>LIABILITIES</span></td>
+                                <td>OWNER'S EQUITY</td>
                                 <td>₱{balanceSheet.ownerEquity?.toLocaleString()||0}</td>
                             </tr>
                             <tr className="balanceSheet-subheader-equity">
@@ -156,7 +155,7 @@ const BalanceSheet = () => {
                                 <td>₱{balanceSheet.totalLiabilitiesPlusTotalEquity?.toLocaleString()||0}</td>
                             </tr>
                             <tr className="balanceSheet-balance-check">
-                                <td style={{ fontWeight: 'bold' }}>BALANCE CHECK:</td>
+                                <td style={{ fontWeight: 'bold', textAlign:'right' }}>BALANCE CHECK:</td>
                                 <td style={{ fontWeight: 'bold', color: balanceSheet.totalAssets === balanceSheet.totalLiabilitiesPlusTotalEquity ? 'green' : 'red' }}>
                                     {balanceSheet.totalAssets === balanceSheet.totalLiabilitiesPlusTotalEquity ? 'BALANCED' : 'NOT BALANCED'}
                                 </td>

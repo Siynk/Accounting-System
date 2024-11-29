@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableHead, TableRow, Box, Toolbar, Container, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Button, TablePagination } from '@mui/material';
+import { Table, TableBody, TableCell, TableHead, TableRow, Box, Toolbar, Container, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Button, TablePagination, Checkbox, Typography } from '@mui/material';
 import ViewIcon from '@mui/icons-material/Visibility';
 import UpdateIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,7 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useStateContext } from '../context/ContextProvider';
 import { formatMoney } from '../utils/helper';
 import EditTransactionModal from '../components/EditTransactionModal';
-import { deleteTransaction, getAllPayments, createPayment } from '../utils/backend';
+import { deleteTransaction, createPayment, addTransaction } from '../utils/backend';
 
 const Transaction = () => {
     const { setSingleTransaction, user } = useStateContext();
@@ -18,7 +18,7 @@ const Transaction = () => {
     const [transactions, setTransactions] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [payments, setPayments] = useState([]); // To store fetched payments
+    const [fee, setFee] = useState('');
     const navigate = useNavigate();
 
     // Pagination states
@@ -29,22 +29,25 @@ const Transaction = () => {
     const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState(null);
 
-    // Fetch payments when component mounts or when transactions change
-    useEffect(() => {
-        const fetchPayments = async () => {
-            try {
-                const data = await getAllPayments(setError,setPayments);
-            } catch (error) {
-                setError("Failed to fetch payments.");
-            }
-        };
-        fetchPayments();
-    }, []); // Empty dependency array ensures this runs once on mount
+    // State for managing checkboxes visibility
+    const [showCheckboxes, setShowCheckboxes] = useState(false);
+    const [selectedTransactions, setSelectedTransactions] = useState(new Set());
+
+    // Toggle checkboxes
+    const handleToggleCheckboxes = () => {
+        setShowCheckboxes(prev => !prev);
+        setSelectedTransactions(new Set()); // Clear selected transactions when toggling
+    };
+
+    const handleFeeChange = (e) => {
+      setFee(e.target.value);
+    };
 
     const handleView = (transaction, path) => {
         setSingleTransaction(transaction);
         navigate(path);
     };
+
     const handleUpdatePopup = (transaction) => {
         setSelectedTransaction(transaction);
     };
@@ -95,32 +98,53 @@ const Transaction = () => {
     // Handle Pay button click and create payment
     const handlePayButtonClick = async (transaction) => {
         try {
-            await createPayment({ transactionID: transaction.id, clientID:transaction.clientID, projectID:transaction.projectID, amount: parseFloat(transaction.amount)+parseFloat(transaction.fee), status: 'Pending' }, setError, (message) => alert(message));
+            await createPayment({ transactionID: transaction.id, clientID: transaction.clientID, projectID: transaction.projectID, amount: parseFloat(transaction.amount), status: 'Pending' }, setError, (message) => alert(message));
             window.location.reload();
         } catch (error) {
             setError("Failed to create payment.");
         }
     };
 
-    // Determine payment status for a given transaction
-    const getPaymentStatus = (transactionId) => {
-        // Ensure payments array is not undefined or empty
-        if (!payments || payments.length === 0) {
-            return null; // No payments exist for this transaction
+    // Toggle individual row checkbox
+    const handleCheckboxChange = (transactionId) => {
+        const newSelectedTransactions = new Set(selectedTransactions);
+        if (newSelectedTransactions.has(transactionId)) {
+            newSelectedTransactions.delete(transactionId);
+        } else {
+            newSelectedTransactions.add(transactionId);
         }
-        const matchingPayments = payments.filter(payment => payment.transactionID === transactionId);
-        
-        if (matchingPayments.length === 0) {
-            return null; // No payment data found for this transaction
+        setSelectedTransactions(newSelectedTransactions);
+    };
+
+    // Handle SEND TO CLIENT button action
+    const handleSendToClient = () => {
+        // Logic to send selected transactions to the client
+        const firstTransaction = [...selectedTransactions][0];
+        let totalAmount = 0;
+
+        selectedTransactions.forEach(transaction => {
+            totalAmount += parseFloat(transaction.amount); // Convert the amount to a number and add to totalAmount
+        });
+        const calculatedFee = (totalAmount * fee) / 100;
+        const payload = {
+          cashFlow: 'Inflow',
+          category: 'Operating',
+          clientID: firstTransaction.clientID,
+          company: firstTransaction.company,
+          description: 'Invoice',
+          productLine: firstTransaction.productLine,
+          projectID:firstTransaction.projectID,
+          projectName:firstTransaction.projectName,
+          status: 'Approved',
+          transactionStatus: 'To Settle',
+          transactionTypes:["11"],
+          amount: totalAmount + calculatedFee
         }
 
-        // Sort payments by created_at to get the most recent payment
-        matchingPayments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        addTransaction(payload, setError);
 
-        // Get the most recent payment
-        const latestPayment = matchingPayments[0];
-
-        return latestPayment.status; // Return the status of the latest payment
+        alert("Selected transactions have been sent to the client.");
+        location.reload();
     };
 
     return (
@@ -134,8 +158,53 @@ const Transaction = () => {
             }}
         >
             <Toolbar />
-            <Container maxWidth="lg" className='tableContainer'>
+            <Container maxWidth="xl" className='tableContainer'>
                 <Filters setTransactions={setTransactions} setError={setError} setLoading={setLoading} />
+                
+                {user.userType !== 'client' && (
+                    <>
+                        <Button
+                            variant="contained"
+                            color={showCheckboxes ? "secondary" : "primary"}
+                            onClick={handleToggleCheckboxes}
+                            sx={{ marginBottom: 2 }}
+                        >
+                            {showCheckboxes ? 'Hide Checkboxes' : 'Select Unsettled Transactions'}
+                        </Button>
+
+                        {showCheckboxes && selectedTransactions.size > 0 && (
+                            <>
+                                {/* Fee Input */}
+                                <input
+                                    label="Fee"
+                                    type="number"
+                                    placeholder='Enter Fee Percentage (%)'
+                                    value={fee}
+                                    onChange={handleFeeChange}
+                                    variant="outlined"
+                                    style={{marginLeft: 10, height:35, position:'relative',top:-5 }}
+                                />
+
+                                {/* Send to Client Button */}
+                                <Button
+                                    variant="contained"
+                                    color="success"
+                                    onClick={handleSendToClient}
+                                    sx={{ marginBottom: 2, marginLeft: 1.5 }}
+                                >
+                                    PROCESS
+                                </Button>
+                            </>
+                        )}
+                    </>
+                )}
+
+                {!showCheckboxes && user.userType !== 'client' && (
+                    <Typography variant="body2" color="textSecondary" sx={{ marginBottom: 2 }}>
+                        <strong>NOTE:</strong> Make sure to select transactions with the same <strong>Project</strong> and <strong>Client</strong>.
+                    </Typography>
+                )}
+
                 <Table className="transaction-table" aria-label="simple table" sx={{ tableLayout: 'fixed' }}>
                     <TableHead>
                         <TableRow>
@@ -143,89 +212,111 @@ const Transaction = () => {
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>TYPE</span></TableCell>}
                             <TableCell><span className='transaction-header'>PROJECT</span></TableCell>
                             <TableCell><span className='transaction-header'>DESCRIPTION</span></TableCell>
-                            {user.userType !== 'client' && <TableCell><span className='transaction-header'>PRODUCT LINE</span></TableCell>}
+                            {user.userType !== 'client' && <TableCell><span className='transaction-header'>SEGMENT</span></TableCell>}
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CLIENT</span></TableCell>}
                             {user.userType !== 'client' && <TableCell><span className='transaction-header'>CATEGORY</span></TableCell>}
                             <TableCell><span className='transaction-header'>AMOUNT</span></TableCell>
-                            {user.userType !== 'client' && <TableCell><span className='transaction-header'>SERVICE FEE</span></TableCell>}
+                            {user.userType !== 'client' && <TableCell><span className='transaction-header'>STATUS</span></TableCell>}
                             <TableCell><span className='transaction-header'>ACTIONS</span></TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                      {loading ? (
-                        <TableRow>
-                          <TableCell colSpan={user.userType === 'client' ? 4 : 10} align="center"><CircularProgress /></TableCell>
-                        </TableRow>
-                      ) : transactions.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={user.userType === 'client' ? 4 : 10} align="center">No Records Found</TableCell>
-                        </TableRow>
-                      ) : (
-                        transactions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((transaction, index) => {
-                          const paymentStatus = getPaymentStatus(transaction.id);
-                          
-                          return (
-                            <TableRow key={index}>
-                              <TableCell><span className='transaction-content'>{dayjs(transaction.transactionDate).format('MM-DD-YYYY')}</span></TableCell>
-                              {user.userType !== 'client' && (
-                                <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>
-                              )}
-                              <TableCell><span className='transaction-content'>{transaction.projectName || 'N/A'}</span></TableCell>
-                              <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
-                              {user.userType !== 'client' && (
-                                <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>
-                              )}
-                              {user.userType !== 'client' && (
-                                <TableCell><span className='transaction-content'>{transaction.company || 'N/A'}</span></TableCell>
-                              )}
-                              {user.userType !== 'client' && (
-                                <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>
-                              )}
-                              <TableCell><span className='transaction-content'>{formatMoney(user.userType === 'client' ? (parseFloat(transaction.amount)+parseFloat(transaction.fee)): parseFloat(transaction.amount))}</span></TableCell>
-                              {user.userType !== 'client' && (
-                                <TableCell><span className='transaction-content'>{transaction.fee}</span></TableCell>
-                              )}
-                              {user.userType === 'client' && (
-                                <TableCell>
-                                {
-                                  paymentStatus === 'Approved' ? (
-                                    <span className="paid-status">PAID</span>
-                                  ) : paymentStatus === 'Pending' ? (
-                                    <span className="pending-status">PENDING</span>
-                                  ) : (
-                                    <Button
-                                      variant="contained"
-                                      color="primary"
-                                      style={{
-                                        backgroundColor: 'yellow',
-                                        color: 'black',
-                                      }}
-                                      onClick={() => handlePayButtonClick(transaction)}
-                                    >
-                                      Pay
-                                    </Button>
-                                  )
-                                }
-                              </TableCell>
-                              
-                              )}
-
-                            {user.userType !== 'client' && (
-                              <TableCell>
-                                <div className='actions-container'>
-                                  <span onClick={() => handleView(transaction)}>
-                                    <Link className='actions view' to="/view-transaction"><ViewIcon /></Link>
-                                  </span>
-                                  {/* Uncomment and Implement Update feature if needed */}
-                                  {/* <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span> */}
-                                  <span className='actions delete' onClick={() => handleDeleteDialogOpen(transaction)}><DeleteIcon /></span>
-                                </div>
-                              </TableCell>
-                            )}
+                        {loading ? (
+                            <TableRow>
+                                <TableCell colSpan={user.userType === 'client' ? 4 : 10} align="center"><CircularProgress /></TableCell>
                             </TableRow>
-                          );
-                        })
-                      )}
+                        ) : transactions.length === 0 ? (
+                            <TableRow>
+                                <TableCell colSpan={user.userType === 'client' ? 4 : 10} align="center">No Records Found</TableCell>
+                            </TableRow>
+                        ) : (
+                            transactions.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((transaction, index) => {
+                                const isUnsettled = transaction.status === 'Unsettled';
+                                return (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            {showCheckboxes && isUnsettled && (
+                                                <Checkbox
+                                                    checked={selectedTransactions.has(transaction)}
+                                                    onChange={() => handleCheckboxChange(transaction)}
+                                                />
+                                            )}
+                                            <span className='transaction-content'>{dayjs(transaction.transactionDate).format('MM-DD-YYYY')}</span>
+                                        </TableCell>
+                                        {user.userType !== 'client' && <TableCell><span className='transaction-content'>{transaction.transactionType}</span></TableCell>}
+                                        <TableCell><span className='transaction-content'>{transaction.projectName || 'N/A'}</span></TableCell>
+                                        <TableCell><span className='transaction-content'>{transaction.description}</span></TableCell>
+                                        {user.userType !== 'client' && <TableCell><span className='transaction-content'>{transaction.productLine}</span></TableCell>}
+                                        {user.userType !== 'client' && <TableCell><span className='transaction-content'>{transaction.company || 'N/A'}</span></TableCell>}
+                                        {user.userType !== 'client' && <TableCell><span className='transaction-content'>{transaction.category}</span></TableCell>}
+                                        <TableCell><span className='transaction-content'>{formatMoney(parseFloat(transaction.amount))}</span></TableCell>
+                                        {user.userType !== 'client' && <TableCell><span className='transaction-content'>{transaction.status || 'N/A'}</span></TableCell>}
+                                        {user.userType !== 'client' && (
+                                          <TableCell>
+                                            <div className='actions-container'>
+                                              <span onClick={() => handleView(transaction)}>
+                                                <Link className='actions view' to="/view-transaction"><ViewIcon /></Link>
+                                              </span>
+                                              {/* Uncomment and Implement Update feature if needed */}
+                                              {/* <span className='actions update' onClick={() => handleUpdatePopup(transaction)}><UpdateIcon /></span> */}
+                                              <span className='actions delete' onClick={() => handleDeleteDialogOpen(transaction)}><DeleteIcon /></span>
+                                            </div>
+                                          </TableCell>
+                                        )}
+                                        {user.userType === 'client' && (
+                                          <TableCell>
+                                            {/* View Invoice Button */}
+                                            <Button
+                                              className="btn-view-invoice"
+                                              sx={{
+                                                background: 'linear-gradient(45deg, #2e7d32, #66bb6a)', // Green tones (lighter green)
+                                                color: 'white',
+                                                fontWeight: 'bold',
+                                                padding: '10px 20px',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                                '&:hover': {
+                                                  background: 'linear-gradient(45deg, #66bb6a, #2e7d32)', // Lighter green to darker green on hover
+                                                  transform: 'scale(1.05)',
+                                                  boxShadow: '0 6px 10px rgba(0, 0, 0, 0.15)',
+                                                },
+                                                '&:active': {
+                                                  transform: 'scale(0.98)',
+                                                },
+                                                marginRight: '10px', // Space between buttons
+                                              }}
+                                            >
+                                              View Invoice
+                                            </Button>
+
+                                            {/* Pay Button */}
+                                            <Button
+                                              className="btn-pay"
+                                              sx={{
+                                                background: 'linear-gradient(45deg, #ffd54f, #ffca28)', // Yellow tones to complement green
+                                                color: 'black',
+                                                fontWeight: 'bold',
+                                                padding: '10px 20px',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                                '&:hover': {
+                                                  background: 'linear-gradient(45deg, #ffca28, #ffd54f)', // Reverse gradient on hover
+                                                  transform: 'scale(1.05)',
+                                                  boxShadow: '0 6px 10px rgba(0, 0, 0, 0.15)',
+                                                },
+                                                '&:active': {
+                                                  transform: 'scale(0.98)',
+                                                },
+                                              }}
+                                            >
+                                              Pay
+                                            </Button>
+                                          </TableCell>
+                                        )}
+                                    </TableRow>
+                                );
+                            })
+                        )}
                     </TableBody>
                 </Table>
 
@@ -239,11 +330,11 @@ const Transaction = () => {
                     onPageChange={handleChangePage}
                     onRowsPerPageChange={handleChangeRowsPerPage}
                     sx={{
-                        position: 'relative', 
-                        top: '-50px', 
+                        position: 'relative',
+                        top: '-50px',
                         marginBottom: 5,
-                        display: 'flex', 
-                        justifyContent: 'center', // Center pagination horizontally
+                        display: 'flex',
+                        justifyContent: 'center',
                     }}
                 />
             </Container>

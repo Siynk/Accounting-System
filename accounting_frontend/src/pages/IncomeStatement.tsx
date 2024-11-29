@@ -87,7 +87,7 @@ const IncomeStatement = () => {
                 margin: 'auto',
             }}
         >
-            <Container maxWidth="md" className="incomeStatement-container">
+            <Container maxWidth="xl" className="incomeStatement-container">
                 <div className="incomeStatement-header">
                     <h1>Generate Income Statement</h1>
                     <div className="incomeStatement-inputs">
