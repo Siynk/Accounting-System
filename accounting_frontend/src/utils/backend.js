@@ -277,7 +277,9 @@ export async function filterTransactions(setError, setTransactions, payload, use
     // Exclude transactions where the transactionType is 'Payment'
     
     if (userType === 'client') {
-      let filteredTransactions = data.filter(transaction => transaction.transactionType === 'Receivable');
+      let filteredTransactions = data.filter(transaction => 
+        ['Receivable', 'Payment'].includes(transaction.transactionType)
+      );
       setTransactions(filteredTransactions);
     } else {
       setTransactions(data);
@@ -294,6 +296,28 @@ export async function filterTransactions(setError, setTransactions, payload, use
     }
   }
 }
+
+export async function getTransactionsByInvoiceNumber(setError, setTransactions, payload) {
+  try {
+    // Ensure payload is correctly formatted as URL query parameters
+    const { invoiceNumber } = payload;
+    const { data } = await axiosInstance.get('/get-transactions-by-invoice-number', {
+      params: { invoiceNumber } // Pass invoiceNumber as query parameter
+    });
+
+    setTransactions(data);
+    setError(null);
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      const errors = error.response.data.errors;
+      setError(errors);
+    } else {
+      console.log('An unexpected error occurred');
+      setError('An unexpected error occurred');
+    }
+  }
+}
+
 
 
 

@@ -7,15 +7,19 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import '../css/login.css';
 import { useStateContext } from "../context/ContextProvider";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { login } from "../utils/backend.js";
 import { Grid } from "@mui/material";
 import { Link } from "react-router-dom";
 
-
 export default function Login() {
 
     let { setUser, setToken } = useStateContext();
+    let [ username, setUsername ] = useState('');
+    let [ password, setPassword ] = useState('');
+    let [ isRemember, setIsremember ] = useState(false);
+    let [ rememberedUser, setRememberedUser ] = useState(null);
+
     let [error, setError] = useState(null);
 
     const handleSubmit = (event) => {
@@ -27,9 +31,39 @@ export default function Login() {
         }
 
         login(payload, setError, setUser, setToken);
-
-
+        if(isRemember){
+          localStorage.setItem('rememberedUsername', username);
+          localStorage.setItem('rememberedPassword', password);
+        }
     };
+
+    const handleRemember = () => {
+      setIsremember(true);
+    }
+
+    const handleChangeUsername = (event) => {
+      let data = event.target.value;
+      setUsername(data);
+    }
+
+    const handleChangePassword = (event) => {
+      let data = event.target.value;
+      setPassword(data);
+    }
+
+    useEffect(() => {
+      if (localStorage.getItem('rememberedUsername') && localStorage.getItem('rememberedPassword')) {
+        const username = localStorage.getItem('rememberedUsername');
+        const password = localStorage.getItem('rememberedPassword');
+        setRememberedUser({ username, password });
+      }
+    }, []);
+    useEffect(() => {
+      if(rememberedUser) {
+        setUsername(rememberedUser.username);  // Set the username state
+        setPassword(rememberedUser.password);  // Set the password state
+      }
+    }, [rememberedUser]);
 
     return (
         <Container component="main" maxWidth="xs">
@@ -51,8 +85,8 @@ export default function Login() {
                         id="username"
                         label="Username"
                         name="username"
-                        autoComplete="username"
-                        autoFocus
+                        value={username} 
+                        onChange={handleChangeUsername}
                         sx={{
                             '& label': {
                                 color: 'rgb(38, 143, 67)', // Normal label color
@@ -85,7 +119,9 @@ export default function Login() {
                         fullWidth
                         name="password"
                         label="Password"
+                        value={password} 
                         type="password"
+                        onChange={handleChangePassword}
                         id="password"
                         autoComplete="current-password"
                         sx={{
@@ -122,6 +158,7 @@ export default function Login() {
                             <FormControlLabel
                                 control={<Checkbox value="remember" sx={{ color: 'rgb(162, 233, 182)' }} />}
                                 label="Remember me"
+                                onChange={handleRemember}
                                 sx={{ color: 'rgb(65, 195, 102)' }}
                             />
                         </Grid>

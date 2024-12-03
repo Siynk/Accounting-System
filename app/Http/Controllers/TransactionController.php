@@ -32,39 +32,62 @@ class TransactionController extends Controller
   {
       // Retrieve validated data from the request
       $validatedData = $request->validated();
-  
+
       // Create a new transaction
       $transaction = new Transaction();
+
+      // Assign the necessary attributes to the transaction
       if (isset($validatedData['clientID']) && isset($validatedData['projectID'])) {
           $transaction->clientID = $validatedData['clientID'];
           $transaction->projectID = $validatedData['projectID'];
       }
-      $transaction->status = $validatedData['transactionStatus'];
+
+      if (isset($validatedData['transactionStatus'])) {
+        $transaction->status = $validatedData['transactionStatus'];
+      }
+      if (isset($validatedData['fee'])) {
+        $transaction->fee = $validatedData['fee'];
+      }
+      
       $transaction->description = $validatedData['description'];
       $transaction->amount = $validatedData['amount'];
       $transaction->category = $validatedData['category'];
       $transaction->cashFlow = $validatedData['cashFlow'];
       $transaction->productLine = $validatedData['productLine'];
+
+      // Check if the invoice number and selected transactions are provided
+      if (isset($validatedData['invoiceNumber']) && $validatedData['transactionStatus'] === 'To Settle' && isset($validatedData['selectedTransactions'])) {
+          // Set the invoice number for the new transaction
+          $transaction->invoice_number = $validatedData['invoiceNumber'];
+
+          // Loop through the selected transactions and update their status and invoice number
+          $selectedTransactions = $validatedData['selectedTransactions'];
+          foreach ($selectedTransactions as $selectedTransaction) {
+              // Update the selected transactions that are "Unsettled"
+              Transaction::where('id', $selectedTransaction['id'])
+                  ->where('status', 'Unsettled')
+                  ->update([
+                      'status' => 'To Settle',
+                      'invoice_number' => $validatedData['invoiceNumber']
+                  ]);
+          }
+      }
+
+      // Save the new transaction
       $transaction->save();
-  
-      // Check if transactionStatus is "To Settle"
-      if ($validatedData['transactionStatus'] === 'To Settle') {
-          // Find all "Unsettled" transactions for the same clientID and update them
-          Transaction::where('clientID', $validatedData['clientID'])
-              ->where('status', 'Unsettled')
-              ->update(['status' => 'To Settle']);
-      }
-  
+
       // Handle material creation if provided
-      if (isset($validatedData['materialName'])) {
-          $material = new Materials();
-          $material->transaction_id = $transaction->id;
-          $material->name = $validatedData['materialName'];
-          $material->price = $validatedData['materialPrice'];
-          $material->quantity = $validatedData['materialQuantity'];
-          $material->save();
+      if (isset($validatedData['materials'])) {
+          foreach ($validatedData['materials'] as $materialData) {
+              $material = new Materials(); // Assuming Material is the model for materials
+              $material->transaction_id = $transaction->id;
+              $material->name = $materialData['name'];
+              $material->price = $materialData['price'];
+              $material->quantity = $materialData['quantity'];
+              $material->save();
+          }
       }
-  
+
       // Save the transaction types
       if (isset($validatedData['transactionTypes'])) {
           foreach ($validatedData['transactionTypes'] as $type) {
@@ -74,7 +97,7 @@ class TransactionController extends Controller
               ]);
           }
       }
-  
+
       // Create a new client transaction request
       $clientTransactionRequest = new ClientTransactionRequest();
       if (isset($validatedData['clientID']) && isset($validatedData['projectID'])) {
@@ -86,10 +109,11 @@ class TransactionController extends Controller
       $clientTransactionRequest->action = 'Create'; // Or whatever action you need
       $clientTransactionRequest->requestDate = now(); // Use current date/time
       $clientTransactionRequest->save();
-  
+
       // Optionally, return a response
       return response()->json(['message' => 'Transaction added successfully'], 200);
   }
+
 
 
     public function getAllTransactions()
@@ -211,7 +235,7 @@ class TransactionController extends Controller
         if ($fromDate) {
             $query->where('transaction.transactionDate', '>=', $fromDate . ' 00:00:00');
         }
-        
+
         if ($toDate) {
             $query->where('transaction.transactionDate', '<=', $toDate . ' 23:59:59');
         }
@@ -252,10 +276,86 @@ class TransactionController extends Controller
         // Order by transaction status in descending order
         $query->orderByDesc('transaction.status'); // Order by status in descending order
 
-        // Execute the query and return results as JSON
-        $filteredTransactions = $query->get();
+        // Execute the query and get transactions
+        $transactions = $query->get();
 
-        return response()->json($filteredTransactions);
+        // Loop through transactions and add materials for each
+        $transactions->each(function ($transaction) {
+            // Eager load the materials for this transaction
+            $transaction->materials = Materials::where('transaction_id', $transaction->id)->get();
+        });
+
+        // Return the transactions with materials included
+        return response()->json($transactions);
+    }
+
+    public function getTransactionsByInvoiceNumber(Request $request)
+    {
+        // Get the invoice number from the request
+        $invoiceNumber = $request->input('invoiceNumber');
+        
+        // Start building the query for transactions
+        $query = Transaction::query();
+        
+        // Add left joins with related tables to allow nullable clientID and projectID
+        $query->leftJoin('users', 'transaction.clientID', '=', 'users.id')
+            ->leftJoin('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->leftJoin('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+            ->leftJoin('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+            ->leftJoin('project', 'transaction.projectID', '=', 'project.id') // Left join with the project table
+            ->leftJoin('materials', 'transaction.id', '=', 'materials.transaction_id'); // Left join with materials table
+
+        // Select the transaction details, including material details like name, price, quantity
+        $query->select(
+            'transaction.*', 
+            'users.company', 
+            'transactiontype.description as transactionType', 
+            'project.projectName',
+            'materials.id as material_id', 
+            'materials.name as material_name', 
+            'materials.price as material_price', 
+            'materials.quantity as material_quantity', 
+            'materials.created_at as material_created_at', 
+            'materials.updated_at as material_updated_at'
+        );
+
+        // Add the filter for the invoice number
+        if ($invoiceNumber) {
+            $query->where('transaction.invoice_number', '=', $invoiceNumber);
+        }
+
+        // Filter for approved transactions (if needed)
+        $query->where('clienttransctionrequest.status', 'Approved');
+        $query->where('transaction.isDeleted', 0); // Ensure we're not getting deleted transactions
+
+        // Execute the query and get the results
+        $transactions = $query->get();
+
+        // Group the results by transaction ID to organize materials under each transaction
+        $groupedTransactions = $transactions->groupBy('id')->map(function ($transactionGroup) {
+            $transaction = $transactionGroup->first(); // Get the first transaction of the group
+            $materials = $transactionGroup->map(function ($item) {
+                return [
+                    'transaction_id' => $item->id,
+                    'name' => $item->material_name,
+                    'price' => $item->material_price,
+                    'quantity' => $item->material_quantity,
+                    'created_at' => $item->material_created_at,
+                    'updated_at' => $item->material_updated_at
+                ];
+            });
+
+            // Remove material-related fields from the transaction details
+            unset($transaction->material_id, $transaction->material_name, $transaction->material_price, $transaction->material_quantity, $transaction->material_created_at, $transaction->material_updated_at);
+
+            // Add the materials to the transaction data
+            $transaction->materials = $materials;
+
+            return $transaction;
+        });
+
+        // Return the grouped transactions as a JSON response
+        return response()->json($groupedTransactions);
     }
 
 
@@ -313,38 +413,54 @@ class TransactionController extends Controller
     public function generateTrendAnalysisReport(Request $request)
     {
         $companyName = $request->input('companyName');
+        $dateFrom = $request->input('dateFrom');
+        $dateTo = $request->input('dateTo');
+        $rangeType = $request->input('rangeType'); // This can be 'week', 'month', or 'year'
 
-        // Define the query to fetch data 
-        $reportData = DB::table('transaction')
+        // Adjusting the date range filter
+        $query = DB::table('transaction')
             ->select(
                 DB::raw('YEAR(transaction.transactionDate) as year'),
                 DB::raw('MONTH(transaction.transactionDate) as month'),
+                DB::raw('WEEK(transaction.transactionDate) as week'),
                 DB::raw('SUM(CASE WHEN transactiontype.description IN ("Revenue", "Sale", "Payment") 
-                          AND NOT EXISTS (
-                              SELECT 1 FROM transactiontransactiontype ttt 
-                              JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
-                              WHERE ttt.transactionID = transaction.id 
-                              AND tt.description IN ("Liabilities", "Asset", "Equity")
-                          ) 
-                          THEN transaction.amount ELSE 0 END) as totalRevenue'),
+                                  AND NOT EXISTS (
+                                      SELECT 1 FROM transactiontransactiontype ttt 
+                                      JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
+                                      WHERE ttt.transactionID = transaction.id 
+                                      AND tt.description IN ("Liabilities", "Asset", "Equity")
+                                  ) 
+                                  THEN transaction.amount ELSE 0 END) as totalRevenue'),
                 DB::raw('SUM(CASE WHEN transactiontype.description IN ("Expense", "Purchase", "Loan") 
-                          AND NOT EXISTS (
-                              SELECT 1 FROM transactiontransactiontype ttt 
-                              JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
-                              WHERE ttt.transactionID = transaction.id 
-                              AND tt.description IN ("Liabilities", "Asset", "Equity")
-                          ) 
-                          THEN transaction.amount ELSE 0 END) as totalExpense')
+                                  AND NOT EXISTS (
+                                      SELECT 1 FROM transactiontransactiontype ttt 
+                                      JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
+                                      WHERE ttt.transactionID = transaction.id 
+                                      AND tt.description IN ("Liabilities", "Asset", "Equity")
+                                  ) 
+                                  THEN transaction.amount ELSE 0 END) as totalExpense')
             )
             ->leftJoin('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
             ->leftJoin('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
             ->leftJoin('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
             ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
             ->where('transaction.isDeleted', 0)
-            ->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('MONTH(transaction.transactionDate)'))
-            ->orderBy('year')
-            ->orderBy('month')
-            ->get();
+            ->whereBetween('transaction.transactionDate', [$dateFrom, $dateTo]); // Apply date range filter
+
+        // Grouping and adjusting for rangeType
+        if ($rangeType === 'week') {
+            $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('WEEK(transaction.transactionDate)'));
+        } elseif ($rangeType === 'month') {
+            $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('MONTH(transaction.transactionDate)'));
+        } elseif ($rangeType === 'year') {
+            $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'));
+        }
+
+        // Fix: Add the transaction.transactionDate field to GROUP BY to resolve the error
+        $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('MONTH(transaction.transactionDate)'), DB::raw('WEEK(transaction.transactionDate)'));
+
+        // Fetching the data
+        $reportData = $query->orderBy('year')->orderBy('month')->orderBy('week')->get();
 
         // Array to convert month number to month name
         $months = [
@@ -362,23 +478,34 @@ class TransactionController extends Controller
             12 => 'December'
         ];
 
-        // Process the report data as needed 
+        // Process the report data as needed
         $processedReportData = [];
 
         foreach ($reportData as $data) {
             $profit = $data->totalRevenue - $data->totalExpense;
+
+            // Process the data based on rangeType
+            if ($rangeType === 'week') {
+                $period = 'Week ' . $data->week+1 . ' of ' . $data->year;
+            } elseif ($rangeType === 'month') {
+                $period = $months[$data->month] . ' ' . $data->year;
+            } elseif ($rangeType === 'year') {
+                $period = $data->year;
+            }
+
             $processedReportData[] = [
-                'year' => $data->year,
-                'month' => $months[$data->month],
+                'period' => $period, // This will hold the week, month, or year
                 'totalRevenue' => $data->totalRevenue,
                 'totalExpense' => $data->totalExpense,
                 'profit' => $profit,
             ];
         }
 
-        // Return or further process $processedReportData as needed 
+        // Return the processed data as a JSON response
         return response()->json($processedReportData);
     }
+
+
 
     public function generateBalanceSheet(Request $request)
     {
@@ -455,68 +582,52 @@ class TransactionController extends Controller
     public function generateIncomeStatement(Request $request)
     {
         try {
+            // Get the custom date range from the request
             $fromDate = $request->input('dateFrom');
             $toDate = $request->input('dateTo');
+            $rangeType = $request->input('rangeType'); // 'month' or 'year'
 
-            // Adjust to include entire day if fromDate and toDate are the same
+            // Adjust the provided dates to include entire days (if needed)
             $fromDate = date('Y-m-d H:i:s', strtotime($fromDate . ' 00:00:00'));
             $toDate = date('Y-m-d H:i:s', strtotime($toDate . ' 23:59:59'));
 
-            // Retrieve the list of revenues
-            $revenues = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
-                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
-                ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-                ->where('transaction.isDeleted', 0)
-                ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactiontype.description', ['Revenue', 'Sale', 'Payment'])
-                ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-                ->select('transaction.description', 'transaction.amount')
-                ->get();
+            // Retrieve the list of revenues for the custom date range
+            $revenues = $this->getRevenues($fromDate, $toDate);
 
-            // Calculate total revenue
+            // Calculate total revenue for the custom date range
             $totalRevenue = $revenues->sum('amount');
 
-            // Retrieve lists and totals for each type of expense
-            $operatingExpenses = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
-                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
-                ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-                ->where('transaction.isDeleted', 0)
-                ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactiontype.description', ['Expense', 'Purchase'])
-                ->where('transaction.category', 'Operating')
-                ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-                ->select('transaction.description', 'transaction.amount')
-                ->get();
+            // Retrieve and calculate total operating, financing, and investing expenses for the custom date range
+            $operatingExpenses = $this->getExpenses($fromDate, $toDate, 'Operating');
             $totalOperatingExpenses = $operatingExpenses->sum('amount');
 
-            $financingExpenses = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
-                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
-                ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-                ->where('transaction.isDeleted', 0)
-                ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactiontype.description', ['Expense', 'Purchase'])
-                ->where('transaction.category', 'Financing')
-                ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-                ->select('transaction.description', 'transaction.amount')
-                ->get();
+            $financingExpenses = $this->getExpenses($fromDate, $toDate, 'Financing');
             $totalFinancingExpenses = $financingExpenses->sum('amount');
 
-            $investingExpenses = Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
-                ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
-                ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-                ->where('transaction.isDeleted', 0)
-                ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-                ->whereIn('transactiontype.description', ['Expense', 'Purchase'])
-                ->where('transaction.category', 'Investing')
-                ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-                ->select('transaction.description', 'transaction.amount')
-                ->get();
+            $investingExpenses = $this->getExpenses($fromDate, $toDate, 'Investing');
             $totalInvestingExpenses = $investingExpenses->sum('amount');
 
-            // Calculate net income
+            // Calculate net income for the custom date range
             $netIncome = $totalRevenue - ($totalOperatingExpenses + $totalFinancingExpenses + $totalInvestingExpenses);
 
-            // Prepare the summary data
+            // If the range is monthly, annualize the income and expenses
+            if ($rangeType == 'month') {
+                // Annualize the revenue and expenses (multiply by 12)
+                $annualNetIncome = $netIncome * 12;
+
+                // Calculate income tax based on the annual income
+                $annualIncomeTax = $this->calculateIncomeTax($annualNetIncome);
+                $incomeTax = $annualIncomeTax/12;
+
+                // Calculate net income after tax for the current month
+                $netIncomeAfterTax = $netIncome - $incomeTax;
+            } else {
+                // For a yearly range, just use the calculated net income and income tax for that range
+                $incomeTax = $this->calculateIncomeTax($netIncome);
+                $netIncomeAfterTax = $netIncome - $incomeTax;
+            }
+
+            // Prepare the summary data to return to the frontend
             $summaryData = [
                 'revenues' => $revenues,
                 'totalRevenue' => $totalRevenue,
@@ -527,6 +638,8 @@ class TransactionController extends Controller
                 'investingExpenses' => $investingExpenses,
                 'totalInvestingExpenses' => $totalInvestingExpenses,
                 'netIncome' => $netIncome,
+                'incomeTax' => $incomeTax,
+                'netIncomeAfterTax' => $netIncomeAfterTax,
             ];
 
             // Return the financial summary as JSON
@@ -539,6 +652,54 @@ class TransactionController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    // Helper function to retrieve revenues for a given date range
+    private function getRevenues($fromDate, $toDate)
+    {
+        return Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+            ->where('transaction.isDeleted', 0)
+            ->where('clienttransctionrequest.status', 'Approved')
+            ->whereIn('transactiontype.description', ['Revenue', 'Sale', 'Payment'])
+            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+            ->select('transaction.description', 'transaction.amount')
+            ->get();
+    }
+
+    // Helper function to retrieve expenses for a given date range and category
+    private function getExpenses($fromDate, $toDate, $category)
+    {
+        return Transaction::join('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+            ->join('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+            ->join('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID')
+            ->where('transaction.isDeleted', 0)
+            ->where('clienttransctionrequest.status', 'Approved')
+            ->whereIn('transactiontype.description', ['Expense', 'Purchase'])
+            ->where('transaction.category', $category)
+            ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
+            ->select('transaction.description', 'transaction.amount')
+            ->get();
+    }
+
+    // Helper function to calculate income tax based on annual income
+    private function calculateIncomeTax($annualIncome)
+    {
+        if ($annualIncome <= 250000) {
+            return 0; // No tax
+        } elseif ($annualIncome <= 400000) {
+            return ($annualIncome - 250000) * 0.20; // 20% of the excess over 250000
+        } elseif ($annualIncome <= 800000) {
+            return 30000 + ($annualIncome - 400000) * 0.25; // 30,000 + 25% of the excess over 400000
+        } elseif ($annualIncome <= 2000000) {
+            return 130000 + ($annualIncome - 800000) * 0.30; // 130,000 + 30% of the excess over 800000
+        } elseif ($annualIncome <= 8000000) {
+            return 490000 + ($annualIncome - 2000000) * 0.32; // 490,000 + 32% of the excess over 2000000
+        } else {
+            return 2410000 + ($annualIncome - 8000000) * 0.35; // 2.41M + 35% of the excess over 8000000
+        }
+    }
+
 
 
     public function getCashflowData(Request $request)
@@ -854,7 +1015,7 @@ class TransactionController extends Controller
         // And join with the paymentDeclineReason table to get the decline reason
         $payments = Payment::select('payment.*', 'paymentDeclineReason.reason as declineReason')
             ->leftJoin('paymentDeclineReason', 'payment.id', '=', 'paymentDeclineReason.paymentID')
-            ->with(['client', 'project', 'transaction'])
+            ->with(['client', 'project', 'transaction', 'approver'])
             ->get();
 
         return response()->json($payments);
@@ -869,29 +1030,38 @@ class TransactionController extends Controller
             'status' => 'required|in:Approved,Declined',  // Only Approved or Declined are allowed
             'decline_reason' => 'required_if:status,Declined|string|max:255',  // Reason is required if status is Declined
             'paymentID' => 'required',
+            'approverID' => 'required',
+            'transactionID' => 'required',
+            'paymentAmount' => 'required',
         ]);
 
-        // Find the payment record by transactionID
+        // Find the payment record by paymentID
         $payment = Payment::where('id', $validated['paymentID'])->first();
 
         if (!$payment) {
             return response()->json(['message' => 'Payment not found'], 404);
         }
 
+        // Find the transaction record by transactionID
+        $transaction = Transaction::where('id', $validated['transactionID'])->first();
+
+        if (!$transaction) {
+            return response()->json(['message' => 'Transaction not found'], 404);
+        }
+
         // If the status is 'Declined', insert the decline reason
         if ($validated['status'] === 'Declined') {
-          $user = User::find($validated['clientID']);
-          Mail::send('emails.decline-payment', ['user' => $user], function ($message) use ($user) {
-              $message->to($user->email);
-              $message->subject('Your Payment Request Has Been Declined');
-          });
+            $user = User::find($validated['clientID']);
+            Mail::send('emails.decline-payment', ['user' => $user], function ($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Your Payment Request Has Been Declined');
+            });
 
-          // Send SMS notification using Twilio (SMS for approved status)
-          $this->sendSms($user->contact, 'Your Payment Request has been declined.');
+            // Send SMS notification for declined status
+            $this->sendSms($user->contact, 'Your Payment Request has been declined.');
+
             // Insert the reason into the paymentDeclineReason table
             $declineReason = $validated['decline_reason'];
-
-            // Create the decline reason record
             \DB::table('paymentDeclineReason')->insert([
                 'paymentID' => $payment->id,
                 'reason' => $declineReason,
@@ -899,18 +1069,37 @@ class TransactionController extends Controller
                 'updated_at' => now(),
             ]);
         }
-        if($validated['status'] === 'Approved'){
-          $user = User::find($validated['clientID']);
-          Mail::send('emails.approve-payment', ['user' => $user], function ($message) use ($user) {
-              $message->to($user->email);
-              $message->subject('Your Payment Request Has Been Approved');
-          });
 
-          // Send SMS notification using Twilio (SMS for approved status)
-          $this->sendSms($user->contact, 'Congratulations! Your Payment Request has been approved.');
+        if ($validated['status'] === 'Approved') {
+            $user = User::find($validated['clientID']);
+            Mail::send('emails.approve-payment', ['user' => $user], function ($message) use ($user) {
+                $message->to($user->email);
+                $message->subject('Your Payment Request Has Been Approved');
+            });
+
+            // Send SMS notification for approved status
+            $this->sendSms($user->contact, 'Congratulations! Your Payment Request has been approved.');
+
+            // Subtract the payment amount from the transaction balance
+            $transaction->amount -= $validated['paymentAmount'];
+            $transaction->save();
+
+            // Check if the transaction amount is 0, and update the status to 'Settled'
+            if ($transaction->amount <= 0) {
+                // Get all transactions with the same invoice number
+                $allTransactionsViaInvoiceNumber = Transaction::where('invoice_number', $transaction->invoice_number)->get();
+                
+                // Loop through all transactions and update their status to 'Settled'
+                foreach ($allTransactionsViaInvoiceNumber as $trans) {
+                    $trans->status = 'Settled';
+                    $trans->save();
+                }
+            }
         }
+
         // Update the payment status
         $payment->status = $validated['status'];
+        $payment->approver_id = $validated['approverID'];
         $payment->save();
 
         return response()->json([
@@ -920,6 +1109,7 @@ class TransactionController extends Controller
     }
 
 
+
     public function createPayment(Request $request)
     {
         // Validate the required fields
@@ -927,6 +1117,9 @@ class TransactionController extends Controller
             'clientID' => 'required|exists:users,id', // Ensure client exists in users table
             'projectID' => 'required|exists:project,id', // Ensure project exists in project table
             'transactionID' => 'required|exists:transaction,id', // Ensure transaction exists in transaction table
+            'receiptNumber' => 'required',
+            'paymentTerm' => 'required|string',
+            'paymentMethod' => 'required|string',
             'amount' => 'required|numeric', // Ensure valid amount
         ]);
 
@@ -935,6 +1128,9 @@ class TransactionController extends Controller
             'clientID' => $validated['clientID'],
             'projectID' => $validated['projectID'],
             'transactionID' => $validated['transactionID'],
+            'receipt_number' => $validated['receiptNumber'],
+            'payment_term' => $validated['paymentTerm'],
+            'payment_method' => $validated['paymentMethod'],
             'amount' => $validated['amount'],
             'status' => 'Pending', // Default value for status is 'Pending'
         ]);

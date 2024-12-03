@@ -25,7 +25,9 @@ class Payment extends Model
         'payment_method',
         'approver_id',
         'amount', 
-        'status'
+        'status',
+        'payment_term',
+        'receipt_number'
     ];
 
     // Automatically manage created_at and updated_at columns
@@ -38,6 +40,12 @@ class Payment extends Model
     {
         // A payment belongs to a client (user)
         return $this->belongsTo(User::class, 'clientID');
+    }
+    
+    public function approver()
+    {
+        // A payment belongs to a client (user)
+        return $this->belongsTo(User::class, 'approver_id');
     }
 
     /**

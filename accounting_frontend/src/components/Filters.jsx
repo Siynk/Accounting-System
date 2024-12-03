@@ -144,6 +144,7 @@ const Filters = ({ setError, setTransactions, setLoading }) => {
                     id="search-field"
                     placeholder="Search"
                     className="filter"
+                    style={{fontSize:14, padding:10}}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                 />

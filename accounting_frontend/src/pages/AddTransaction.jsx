@@ -1,4 +1,4 @@
-import { Box, Container, Toolbar } from "@mui/material";
+import { Box, Container, Toolbar, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
 import React, { useState, useEffect, useRef } from 'react';
 import '../css/addTransaction.css';
 import { addTransaction, getClients, getApprovedProjects } from "../utils/backend";
@@ -7,13 +7,14 @@ import { useStateContext } from "../context/ContextProvider";
 const AddTransaction = () => {
     const [clients, setClients] = useState([]);
     const [projects, setProjects] = useState([]);
-    const [selectedClient, setSelectedClient] = useState("N/A"); // Default to 'N/A'
-    const [selectedProject, setSelectedProject] = useState("N/A"); // Default to 'N/A'
+    const [selectedClient, setSelectedClient] = useState("N/A");
+    const [selectedProject, setSelectedProject] = useState("N/A");
     const [showClientProjectFields, setShowClientProjectFields] = useState(false);
-    const [showMaterialFields, setShowMaterialFields] = useState(false); // State for material fields
-    const [materialPrice, setMaterialPrice] = useState(0); // State for material price
-    const [materialQuantity, setMaterialQuantity] = useState(0); // State for material quantity
-    const [amount, setAmount] = useState(0); // State for amount field
+    const [showMaterialFields, setShowMaterialFields] = useState(false);
+    const [amount, setAmount] = useState(0);
+    const [materials, setMaterials] = useState([]);
+    const [newMaterial, setNewMaterial] = useState({ name: "", price: 0, quantity: 0 });
+    const [openMaterialDialog, setOpenMaterialDialog] = useState(false);
     const [error, setError] = useState({});
     let { user } = useStateContext();
 
@@ -31,7 +32,7 @@ const AddTransaction = () => {
         { id: 11, name: 'Receivable' }
     ];
 
-    const formRef = useRef(); // Create a ref for the form
+    const formRef = useRef();
 
     useEffect(() => {
         const fetchClients = async () => {
@@ -51,102 +52,105 @@ const AddTransaction = () => {
 
     const handleClientChange = (e) => {
         setSelectedClient(e.target.value);
-        setSelectedProject("N/A"); // Reset project selection when client is changed
+        setSelectedProject("N/A");
     };
 
     const handleProjectChange = (e) => {
         setSelectedProject(e.target.value);
     };
 
+    const handleMaterialNameChange = (e) => {
+        setNewMaterial({ ...newMaterial, name: e.target.value });
+    };
+
     const handleMaterialPriceChange = (e) => {
-        setMaterialPrice(e.target.value);
+        setNewMaterial({ ...newMaterial, price: parseFloat(e.target.value) });
     };
 
     const handleMaterialQuantityChange = (e) => {
-        setMaterialQuantity(e.target.value);
+        setNewMaterial({ ...newMaterial, quantity: parseInt(e.target.value, 10) });
     };
 
-    // Update Amount when Material Fields are shown or the material values change
+    // Update Amount based on materials in state
     useEffect(() => {
-        if (showMaterialFields) {
-            setAmount(materialPrice * materialQuantity); // Calculate amount based on material fields
+        const totalAmount = materials.reduce((sum, material) => sum + (material.price * material.quantity), 0);
+        setAmount(totalAmount);
+    }, [materials]);
+
+    const handleAddMaterial = () => {
+        if (newMaterial.name && newMaterial.price && newMaterial.quantity) {
+            setMaterials([...materials, newMaterial]);
+            setNewMaterial({ name: "", price: 0, quantity: 0 });
+            setOpenMaterialDialog(false); // Close dialog after adding
+        } else {
+            setError({ ...error, material: "Please fill all fields for the material" });
         }
-    }, [showMaterialFields, materialPrice, materialQuantity]);
+    };
+
+    const handleRemoveMaterial = (index) => {
+        setMaterials(materials.filter((_, i) => i !== index));
+    };
 
     const handleSubmit = (e) => {
-      e.preventDefault();
-      
-      // Temporarily enable the amount field
-      const amountInput = document.querySelector('input[name="amount"]');
-      amountInput.disabled = false;  // Enable amount input temporarily
-  
-      const formData = new FormData(e.target);
-      const data = {};
-  
-      // Loop through the form data entries
-      for (let [key, value] of formData.entries()) {
-          if (key === 'transactionTypes[]') {
-              // If it's a checkbox field (transaction types), collect all selected values
-              if (!data.transactionTypes) {
-                  data.transactionTypes = [];
-              }
-              data.transactionTypes.push(value);
-          } else {
-              data[key] = value;
-          }
-      }
-  
-      if (showClientProjectFields) {
-          data.transactionStatus = 'Unsettled';
-      } else {
-          data.transactionStatus = '';
-      }
-  
-      // Set status based on userType
-      data.status = user.userType === 'client' ? 'Pending' : 'Approved';
-  
-      // Call the addTransaction function to submit the data
-      addTransaction(data, setError, e);
+        e.preventDefault();
 
-      // Reset all states after form submission
-      resetForm();
-  
-      // Re-disable the amount field after submission
-      amountInput.disabled = true;
-  };
+        const formData = new FormData(e.target);
+        const data = {};
 
-  const resetForm = () => {
-    // Reset form fields
-    if (formRef.current) {
-        formRef.current.reset();
-    }
+        for (let [key, value] of formData.entries()) {
+            if (key === 'transactionTypes[]') {
+                if (!data.transactionTypes) {
+                    data.transactionTypes = [];
+                }
+                data.transactionTypes.push(value);
+            } else {
+                data[key] = value;
+            }
+        }
+
+        data.materials = materials;
+        data.amount = amount;
+
+        if (showClientProjectFields) {
+            data.transactionStatus = 'Unsettled'; 
+        } else {
+            data.transactionStatus = ''; 
+        }
+
+        data.status = user.userType === 'client' ? 'Pending' : 'Approved';
+
+        addTransaction(data, setError, e);
+
+        resetForm();
+    };
+
+    const resetForm = () => {
+        if (formRef.current) {
+            formRef.current.reset();
+        }
+
+        setSelectedClient("N/A");
+        setSelectedProject("N/A");
+        setShowClientProjectFields(false);
+        setShowMaterialFields(false);
+        setMaterials([]);
+        setAmount(0);
+        setError({});
+    };
     
-    // Reset state variables to their default values
-    setSelectedClient("N/A");
-    setSelectedProject("N/A");
-    setShowClientProjectFields(false);
-    setShowMaterialFields(false);
-    setMaterialPrice(0);
-    setMaterialQuantity(0);
-    setAmount(0);
-    setError({});
-  };
 
     return (
         <Box
             component="main"
             sx={{
-                backgroundColor: (theme) =>
-                    theme.palette.mode === 'light'
-                        ? theme.palette.grey[100]
-                        : theme.palette.grey[900],
+                backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
                 flexGrow: 1,
                 height: '100vh',
                 overflow: 'auto',
             }}
         >
             <Toolbar />
-            <Container maxWidth="lg" className='tableContainer' sx={{ marginBottom: 10 }}>
+            <Container maxWidth="xl" className='tableContainer' sx={{ marginBottom: 10 }}>
                 <div className="addTransactionForm">
                     <form ref={formRef} onSubmit={handleSubmit}>
                         <div className="addTransactionInputs">
@@ -154,20 +158,18 @@ const AddTransaction = () => {
                                 Description:
                                 <input type="text" name="description" />
                             </label>
-                            {error && <span className="error">{error.description}</span>}
+                            {error?.description && <span className="error">{error.description}</span>} 
 
-                            {/* Button to show client/project fields */}
                             {user.userType !== 'client' && (
-                                <button
-                                    type="button"
-                                    style={{ background: '#007bff', width: '100%' }}
+                                <Button
+                                    variant="contained"
                                     onClick={() => setShowClientProjectFields(!showClientProjectFields)}
+                                    sx={{ backgroundColor: '#007bff', width: '100%', marginBottom: '10px' }}
                                 >
-                                    For Client Transaction
-                                </button>
+                                    {showClientProjectFields ? "For Joriel's Transaction" : "For Client's Transaction"}
+                                </Button>
                             )}
 
-                            {/* Show Client and Project select fields only when the button is clicked */}
                             {showClientProjectFields && (
                                 <>
                                     <label>
@@ -184,9 +186,7 @@ const AddTransaction = () => {
                                         </select>
                                     </label>
 
-                                    {error && <span className="error">{error.clientID}</span>}
-
-                                    <label style={{marginTop:-10}}>
+                                    <label>
                                         Approved Project:
                                         <select name="projectID" value={selectedProject} onChange={handleProjectChange}>
                                             <option value="N/A">Select Project</option>
@@ -199,34 +199,6 @@ const AddTransaction = () => {
                                             )}
                                         </select>
                                     </label>
-                                    {error && <span className="error">{error.projectID}</span>}
-
-                                    {/* Include Material Button */}
-                                    <button
-                                        type="button"
-                                        style={{ background: showMaterialFields ? '#dc3545' : '#28a745', width: '100%' }}
-                                        onClick={() => setShowMaterialFields(!showMaterialFields)}
-                                    >
-                                        {showMaterialFields && "Don't "}Include Material
-                                    </button>
-
-                                    {/* Material Fields (hidden unless Include Material is clicked) */}
-                                    {showMaterialFields && (
-                                        <div>
-                                            <label>
-                                                Material Name:
-                                                <input type="text" name="materialName" />
-                                            </label>
-                                            <label>
-                                                Material Price:
-                                                <input type="number" name="materialPrice" value={materialPrice} onChange={handleMaterialPriceChange} />
-                                            </label>
-                                            <label>
-                                                Material Quantity:
-                                                <input type="number" name="materialQuantity" value={materialQuantity} onChange={handleMaterialQuantityChange} />
-                                            </label>
-                                        </div>
-                                    )}
                                 </>
                             )}
 
@@ -241,51 +213,142 @@ const AddTransaction = () => {
                                     ))}
                                 </div>
                             </label>
-                            {error && <span className="error">{error.transactionType}</span>}
                         </div>
+
                         <div className="addTransactionInputsRight">
                             <label>
                                 Amount:
                                 <input
                                     type="number"
                                     name="amount"
-                                    value={showMaterialFields ? amount : amount} // Update the value based on whether material fields are shown
-                                    disabled={showMaterialFields} // Disable if showMaterialFields is true
+                                    value={amount}
+                                    disabled={showMaterialFields ? true:false}
                                     onChange={(e) => {
-                                        // Allow manual input if material fields are not shown
                                         if (!showMaterialFields) {
                                             setAmount(e.target.value);
                                         }
                                     }}
                                 />
                             </label>
-                            {error && <span className="error">{error.amount}</span>}
+
+                            <Button
+                                variant="contained"
+                                onClick={() => setShowMaterialFields(!showMaterialFields)}
+                                fullWidth
+                                sx={{ marginBottom: '10px' }}
+                            >
+                                {showMaterialFields ? "Don't Include Materials" : "Include Materials"}
+                            </Button>
+
+                            {showMaterialFields && (
+                                <>
+                                    <Button
+                                        variant="contained"
+                                        onClick={() => setOpenMaterialDialog(true)}
+                                        fullWidth
+                                        sx={{ marginBottom: '10px' }}
+                                    >
+                                        Add Material
+                                    </Button>
+                                    <div className="materialsTable">
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ background: 'linear-gradient(45deg, #66bb6a, #2e7d32)', color: '#fff' }}>
+                                                    <th>Material Name</th>
+                                                    <th>Price</th>
+                                                    <th>Quantity</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {materials.map((material, index) => (
+                                                    <tr key={index} style={{textAlign:'center'}}>
+                                                        <td>{material.name}</td>
+                                                        <td>{material.price}</td>
+                                                        <td>{material.quantity}</td>
+                                                        <td>
+                                                            <Button
+                                                                onClick={() => handleRemoveMaterial(index)}
+                                                                variant="outlined"
+                                                                color="error"
+                                                            >
+                                                                Remove
+                                                            </Button>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </>
+                            )}
+
                             <label>
                                 Transaction Category:
-                                <select name="category" >
+                                <select name="category">
                                     <option value="Operating">Operating</option>
                                     <option value="Investing">Investing</option>
                                     <option value="Financing">Financing</option>
                                 </select>
                             </label>
+
                             <label>
                                 Cash flow:
-                                <select name="cashFlow" >
+                                <select name="cashFlow">
                                     <option value="Inflow">Inflow</option>
                                     <option value="Outflow">Outflow</option>
                                 </select>
                             </label>
-                            {error && <span className="error">{error.cashFlowCategory}</span>}
+
                             <label>
                                 Segment:
                                 <input type="text" name="productLine" />
                             </label>
-                            {error && <span className="error">{error.productLine}</span>}
                         </div>
-                        <button className="addTransactionButton" type="submit">Submit</button>
+
+                        <Button variant="contained" type="submit">Submit</Button>
                     </form>
                 </div>
             </Container>
+
+            {/* Material Dialog */}
+            <Dialog open={openMaterialDialog} onClose={() => setOpenMaterialDialog(false)}>
+                <DialogTitle>Add Material</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Material Name"
+                        value={newMaterial.name}
+                        onChange={handleMaterialNameChange}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Material Price"
+                        type="number"
+                        value={newMaterial.price}
+                        onChange={handleMaterialPriceChange}
+                        fullWidth
+                        margin="normal"
+                    />
+                    <TextField
+                        label="Material Quantity"
+                        type="number"
+                        value={newMaterial.quantity}
+                        onChange={handleMaterialQuantityChange}
+                        fullWidth
+                        margin="normal"
+                    />
+                    {error?.material && <div className="error">{error.material}</div>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenMaterialDialog(false)} color="primary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleAddMaterial} color="primary">
+                        Add Material
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };

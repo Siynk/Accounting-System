@@ -240,6 +240,7 @@ const ClientManagement = () => {
                         id="search-field"
                         placeholder="Search Client"
                         className="filter-client"
+                        style={{fontSize:14, padding:10}}
                         value={searchText}
                         onChange={(e) => setSearchText(e.target.value)}
                     />

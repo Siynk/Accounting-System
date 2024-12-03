@@ -44,6 +44,103 @@ export default function Dashboard() {
     const [dateTo, setDateTo] = useState('');
     const { user } = useStateContext();
     const [companyName, setCompanyName] = useState('');
+    const [rangeType, setRangeType] = useState('week');
+    const [year, setYear] = useState('');
+    const [month, setMonth] = useState('');
+    const [week, setWeek] = useState('');
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure 2-digit month
+      const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
+      return `${year}-${month}-${day}`;
+    }
+
+    const handleGenerateTrendAnalysisReport = () => {
+      let dateRange = { dateFrom: '', dateTo: '' };
+  
+      if (rangeType === 'week') {
+          // Calculate date range for selected week
+          if (year && week) {
+              dateRange = getWeekDateRange(year, week);
+          }
+      } else if (rangeType === 'month') {
+          // Calculate date range for selected month
+          if (year && month !== '') {
+              dateRange = getMonthDateRange(year, month);
+          }
+      } else if (rangeType === 'year') {
+          // Calculate date range for selected year
+          if (year) {
+              dateRange = getYearDateRange(year);
+          }
+      }
+      
+      // Now use the date range in the payload for report generation
+      const payload = { companyName: '', rangeType, ...dateRange };
+
+      setLoading(true);
+        generateTrendAnalysisReport(setError, setTrendAnalysisReport, payload)
+            .finally(() => setLoading(false));
+  };
+
+  const handleRangeTypeChange = (e) => {
+      setRangeType(e.target.value);
+  };
+
+  const getWeekDateRange = (year, week) => {
+    const startDate = new Date(year, 0, (week - 1) * 7 + 1); // Get the start of the week
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 6); // Get the end of the week (7 days later)
+  
+    return {
+        dateFrom: formatDate(startDate), // Format: YYYY-MM-DD
+        dateTo: formatDate(endDate) // Format: YYYY-MM-DD
+    };
+  };
+  
+  // Helper function to get the first and last day of the selected month
+  function getMonthDateRange(year, month) {
+    if (month < 1 || month > 12) {
+      throw new Error("Month must be between 1 and 12");
+    }
+    const dateFrom = new Date(year, month - 1, 1);
+    const dateTo = new Date(year, month, 0);
+    return {
+      dateFrom: formatDate(dateFrom),
+      dateTo: formatDate(dateTo)
+    };
+  }
+  
+  // Helper function to get the first and last day of the selected year
+  const getYearDateRange = (year) => {
+    const startDate = new Date(year, 0, 1); // First day of the year
+    const endDate = new Date(year, 11, 31); // Last day of the year
+  
+    return {
+        dateFrom: formatDate(startDate),
+        dateTo: formatDate(endDate)
+    };
+  };
+  
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const years = ['Select Year']; // Add the "Select Year" as the first option
+    for (let i = currentYear; i >= currentYear - 10; i--) {
+        years.push(i);
+    }
+    return years;
+  };
+  
+  
+  const generateWeekOptions = () => {
+      const weeks = ['Select Week'];
+      const totalWeeks = 52;
+      for (let i = 1; i <= totalWeeks; i++) {
+          weeks.push(i);
+      }
+      return weeks;
+  };
     // Set the initial date range on component mount
     useEffect(() => {
         const currentDate = new Date();
@@ -123,7 +220,6 @@ export default function Dashboard() {
                     generateCashflowStatement(setError, setCashflowStatement, params),
                     generateIncomeStatement(setError, setIncomeStatement, params),
                     generateSegmentReport(setError, setSegmentReport, params),
-                    generateTrendAnalysisReport(setError, setTrendAnalysisReport, params),
                 ]);
             } catch (err) {
                 setError(err);
@@ -520,6 +616,215 @@ export default function Dashboard() {
                             <Card>
                                 <CardContent>
                                     <Typography variant="h6">Trend Analysis</Typography>
+                                    <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                    marginTop: '20px',
+                    animation: 'fadeIn 1s ease-out',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', marginTop: 8 }}>
+                    <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                      <label style={{ marginRight: '10px' }}>Range Type</label>
+                      <select
+                        value={rangeType}
+                        onChange={handleRangeTypeChange}
+                        style={{
+                          width: '160px',
+                          padding: '12px 20px',
+                          fontSize: '14px',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd',
+                          backgroundColor: '#f4f4f4',
+                          height: '45px',
+                          boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                          transition: 'all 0.3s ease',
+                        }}
+                        onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
+                        onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
+                      >
+                        <option value="week">Week</option>
+                        <option value="month">Month</option>
+                        <option value="year">Year</option>
+                      </select>
+                    </div>
+
+                    {rangeType === 'week' && (
+                      <>
+                        <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                          <label style={{ marginRight: '10px' }}>Week</label>
+                          <select
+                            value={week}
+                            onChange={(e) => setWeek(e.target.value)}
+                            style={{
+                              width: '160px',
+                              padding: '12px 20px',
+                              fontSize: '14px',
+                              borderRadius: '8px',
+                              border: '1px solid #ddd',
+                              backgroundColor: '#f4f4f4',
+                              height: '45px',
+                              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                              transition: 'all 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
+                            onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
+                          >
+                            {generateWeekOptions().map((weekOption) => (
+                              <option key={weekOption} value={weekOption}>
+                                {weekOption}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                          <label style={{ marginRight: '10px' }}>Year</label>
+                          <select
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            style={{
+                              width: '160px',
+                              padding: '12px 20px',
+                              fontSize: '14px',
+                              borderRadius: '8px',
+                              border: '1px solid #ddd',
+                              backgroundColor: '#f4f4f4',
+                              height: '45px',
+                              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                              transition: 'all 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
+                            onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
+                          >
+                            {generateYearOptions().map((yearOption) => (
+                              <option key={yearOption} value={yearOption}>
+                                {yearOption}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    )}
+
+                    {rangeType === 'month' && (
+                      <>
+                        <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                          <label style={{ marginRight: '10px' }}>Month</label>
+                          <select
+                            value={month}
+                            onChange={(e) => setMonth(e.target.value)}
+                            style={{
+                              width: '160px',
+                              padding: '12px 20px',
+                              fontSize: '14px',
+                              borderRadius: '8px',
+                              border: '1px solid #ddd',
+                              backgroundColor: '#f4f4f4',
+                              height: '45px',
+                              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                              transition: 'all 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
+                            onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
+                          >
+                            {[
+                              'January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'
+                            ].map((monthName, index) => (
+                              <option key={index} value={index+1}>
+                                {monthName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                          <label style={{ marginRight: '10px' }}>Year</label>
+                          <select
+                            value={year}
+                            onChange={(e) => setYear(e.target.value)}
+                            style={{
+                              width: '160px',
+                              padding: '12px 20px',
+                              fontSize: '14px',
+                              borderRadius: '8px',
+                              border: '1px solid #ddd',
+                              backgroundColor: '#f4f4f4',
+                              height: '45px',
+                              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                              transition: 'all 0.3s ease',
+                            }}
+                            onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
+                            onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
+                          >
+                            {generateYearOptions().map((yearOption) => (
+                              <option key={yearOption} value={yearOption}>
+                                {yearOption}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </>
+                    )}
+
+                    {rangeType === 'year' && (
+                      <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                        <label style={{ marginRight: '10px' }}>Year</label>
+                        <select
+                          value={year}
+                          onChange={(e) => setYear(e.target.value)}
+                          style={{
+                            width: '160px',
+                            padding: '12px 20px',
+                            fontSize: '14px',
+                            borderRadius: '8px',
+                            border: '1px solid #ddd',
+                            backgroundColor: '#f4f4f4',
+                            height: '45px',
+                            boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
+                            transition: 'all 0.3s ease',
+                          }}
+                          onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
+                          onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
+                        >
+                          {generateYearOptions().map((yearOption) => (
+                            <option key={yearOption} value={yearOption}>
+                              {yearOption}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <button
+                      style={{
+                        background: 'linear-gradient(45deg, #4caf50, #66bb6a)', // Lighter green gradient
+                        color: 'white',
+                        padding: '12px 25px',
+                        fontSize: '16px',
+                        borderRadius: '8px',
+                        border: 'none',
+                        height: '45px',
+                        cursor: 'pointer',
+                        marginRight: '15px',
+                        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.15)',
+                        transition: 'all 0.3s ease',
+                      }}
+                      onMouseEnter={(e) => (e.target.style.background = 'linear-gradient(45deg, #66bb6a, #81c784)')}
+                      onMouseLeave={(e) => (e.target.style.background = 'linear-gradient(45deg, #4caf50, #66bb6a)')}
+                      onClick={(e) => {e.target.style.transform = 'scale(0.98)'; handleGenerateTrendAnalysisReport()}}
+                      onAnimationEnd={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      Generate Report
+                    </button>
+                  </div>
+                </div>
                                     {loading ? <CircularProgress size={50} /> : (
                                         <ResponsiveContainer width="100%" height={300}>
                                             <LineChart data={trendData}>

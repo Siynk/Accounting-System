@@ -28,7 +28,7 @@ const SingleUser = () => {
             }}
         >
             <div id='print-content'>
-                <Container maxWidth="md" className="history-container">
+                <Container maxWidth="xl" className="history-container">
                     <div className="header">
                         <h2>User Details</h2>
                         <Button className='hidebtn' sx={{

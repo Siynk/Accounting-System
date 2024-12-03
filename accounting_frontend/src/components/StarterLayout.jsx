@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Outlet, Navigate,useNavigate } from 'react-router-dom';
+import { Outlet, Navigate,useNavigate, useLocation } from 'react-router-dom';
 import { useStateContext } from '../context/ContextProvider';
 import { getAccess } from "../utils/backend"; // Adjust your import based on how you structure this utility
 import logo from '../assets/logo-removebg-preview.png';
@@ -26,7 +26,8 @@ function StarterLayout() {
     const [accesses, setAccesses] = useState([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate(); 
-
+    const location = useLocation();
+    
     useEffect(() => {
         if (token && user) {
             const fetchAccess = async () => {
@@ -77,7 +78,7 @@ function StarterLayout() {
     return (
         <Box maxWidth='100%' className="starter-layout" style={{ backgroundImage: `url(${background})` }}>
             <Box maxWidth='xs' className="starter-layout-content">
-            <Box className="logo-container" style={{
+            {(!location.pathname.includes('register') && !location.pathname.includes('forgot-password')) && <Box className="logo-container" style={{
                 background: 'linear-gradient(to bottom left, rgba(8, 65, 18, 1), rgba(0, 102, 51, 1), rgba(34, 139, 34, 1))',
                 padding: '30px',
                 borderRadius: '10px',
@@ -156,7 +157,7 @@ function StarterLayout() {
                       boxShadow: '0 2px 5px rgba(0, 0, 0, 0.1)',
                   }} className="decorative-element" />
 
-              </Box>
+              </Box>}
               <Box className="login-outlet">
                   <Outlet />
               </Box>

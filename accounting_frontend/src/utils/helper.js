@@ -95,4 +95,24 @@ export function formatMoney(amount) {
     });
 }
 
+export function generateInvoiceNumber() {
+  // Get the current date and time (year, month, day, hours, minutes, seconds)
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = ('0' + (date.getMonth() + 1)).slice(-2);  // Add leading zero
+  const day = ('0' + date.getDate()).slice(-2);  // Add leading zero
+  const hours = ('0' + date.getHours()).slice(-2);  // Add leading zero
+  const minutes = ('0' + date.getMinutes()).slice(-2);  // Add leading zero
+  const seconds = ('0' + date.getSeconds()).slice(-2);  // Add leading zero
+
+  // Generate a random 4-digit number
+  const randomNumber = Math.floor(1000 + Math.random() * 9000);
+
+  // Combine the date/time components and random number to create the invoice number
+  const invoiceNumber = `INV${year}${month}${day}${hours}${minutes}${seconds}${randomNumber}`;
+
+  return invoiceNumber;
+}
+
+
 

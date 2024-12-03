@@ -52,7 +52,7 @@ const AddUser = () => {
             }}
         >
             <Toolbar />
-            <Container maxWidth="lg">
+            <Container maxWidth="xl">
                 <Grid container spacing={3} justifyContent="flex-start">
                     <Grid item xs={12} sm={12}>
                         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>

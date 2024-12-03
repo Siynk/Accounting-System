@@ -6,6 +6,7 @@ import { useStateContext } from '../context/ContextProvider';
 
 const BalanceSheet = () => {
     const [balanceSheet, setBalanceSheet] = useState({});
+    const [normalizedBalanceSheet, setNormalizedBalanceSheet] = useState({});
     const [companyName, setCompanyName] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
@@ -43,6 +44,18 @@ const BalanceSheet = () => {
             console.error('Failed to open print window');
         }
     };
+
+    useEffect(() => {
+      if(balanceSheet.assets){
+        const updatedAssets = balanceSheet.assets.filter(asset => asset.amount !== "0");
+  
+      // Update the balance sheet with the filtered assets
+      setNormalizedBalanceSheet(prevState => ({
+        ...prevState,
+        assets: updatedAssets,
+      }));
+      }
+    }, [balanceSheet]);
     
 
     return (
@@ -106,8 +119,8 @@ const BalanceSheet = () => {
                                 <td>Assets</td>
                                 <td></td>
                             </tr>
-                            {balanceSheet.assets && balanceSheet.assets.length > 0 ? (
-                                balanceSheet.assets.map((asset, index) => (
+                            {normalizedBalanceSheet.assets && normalizedBalanceSheet.assets.length > 0 ? (
+                                normalizedBalanceSheet.assets.map((asset, index) => (
                                     <tr key={index} className="balanceSheet-asset">
                                         <td>{asset.description}{asset.transactionType === 'Receivable' && ' (Accounts Receivable)'}</td>
                                         <td>₱{parseFloat(asset.amount).toLocaleString()}</td>

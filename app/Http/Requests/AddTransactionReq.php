@@ -33,9 +33,10 @@ class AddTransactionReq extends FormRequest
             'category'   => 'required|string|max:255',
             'cashFlow'   => 'required|string|max:255',
             'status'   => 'required|string',
-            'materialName' => 'nullable|string',
-            'materialPrice' => 'nullable|numeric',
-            'materialQuantity' => 'nullable|numeric',
+            'materials' => 'nullable',
+            'selectedTransactions' => 'nullable',
+            'invoiceNumber' => 'nullable|string',
+            'fee' => 'nullable|numeric',
         ];
     }
 }

@@ -5,6 +5,7 @@ import Container from '@mui/material/Container';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, Dialog, DialogActions, DialogContent, DialogTitle, TextField, TablePagination } from '@mui/material';
 import { getAllPayments, updatePaymentStatus, addTransaction } from '../utils/backend';
 import '../css/payment.css';
+import { useStateContext } from '../context/ContextProvider';
 
 const Payment = () => {
   const [payments, setPayments] = useState([]);
@@ -12,7 +13,8 @@ const Payment = () => {
   const [openDeclineModal, setOpenDeclineModal] = useState(false);
   const [declineReason, setDeclineReason] = useState('');
   const [selectedPayment, setSelectedPayment] = useState(null);
-  
+  const { user } = useStateContext();
+
   // Pagination state
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5); // Adjust this value to change the number of rows per page
@@ -28,7 +30,6 @@ const Payment = () => {
     };
     fetchPayments();
   }, []);
-  console.log(payments);
 
   // Handle Approve button click
   const handleApprove = async (payment) => {
@@ -51,7 +52,7 @@ const Payment = () => {
       await addTransaction(transactionData, setError);
 
       // After approving, update payment status
-      await handlePaymentStatusChange('Approved', payment.id, 'Approve', payment.client.id);
+      await handlePaymentStatusChange('Approved', payment.id, 'Approve', payment.client.id, payment.amount, payment.transactionID);
       
       // Optionally, refetch payments
       await getAllPayments(setError, setPayments);
@@ -66,11 +67,16 @@ const Payment = () => {
     setOpenDeclineModal(true);
   };
 
-  const handlePaymentStatusChange = async (status, paymentID, updateType, clientID) => {
+  console.log(payments)
+
+  const handlePaymentStatusChange = async (status, paymentID, updateType, clientID, paymentAmount, transactionID) => {
     const payload = {
       status: status,
       paymentID: paymentID,
       clientID: clientID,
+      paymentAmount: paymentAmount,  // Pass the payment amount
+      transactionID: transactionID,  // Pass the transaction ID
+      approverID: user.id
     };
 
     if(updateType === 'Decline'){
@@ -90,7 +96,7 @@ const Payment = () => {
       setError('Decline reason is required');
       return;
     }
-    handlePaymentStatusChange('Declined', selectedPayment.id, 'Decline', selectedPayment.client.id);
+    handlePaymentStatusChange('Declined', selectedPayment.id, 'Decline', selectedPayment.client.id, selectedPayment.amount, selectedPayment.transactionID);
     await getAllPayments(setError, setPayments);
   };
 
@@ -140,8 +146,10 @@ const Payment = () => {
               <TableRow>
                 <TableCell sx={cellStyle}><strong>Client</strong></TableCell>
                 <TableCell sx={cellStyle}><strong>Project</strong></TableCell>
+                <TableCell sx={cellStyle}><strong>Handled By</strong></TableCell>
                 <TableCell sx={cellStyle}><strong>Amount</strong></TableCell>
                 <TableCell sx={cellStyle}><strong>Status</strong></TableCell>
+                <TableCell sx={cellStyle}><strong>Receipt Number</strong></TableCell>
                 <TableCell sx={cellStyle}><strong>Decline Reason</strong></TableCell>
                 <TableCell sx={cellStyle}><strong>Actions</strong></TableCell>
               </TableRow>
@@ -152,8 +160,10 @@ const Payment = () => {
                   <TableRow key={index}>
                     <TableCell>{payment.client.name}</TableCell>
                     <TableCell>{payment.project.projectName}</TableCell>
+                    <TableCell>{payment.approver ? payment.approver.name : 'N/A'}</TableCell>
                     <TableCell>{payment.amount}</TableCell>
                     <TableCell sx={{color: payment.status === 'Approved' ? "green" : 'red'}}>{payment.status}</TableCell>
+                    <TableCell>{payment.receipt_number || "N/A"}</TableCell>
                     <TableCell>{payment.declineReason || "N/A"}</TableCell>
                     <TableCell>
                       {payment.status === 'Pending' ? (
@@ -184,7 +194,7 @@ const Payment = () => {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} align="center">No payments found.</TableCell>
+                  <TableCell colSpan={8} align="center">No payments found.</TableCell>
                 </TableRow>
               )}
             </TableBody>

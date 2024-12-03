@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('get-all-transactions', [TransactionController::class, 'getAllTransactions']);
     Route::get('get-counts', [TransactionController::class, 'getCounts']);
     Route::post('filter-transactions', [TransactionController::class, 'filterTransactions']);
+    Route::get('get-transactions-by-invoice-number', [TransactionController::class, 'getTransactionsByInvoiceNumber']);
     Route::post('update-transaction', [TransactionController::class, 'updateTransaction']);
     Route::get('get-all-clients', [UserController::class, 'getAllClients']);
     Route::post('delete-transaction', [TransactionController::class, 'deleteTransaction']);

@@ -159,8 +159,9 @@ export default function ManageAccess() {
                             placeholder="Search"
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="searchInput"
+                            style={{fontSize:14, padding:10}}
                         />
-                        <button className="manageAccess-addButton" onClick={handleOpenDialog}>
+                        <button className="manageAccess-addButton" onClick={handleOpenDialog} style={{fontSize:14, padding:10}}>
                             Add New Access
                         </button>
                     </div>

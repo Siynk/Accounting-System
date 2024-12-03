@@ -25,7 +25,9 @@ class Transaction extends Model
         'status',
         'category',
         'cashFlow',
-        'isDeleted'
+        'isDeleted',
+        'invoice_number',
+        'fee'
     ];
 
     public $timestamps = false;
