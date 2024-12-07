@@ -103,6 +103,18 @@ const Register = () => {
                                     ))}
                                 </div>
                                 <div className="input_field-register">
+                                    <span className='register-icon'><Password /></span>
+                                    <input
+                                        type="password"
+                                        name="confirmPassword"
+                                        placeholder="Confirm Password"
+                                        value={formData.confirmPassword}
+                                        onChange={handleChange}
+                                        required
+                                    />
+                                    {confirmError && <p className="registerErrorColor">{confirmError}</p>}
+                                </div>
+                                <div className="input_field-register">
                                     <span className='register-icon'><Email /></span>
                                     <input
                                         type="email"
@@ -115,18 +127,6 @@ const Register = () => {
                                     {error && error.email && error.email.map((errorMessage, index) => (
                                         <Typography key={index}><span className="registerErrorColor">{errorMessage}</span></Typography>
                                     ))}
-                                </div>
-                                <div className="input_field-register">
-                                    <span className='register-icon'><Password /></span>
-                                    <input
-                                        type="password"
-                                        name="confirmPassword"
-                                        placeholder="Confirm Password"
-                                        value={formData.confirmPassword}
-                                        onChange={handleChange}
-                                        required
-                                    />
-                                    {confirmError && <p className="registerErrorColor">{confirmError}</p>}
                                 </div>
                                 <div className="input_field-register">
                                     <span className='register-icon'><Address /></span>

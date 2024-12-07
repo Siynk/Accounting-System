@@ -15,12 +15,17 @@
     margin: auto;
 }
 .starter-layout {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    background-image: url('../assets/5011342.jpg');
     background-size: cover;
     background-position: center;
+    background-repeat: no-repeat;
+    width: 100vw;
     height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    overflow: hidden;
 }
 
 .starter-layout-content {

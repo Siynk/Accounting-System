@@ -153,17 +153,16 @@ export default function Login() {
                     <Typography className="error" color="error">
                         {error}
                     </Typography>
-                    <Grid container spacing={2}>
+                    <Grid container spacing={2} direction="row">
                         <Grid item xs>
                             <FormControlLabel
                                 control={<Checkbox value="remember" sx={{ color: 'rgb(162, 233, 182)' }} />}
                                 label="Remember me"
-                                onChange={handleRemember}
                                 sx={{ color: 'rgb(65, 195, 102)' }}
                             />
                         </Grid>
-                        <Grid item xs sx={{ marginTop: '12px', marginRight: '-130px' }}>
-                            <Link to={'/forgot-password'} variant="body2" style={{ color: 'rgb(154, 150, 240)', }}>
+                        <Grid item xs={12} sm={4} sx={{ marginTop: { xs: '1px', sm: '12px' } }}>
+                            <Link to={'/forgot-password'} variant="body2" style={{ color: 'rgb(154, 150, 240)' }}>
                                 Forgot password?
                             </Link>
                         </Grid>
@@ -176,13 +175,13 @@ export default function Login() {
                     >
                         Log In
                     </Button>
-                    <Grid container spacing={2}>
+                    {/* <Grid container spacing={2}>
                         <Grid item>
                             <Link to="/register" variant="body2" style={{ color: 'rgb(154, 150, 240)' }}>
                                 {"Don't have an account? Sign Up"}
                             </Link>
                         </Grid>
-                    </Grid>
+                    </Grid> */}
                 </Box>
             </Box>
         </Container>
