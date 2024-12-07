@@ -26,34 +26,33 @@ const TrendAnalysisReports = () => {
       return `${year}-${month}-${day}`;
     }
 
+    const getPeriodLabel = (report) => {
+      if (rangeType === 'week') {
+        // For 'week' rangeType, display the week number
+        return `Week ${report.week}`;
+      } else if (rangeType === 'month') {
+        // For 'month' rangeType, display the month name
+        const monthNames = [
+          "January", "February", "March", "April", "May", "June", 
+          "July", "August", "September", "October", "November", "December"
+        ];
+        return monthNames[report.month - 1]; // Adjusting index because months are 1-indexed
+      } else if (rangeType === 'year') {
+        // For 'year' rangeType, display the year
+        return `${report.year}`;
+      }
+    };
+
     useEffect(() => {
         if (user && user.userType === 'client') {
             setSearchText(user.company);
         }
     }, [user]);
 
-    const handleGenerateTrendAnalysisReport = () => {
-        let dateRange = { dateFrom: '', dateTo: '' };
     
-        if (rangeType === 'week') {
-            // Calculate date range for selected week
-            if (year && week) {
-                dateRange = getWeekDateRange(year, week);
-            }
-        } else if (rangeType === 'month') {
-            // Calculate date range for selected month
-            if (year && month !== '') {
-                dateRange = getMonthDateRange(year, month);
-            }
-        } else if (rangeType === 'year') {
-            // Calculate date range for selected year
-            if (year) {
-                dateRange = getYearDateRange(year);
-            }
-        }
-        
-        // Now use the date range in the payload for report generation
-        const payload = { companyName: searchText, rangeType, ...dateRange };
+
+    const handleGenerateTrendAnalysisReport = () => {
+        const payload = { companyName: searchText, rangeType, month:month, year:year };
         fetchReport(payload);
     };
 
@@ -138,15 +137,6 @@ const generateYearOptions = () => {
 };
 
 
-const generateWeekOptions = () => {
-    const weeks = ['Select Week'];
-    const totalWeeks = 52;
-    for (let i = 1; i <= totalWeeks; i++) {
-        weeks.push(i);
-    }
-    return weeks;
-};
-
 
     return (
       <Box component="main" sx={{ backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900], flexGrow: 1, height: '100vh', overflow: 'auto', margin: 'auto' }}>
@@ -193,11 +183,12 @@ const generateWeekOptions = () => {
 
                     {rangeType === 'week' && (
                       <>
-                        <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
-                          <label style={{ marginRight: '10px' }}>Week</label>
+                      
+                      <div style={{ marginRight: '15px', minWidth: 120, display: 'flex', alignItems: 'center' }}>
+                          <label style={{ marginRight: '10px' }}>Month</label>
                           <select
-                            value={week}
-                            onChange={(e) => setWeek(e.target.value)}
+                            value={month}
+                            onChange={(e) => setMonth(e.target.value)}
                             style={{
                               width: '160px',
                               padding: '12px 20px',
@@ -212,9 +203,12 @@ const generateWeekOptions = () => {
                             onMouseEnter={(e) => (e.target.style.borderColor = '#66bb6a')}
                             onMouseLeave={(e) => (e.target.style.borderColor = '#ddd')}
                           >
-                            {generateWeekOptions().map((weekOption) => (
-                              <option key={weekOption} value={weekOption}>
-                                {weekOption}
+                            {[
+                              'January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'
+                            ].map((monthName, index) => (
+                              <option key={index} value={index+1}>
+                                {monthName}
                               </option>
                             ))}
                           </select>
@@ -392,39 +386,38 @@ const generateWeekOptions = () => {
 
 
                 <div id="printable-area">
-                    <Table className="trendAnalysis-user-table" aria-label="simple table" sx={{ marginTop: '20px' }}>
-                        <TableHead>
-                            <TableRow>
-                                
-                                <TableCell>PERIOD</TableCell>
-                                <TableCell>TOTAL REVENUE</TableCell>
-                                <TableCell>TOTAL EXPENSE</TableCell>
-                                <TableCell>PROFIT</TableCell>
+                  <Table className="trendAnalysis-user-table" aria-label="simple table" sx={{ marginTop: '20px' }}>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>PERIOD</TableCell>
+                        <TableCell>TOTAL REVENUE</TableCell>
+                        <TableCell>TOTAL EXPENSE</TableCell>
+                        <TableCell>PROFIT</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {loading ? (
+                        <TableRow>
+                          <TableCell colSpan={4} align="center"><CircularProgress /></TableCell>
+                        </TableRow>
+                      ) : (
+                        trendAnalysisReport.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={4} align="center">No Records Found</TableCell>
+                          </TableRow>
+                        ) : (
+                          trendAnalysisReport.map((report, index) => (
+                            <TableRow key={index}>
+                              <TableCell>{getPeriodLabel(report)}</TableCell>
+                              <TableCell>₱{parseFloat(report.totalRevenue).toLocaleString()}</TableCell>
+                              <TableCell>₱{parseFloat(report.totalExpense).toLocaleString()}</TableCell>
+                              <TableCell>₱{parseFloat(report.profit).toLocaleString()}</TableCell>
                             </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {loading ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} align="center"><CircularProgress /></TableCell>
-                                </TableRow>
-                            ) : (
-                                trendAnalysisReport.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} align="center">No Records Found</TableCell>
-                                    </TableRow>
-                                ) : (
-                                    trendAnalysisReport.map((report, index) => (
-                                        <TableRow key={index}>
-                                            <TableCell>{report.period}</TableCell>
-                                            <TableCell>₱{parseFloat(report.totalRevenue).toLocaleString()}</TableCell>
-                                            <TableCell>₱{parseFloat(report.totalExpense).toLocaleString()}</TableCell>
-                                            <TableCell>₱{parseFloat(report.profit).toLocaleString()}</TableCell>
-                                        </TableRow>
-                                    ))
-                                )
-                            )}
-                        </TableBody>
-                    </Table>
+                          ))
+                        )
+                      )}
+                    </TableBody>
+                  </Table>
                 </div>
             </Container>
         </Box>

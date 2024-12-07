@@ -411,99 +411,85 @@ class TransactionController extends Controller
     }
 
     public function generateTrendAnalysisReport(Request $request)
-    {
-        $companyName = $request->input('companyName');
-        $dateFrom = $request->input('dateFrom');
-        $dateTo = $request->input('dateTo');
-        $rangeType = $request->input('rangeType'); // This can be 'week', 'month', or 'year'
+{
+    $companyName = $request->input('companyName');
+    $month = $request->input('month'); // For weeks, the month is provided
+    $year = $request->input('year');  // Year input
+    $rangeType = $request->input('rangeType'); // This can be 'week', 'month', or 'year'
 
-        // Adjusting the date range filter
-        $query = DB::table('transaction')
-            ->select(
-                DB::raw('YEAR(transaction.transactionDate) as year'),
-                DB::raw('MONTH(transaction.transactionDate) as month'),
-                DB::raw('WEEK(transaction.transactionDate) as week'),
-                DB::raw('SUM(CASE WHEN transactiontype.description IN ("Revenue", "Sale", "Payment") 
-                                  AND NOT EXISTS (
-                                      SELECT 1 FROM transactiontransactiontype ttt 
-                                      JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
-                                      WHERE ttt.transactionID = transaction.id 
-                                      AND tt.description IN ("Liabilities", "Asset", "Equity")
-                                  ) 
-                                  THEN transaction.amount ELSE 0 END) as totalRevenue'),
-                DB::raw('SUM(CASE WHEN transactiontype.description IN ("Expense", "Purchase", "Loan") 
-                                  AND NOT EXISTS (
-                                      SELECT 1 FROM transactiontransactiontype ttt 
-                                      JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
-                                      WHERE ttt.transactionID = transaction.id 
-                                      AND tt.description IN ("Liabilities", "Asset", "Equity")
-                                  ) 
-                                  THEN transaction.amount ELSE 0 END) as totalExpense')
-            )
-            ->leftJoin('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
-            ->leftJoin('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
-            ->leftJoin('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
-            ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
-            ->where('transaction.isDeleted', 0)
-            ->whereBetween('transaction.transactionDate', [$dateFrom, $dateTo]); // Apply date range filter
+    // Start by preparing the basic query
+    $query = DB::table('transaction')
+        ->select(
+            DB::raw('SUM(CASE WHEN transactiontype.description IN ("Revenue", "Sale", "Payment") 
+                              AND NOT EXISTS (
+                                  SELECT 1 FROM transactiontransactiontype ttt 
+                                  JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
+                                  WHERE ttt.transactionID = transaction.id 
+                                  AND tt.description IN ("Liabilities", "Asset", "Equity")
+                              ) 
+                              THEN transaction.amount ELSE 0 END) as totalRevenue'),
+            DB::raw('SUM(CASE WHEN transactiontype.description IN ("Expense", "Purchase", "Loan") 
+                              AND NOT EXISTS (
+                                  SELECT 1 FROM transactiontransactiontype ttt 
+                                  JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
+                                  WHERE ttt.transactionID = transaction.id 
+                                  AND tt.description IN ("Liabilities", "Asset", "Equity")
+                              ) 
+                              THEN transaction.amount ELSE 0 END) as totalExpense'),
+            DB::raw('SUM(CASE WHEN transactiontype.description IN ("Revenue", "Sale", "Payment") 
+                              AND NOT EXISTS (
+                                  SELECT 1 FROM transactiontransactiontype ttt 
+                                  JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
+                                  WHERE ttt.transactionID = transaction.id 
+                                  AND tt.description IN ("Liabilities", "Asset", "Equity")
+                              ) 
+                              THEN transaction.amount ELSE 0 END) - 
+                    SUM(CASE WHEN transactiontype.description IN ("Expense", "Purchase", "Loan") 
+                              AND NOT EXISTS (
+                                  SELECT 1 FROM transactiontransactiontype ttt 
+                                  JOIN transactiontype tt ON ttt.transactionTypeID = tt.id
+                                  WHERE ttt.transactionID = transaction.id 
+                                  AND tt.description IN ("Liabilities", "Asset", "Equity")
+                              ) 
+                              THEN transaction.amount ELSE 0 END) as profit')
+        )
+        ->leftJoin('transactiontransactiontype', 'transaction.id', '=', 'transactiontransactiontype.transactionID')
+        ->leftJoin('transactiontype', 'transactiontransactiontype.transactionTypeID', '=', 'transactiontype.id')
+        ->leftJoin('clienttransctionrequest', 'transaction.id', '=', 'clienttransctionrequest.transactionID') // Join with clientTransactionRequest
+        ->where('clienttransctionrequest.status', 'Approved') // Filter for approved transactions
+        ->where('transaction.isDeleted', 0);
 
-        // Grouping and adjusting for rangeType
-        if ($rangeType === 'week') {
-            $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('WEEK(transaction.transactionDate)'));
-        } elseif ($rangeType === 'month') {
-            $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('MONTH(transaction.transactionDate)'));
-        } elseif ($rangeType === 'year') {
-            $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'));
-        }
-
-        // Fix: Add the transaction.transactionDate field to GROUP BY to resolve the error
-        $query->groupBy(DB::raw('YEAR(transaction.transactionDate)'), DB::raw('MONTH(transaction.transactionDate)'), DB::raw('WEEK(transaction.transactionDate)'));
-
-        // Fetching the data
-        $reportData = $query->orderBy('year')->orderBy('month')->orderBy('week')->get();
-
-        // Array to convert month number to month name
-        $months = [
-            1 => 'January',
-            2 => 'February',
-            3 => 'March',
-            4 => 'April',
-            5 => 'May',
-            6 => 'June',
-            7 => 'July',
-            8 => 'August',
-            9 => 'September',
-            10 => 'October',
-            11 => 'November',
-            12 => 'December'
-        ];
-
-        // Process the report data as needed
-        $processedReportData = [];
-
-        foreach ($reportData as $data) {
-            $profit = $data->totalRevenue - $data->totalExpense;
-
-            // Process the data based on rangeType
-            if ($rangeType === 'week') {
-                $period = 'Week ' . $data->week+1 . ' of ' . $data->year;
-            } elseif ($rangeType === 'month') {
-                $period = $months[$data->month] . ' ' . $data->year;
-            } elseif ($rangeType === 'year') {
-                $period = $data->year;
-            }
-
-            $processedReportData[] = [
-                'period' => $period, // This will hold the week, month, or year
-                'totalRevenue' => $data->totalRevenue,
-                'totalExpense' => $data->totalExpense,
-                'profit' => $profit,
-            ];
-        }
-
-        // Return the processed data as a JSON response
-        return response()->json($processedReportData);
+    // Adjust the query based on the rangeType
+    if ($rangeType == 'week') {
+        // Filter strictly for the specified month and year, then group by the week number within that month
+        $query->whereYear('transaction.created_at', $year)
+              ->whereMonth('transaction.created_at', $month)
+              ->whereBetween(DB::raw('WEEK(transaction.created_at, 1)'), [1, 52]) // Restrict to weeks 1-52
+              ->groupBy(DB::raw('WEEK(transaction.created_at, 1)')) // Group by week number
+              ->addSelect(DB::raw('WEEK(transaction.created_at, 1) as week'));
+    } elseif ($rangeType == 'month') {
+        // Filter strictly for the specified year, then group by the month
+        $query->whereYear('transaction.created_at', $year)
+              ->whereMonth('transaction.created_at', $month) // Ensure we're within the correct month
+              ->groupBy(DB::raw('MONTH(transaction.created_at)'))
+              ->addSelect(DB::raw('MONTH(transaction.created_at) as month'));
+    } elseif ($rangeType == 'year') {
+        // Filter strictly for the specified year, then group by the year
+        $query->whereYear('transaction.created_at', $year)
+              ->groupBy(DB::raw('YEAR(transaction.created_at)'))
+              ->addSelect(DB::raw('YEAR(transaction.created_at) as year'));
     }
+
+    // Execute the query and get the results
+    $processedReportData = $query->get();
+
+    // Return the results as a JSON response
+    return response()->json($processedReportData);
+}
+
+
+
+
 
 
 
