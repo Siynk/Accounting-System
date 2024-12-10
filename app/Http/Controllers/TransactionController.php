@@ -517,7 +517,7 @@ class TransactionController extends Controller
             ->whereIn('transactiontype.description', $assetTypes)
             ->where('clienttransctionrequest.status', 'Approved')
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->select('transaction.description', 'transaction.amount', 'transactiontype.description as transactionType')
+            ->select('transaction.description', 'transaction.amount', 'transactiontype.description as transactionType', 'transaction.transactionDate as date')
             ->get();
     
         // Query for liabilities
@@ -529,7 +529,7 @@ class TransactionController extends Controller
             ->whereIn('transactiontype.description', $liabilityTypes)
             ->where('clienttransctionrequest.status', 'Approved')
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->select('transaction.description', 'transaction.amount')
+            ->select('transaction.description', 'transaction.amount', 'transaction.transactionDate as date')
             ->get();
     
         // Query for owner's equity
@@ -541,7 +541,7 @@ class TransactionController extends Controller
             ->whereIn('transactiontype.description', $equityTypes)
             ->where('clienttransctionrequest.status', 'Approved')
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->select('transaction.description', 'transaction.amount')
+            ->select('transaction.description', 'transaction.amount', 'transaction.transactionDate as date')
             ->get();
     
         // Calculate totals
@@ -649,7 +649,7 @@ class TransactionController extends Controller
             ->where('clienttransctionrequest.status', 'Approved')
             ->whereIn('transactiontype.description', ['Revenue', 'Sale', 'Payment'])
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->select('transaction.description', 'transaction.amount')
+            ->select('transaction.description', 'transaction.amount', 'transaction.transactionDate as date')
             ->get();
     }
 
@@ -664,7 +664,7 @@ class TransactionController extends Controller
             ->whereIn('transactiontype.description', ['Expense', 'Purchase'])
             ->where('transaction.category', $category)
             ->whereBetween('transaction.transactionDate', [$fromDate, $toDate])
-            ->select('transaction.description', 'transaction.amount')
+            ->select('transaction.description', 'transaction.amount', 'transaction.transactionDate as date')
             ->get();
     }
 

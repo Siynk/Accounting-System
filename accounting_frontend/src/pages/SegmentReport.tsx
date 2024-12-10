@@ -3,6 +3,7 @@ import { Box, Container } from '@mui/material';
 import '../css/reports.css';
 import { generateSegmentReport } from '../utils/backend';
 import { useStateContext } from '../context/ContextProvider';
+import appLogo from '../assets/logo-removebg-preview.png';
 
 const SegmentReport = () => {
     const [segmentReport, setSegmentReport] = useState({});
@@ -29,21 +30,97 @@ const SegmentReport = () => {
     }, [companyName, dateFrom, dateTo]);
 
     const handlePrint = () => {
-        const printWindow = window.open('', '', 'height=600,width=800');
-        
-        // Check if the printWindow was opened successfully
-        if (printWindow) {
-            printWindow.document.write('<html><head><title>Segment Report</title>');
-            printWindow.document.write('<style>body { font-family: Arial, sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #000; padding: 8px; text-align: left; } th { background-color: #f2f2f2; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(document.querySelector('.segmentReport-content').innerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        } else {
-            console.error('Failed to open print window');
-        }
-    };
+      const printContent = document.querySelector('.segmentReport-content');
+      const printWindow = window.open('', '', 'height=600,width=800');
+      
+      // Check if the printWindow was opened successfully
+      if (printWindow) {
+          printWindow.document.write('<html><head><title>Segment Report</title>');
+          printWindow.document.write('<link rel="stylesheet" href="../css/reports.css">');
+          
+          // Add custom print styles
+          printWindow.document.write(`
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      margin: 20px;
+                  }
+                  .header {
+                      display: flex;
+                      align-items: center;
+                      justify-content: space-between;
+                      margin-bottom: 20px;
+                  }
+                  .header img {
+                      height: 60px;
+                      width: auto;
+                  }
+                  .report-title {
+                      text-align: center;
+                      font-size: 24px;
+                      font-weight: bold;
+                      margin-bottom: 10px;
+                  }
+                  table {
+                      width: 100%;
+                      border-collapse: collapse;
+                      margin-top: 20px;
+                  }
+                  th, td {
+                      padding: 12px;
+                      text-align: left;
+                      border: 1px solid #ddd;
+                  }
+                  th {
+                      background-color: #f4f4f4;
+                  }
+                  .approved-section {
+                      margin-top: 40px;
+                      text-align: right; /* Align the content to the right */
+                  }
+                  .approved-section .underline {
+                      text-decoration: underline;
+                      margin-top: 5px;
+                  }
+                  .signature {
+                      margin-top: 10px;
+                      font-style: italic;
+                  }
+              </style>
+          `);
+          
+          printWindow.document.write('</head><body>');
+          
+          // Print content with appLogo and additional information
+          printWindow.document.write(`
+              <div class="header">
+                  <img src="${appLogo}" alt="App Logo" />
+                  <div class="report-title">Segment Report</div>
+              </div>
+              <div id="printable-content">${printContent.innerHTML}</div>
+          `);
+          
+          // Add Approved By section
+          printWindow.document.write(`
+              <div class="approved-section">
+                  <div>Approved By:</div>
+                  <div class="underline">____________________</div>
+                  <div class="signature">Signature over printed name</div>
+              </div>
+          `);
+          
+          printWindow.document.write('</body></html>');
+          printWindow.document.close();
+          
+          // Trigger the print dialog
+          setTimeout(() => {
+              printWindow.print();
+          }, 500);
+      } else {
+          console.error('Failed to open print window');
+      }
+  };
+  
 
     return (
         <Box

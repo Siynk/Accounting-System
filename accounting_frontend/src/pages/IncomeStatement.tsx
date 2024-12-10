@@ -3,6 +3,7 @@ import { Box, Container } from '@mui/material';
 import '../css/reports.css';
 import { generateIncomeStatement } from '../utils/backend';
 import { useStateContext } from '../context/ContextProvider';
+import logo from '../assets/logo-removebg-preview.png';
 
 const IncomeStatement = () => {
     const [incomeStatement, setIncomeStatement] = useState({});
@@ -63,20 +64,196 @@ const IncomeStatement = () => {
     }, [companyName, dateFrom, dateTo, selectionMode]);
 
     const handlePrint = () => {
-        const printWindow = window.open('', '', 'height=600,width=800');
-
-        if (printWindow) {
-            printWindow.document.write('<html><head><title>Segment Report</title>');
-            printWindow.document.write('<style>body { font-family: Arial, sans-serif; } table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #000; padding: 8px; text-align: left; } th { background-color: #f2f2f2; }</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(document.querySelector('.incomeStatement-content').innerHTML);
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        } else {
-            console.error('Failed to open print window');
-        }
-    };
+      // Function to format numbers as Peso currency
+      const formatCurrency = (value) => {
+          return new Intl.NumberFormat('en-PH', {
+              style: 'currency',
+              currency: 'PHP',
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+          }).format(value);
+      };
+  
+      const printWindow = window.open('', '', 'height=600,width=800');
+      
+      // Check if the print window was opened successfully
+      if (printWindow) {
+          printWindow.document.write('<html><head><title>Income Statement</title>');
+          printWindow.document.write('<style>');
+          
+          // Inline styles for print layout
+          printWindow.document.write(`
+              body {
+                  font-family: Arial, sans-serif;
+                  font-size: 12px;
+                  margin: 0;
+                  padding: 0;
+                  background-color: #f9f9f9;
+              }
+              .container {
+                  width: 100%;
+                  max-width: 800px;
+                  margin: 0 auto;
+                  padding: 20px;
+                  box-sizing: border-box;
+                  background-color: #ffffff;
+                  border-radius: 10px;
+                  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+              }
+              .header {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 10px;
+                  width: 100%;
+              }
+              .header img {
+                  height: 50px;
+                  width: auto;
+              }
+              .title {
+                  font-size: 20px;
+                  font-weight: bold;
+                  margin: 0;
+              }
+              .section {
+                  margin-bottom: 20px;
+                  width: 100%;
+                  padding: 10px 0;
+                  border-bottom: 1px solid #ddd;
+              }
+              .section-title {
+                  font-weight: bold;
+                  font-size: 14px;
+                  color: #333;
+                  margin-bottom: 10px;
+              }
+              .section-item {
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 10px;
+              }
+              .section-item .description {
+                  flex: 3;
+                  padding-right: 10px;
+                  font-size: 12px;
+                  color: #555;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+              }
+              .section-item .amount,
+              .section-item .date {
+                  width: 120px;
+                  text-align: right;
+                  font-size: 12px;
+                  color: #555;
+              }
+              .totals {
+                  margin-top: 30px;
+                  text-align: right;
+                  font-weight: bold;
+                  border-top: 2px solid #000;
+                  padding-top: 14px;
+                  font-size: 14px;
+              }
+              .footer {
+                  margin-top: 40px;
+                  text-align: left;
+                  font-size: 12px;
+              }
+              .footer .approved {
+                  text-decoration: underline;
+                  display: inline-block;
+                  width: 200px;
+                  margin-bottom: 5px;
+              }
+              .footer .signature {
+                  margin-top: 5px;
+              }
+  
+              /* Print-specific styles */
+              @media print {
+                  body {
+                      background-color: #ffffff;
+                  }
+                  .container {
+                      box-shadow: none;
+                      padding: 10px;
+                  }
+                  .header img {
+                      height: 40px;
+                  }
+              }
+          `);
+          
+          printWindow.document.write('</style></head><body>');
+          
+          // Header with title and logo
+          printWindow.document.write('<div class="container">');
+          printWindow.document.write('<div class="header">');
+          printWindow.document.write('<div class="title">Income Statement</div>');
+          printWindow.document.write(`<img src="${logo}" alt="Logo">`);
+          printWindow.document.write('</div>');
+          
+          // Render the revenues section
+          const renderSection = (title, items) => {
+              let sectionHtml = `<div class="section"><div class="section-title">${title}</div>`;
+              
+              items.forEach(item => {
+                  const formattedDate = new Date(item.date).toLocaleDateString();
+                  sectionHtml += `
+                      <div class="section-item">
+                          <div class="description">${item.description}</div>
+                          <div class="amount">${formatCurrency(item.amount)}</div>
+                          <div class="date">${formattedDate}</div>
+                      </div>
+                  `;
+              });
+              
+              sectionHtml += '</div>';
+              return sectionHtml;
+          };
+          
+          // Render all sections: Revenues, Operating Expenses, Financing Expenses, Investing Expenses
+          printWindow.document.write(renderSection('Revenues', incomeStatement.revenues));
+          printWindow.document.write(renderSection('Operating Expenses', incomeStatement.operatingExpenses));
+          printWindow.document.write(renderSection('Financing Expenses', incomeStatement.financingExpenses));
+          printWindow.document.write(renderSection('Investing Expenses', incomeStatement.investingExpenses));
+          
+          // Totals and net income
+          printWindow.document.write('<div class="totals">');
+          printWindow.document.write(`Total Revenue: ${formatCurrency(incomeStatement.totalRevenue)}<br>`);
+          printWindow.document.write(`Total Operating Expenses: ${formatCurrency(incomeStatement.totalOperatingExpenses)}<br>`);
+          printWindow.document.write(`Total Financing Expenses: ${formatCurrency(incomeStatement.totalFinancingExpenses)}<br>`);
+          printWindow.document.write(`Total Investing Expenses: ${formatCurrency(incomeStatement.totalInvestingExpenses)}<br>`);
+          printWindow.document.write(`Net Income: ${formatCurrency(incomeStatement.netIncome)}<br>`);
+          printWindow.document.write(`<strong>Net Income After Tax: ${formatCurrency(incomeStatement.netIncomeAfterTax)}</strong>`);
+          printWindow.document.write('</div>');
+          
+          // Footer with Approved by section
+          printWindow.document.write('<div class="footer">');
+          printWindow.document.write('<div class="approved">Approved By: ___________________</div>');
+          printWindow.document.write('<div class="signature">Signature over Printed Name</div>');
+          printWindow.document.write('</div>');
+          
+          printWindow.document.write('</div>');
+          
+          // Finalize the document for printing
+          printWindow.document.write('</body></html>');
+          
+          printWindow.document.close();
+          setTimeout(() => {
+              printWindow.print();
+          }, 500);
+      } else {
+          console.error('Failed to open print window');
+      }
+  };
+  
+  
+  
 
     const formatAmount = (amount) => {
         return amount ? `₱${parseFloat(amount).toLocaleString()}` : '₱0';

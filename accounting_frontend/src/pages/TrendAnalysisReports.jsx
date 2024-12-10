@@ -5,6 +5,8 @@ import { useStateContext } from '../context/ContextProvider';
 import { generateTrendAnalysisReport } from '../utils/backend';
 import '../css/reports.css';
 import { dark } from '@mui/material/styles/createPalette';
+import appLogo from '../assets/logo-removebg-preview.png';
+
 
 const TrendAnalysisReports = () => {
     const [searchText, setSearchText] = useState('');
@@ -61,16 +63,90 @@ const TrendAnalysisReports = () => {
     };
 
     const handlePrint = () => {
-        const printContent = document.getElementById('printable-area');
-        const win = window.open('', '', 'height=500,width=800');
-        win.document.write('<html><head><title>Trend Analysis Report</title>');
-        win.document.write('<link rel="stylesheet" href="../css/reports.css">');
-        win.document.write('</head><body>');
-        win.document.write(printContent.innerHTML);
-        win.document.write('</body></html>');
-        win.document.close();
-        win.print();
-    };
+      const printContent = document.getElementById('printable-area');
+      const win = window.open('', '', 'height=500,width=800');
+      win.document.write('<html><head><title>Trend Analysis Report</title>');
+      win.document.write('<link rel="stylesheet" href="../css/reports.css">');
+      
+      // Add custom print styles
+      win.document.write(`
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+          }
+          .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+          }
+          .header img {
+            height: 60px;
+            width: auto;
+          }
+          .report-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+          }
+          th {
+            background-color: #f4f4f4;
+          }
+          .approved-section {
+            margin-top: 40px;
+            text-align: right; /* Align the content to the right */
+          }
+          .approved-section .underline {
+            text-decoration: underline;
+            margin-top: 5px;
+          }
+          .signature {
+            margin-top: 10px;
+            font-style: italic;
+          }
+        </style>
+      `);
+    
+      win.document.write('</head><body>');
+    
+      // Print content with appLogo and additional information
+      win.document.write(`
+        <div class="header">
+          <img src="${appLogo}" alt="App Logo" />
+          <div class="report-title">Trend Analysis Report</div>
+        </div>
+        <div id="printable-content">${printContent.innerHTML}</div>
+      `);
+    
+      // Add Approved By section
+      win.document.write(`
+        <div class="approved-section">
+          <div>Approved By:</div>
+          <div class="underline">____________________</div>
+          <div class="signature">Signature over printed name</div>
+        </div>
+      `);
+    
+      win.document.write('</body></html>');
+      win.document.close();
+      setTimeout(() => {
+          win.print();
+      }, 500);
+  };
+  
+    
 
     const debounce = (func, wait) => {
         let timeout;
