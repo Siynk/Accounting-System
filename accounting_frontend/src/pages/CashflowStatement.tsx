@@ -79,12 +79,12 @@ const CashflowStatement = () => {
           width: auto;
         }
         .title {
-          font-size: 20;
+          font-size: 20px;
           font-weight: bold;
           margin: 0;
         }
         .activity-section {
-          margin-bottom: 5px;
+          margin-bottom: 20px;
           width: 100%;
           padding: 10px 0;
           border-bottom: 1px solid #ddd;
@@ -92,58 +92,49 @@ const CashflowStatement = () => {
         .activity-title {
           font-weight: bold;
           margin-bottom: 10px;
-          font-size: 14;
+          font-size: 14px;
           color: #333;
         }
+    
+        /* Flexbox for Activity Item (Row) and Section Header */
         .activity-item {
           display: flex;
           justify-content: space-between;
           align-items: center;
+          margin-bottom: 5px;
+        }
+    
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          font-weight: bold;
+          font-size: 12px;
+          color: #333;
+          border-bottom: 1px solid #ddd;
+          padding-bottom: 5px;
           margin-bottom: 10px;
         }
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-            font-size: 12px;
-            color: #333;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-        }
-        .activity-item .description {
-          flex: 3; /* Make description area wider */
+    
+        /* Column style for description */
+        .description {
+          flex: 6; /* Increase the flex ratio for more room */
           padding-right: 10px;
           font-size: 10px;
           color: #555;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          text-align: left;
+          white-space: normal;  /* Allow wrapping */
+          word-wrap: break-word; /* Ensure long words break and wrap to the next line */
         }
-        .activity-item .amount,
-        .activity-item .cashFlow,
-        .activity-item .transactionDate {
-          width: 120px;
+    
+        /* Column style for amount, cash flow, and date */
+        .amount, .cashFlow, .transactionDate {
+          width: 15%; /* Adjust the width of the other columns to balance space */
           text-align: right;
           font-size: 10px;
           color: #555;
         }
-        .section-header .description {
-            flex: 3;
-            padding-right: 10px;
-            font-size: 12px;
-            color: #555;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .section-header .amount,
-        .section-header .date {
-            width: 120px;
-            text-align: right;
-            font-size: 12px;
-            color: #555;
-        }
+    
+        /* Styling for totals */
         .totals {
           margin-top: 30px;
           text-align: right;
@@ -151,27 +142,28 @@ const CashflowStatement = () => {
           border-top: 2px solid #000;
           padding-top: 14px;
           font-size: 14px;
-          padding-bottom: 15px; /* Added padding-bottom for extra spacing */
+          padding-bottom: 15px;
         }
-
         .totals div {
-          margin-bottom: 10px; /* Added margin-bottom to space out the individual total items */
+          margin-bottom: 10px;
         }
+    
+        /* Footer styling */
         .footer {
           margin-top: 40px;
           text-align: left;
           font-size: 12px;
         }
         .footer .signature-line {
-            width: 350px;
-            border-bottom: 1px solid #000;
-            text-align: center;
-            padding-bottom: 2px;
-            margin-top:30px;
+          width: 350px;
+          border-bottom: 1px solid #000;
+          text-align: center;
+          padding-bottom: 2px;
+          margin-top: 30px;
         }
         .footer .signature-text {
-            text-align: left;
-            margin-top: 10px; /* Increased space between signature line and text */
+          text-align: left;
+          margin-top: 10px;
         }
     
         /* Print-specific styles */
@@ -201,27 +193,29 @@ const CashflowStatement = () => {
       // Render the activity sections (Operating, Investing, Financing)
       const renderActivitySection = (title, activities) => {
         let sectionHtml = `<div class="activity-section"><div class="activity-title">${title}</div>`;
-
+    
+        // Section Header with titles for each column
         sectionHtml += `
-                  <div class="section-header">
-                      <div class="description">Description</div>
-                      <div class="amount">Amount</div>
-                      <div class="date">Date</div>
-                  </div>
-              `;
-        
+          <div class="section-header">
+            <div class="description">Description</div>
+            <div class="amount">Amount</div>
+            <div class="cashFlow">Flow</div>
+            <div class="transactionDate">Date</div>
+          </div>
+        `;
+    
         activities.forEach(activity => {
           const formattedDate = new Date(activity.transactionDate).toLocaleDateString();
           sectionHtml += `
             <div class="activity-item">
               <div class="description">${activity.description}</div>
               <div class="amount">${formatCurrency(activity.amount)}</div>
-              <div class="cashFlow">${activity.cashFlow}</div>
+              <div class="cashFlow">${activity.cashFlow === 'Inflow' ? 'IN' : 'OUT'}</div>
               <div class="transactionDate">${formattedDate}</div>
             </div>
           `;
         });
-        
+    
         sectionHtml += '</div>';
         return sectionHtml;
       };
@@ -238,19 +232,19 @@ const CashflowStatement = () => {
       // Totals and net cashflow display
       printWindow.document.write('<div class="totals">');
       printWindow.document.write(`
-          <div style="margin-bottom: 10px;">Operating Net Cashflow: ${formatCurrency(cashflowStatement.operatingNetCashflow)}</div>
-          <div style="margin-bottom: 10px;">Investing Net Cashflow: ${formatCurrency(cashflowStatement.investingNetCashflow)}</div>
-          <div style="margin-bottom: 10px;">Financing Net Cashflow: ${formatCurrency(cashflowStatement.financingNetCashflow)}</div>
-          <div style="font-weight: bold; margin-bottom: 20px;">Total Net Cashflow: ${formatCurrency(cashflowStatement.totalNetCashflow)}</div>
+        <div>Operating Net Cashflow: ${formatCurrency(cashflowStatement.operatingNetCashflow)}</div>
+        <div>Investing Net Cashflow: ${formatCurrency(cashflowStatement.investingNetCashflow)}</div>
+        <div>Financing Net Cashflow: ${formatCurrency(cashflowStatement.financingNetCashflow)}</div>
+        <div style="font-weight: bold; margin-bottom: 20px;">Total Net Cashflow: ${formatCurrency(cashflowStatement.totalNetCashflow)}</div>
       `);
       printWindow.document.write('</div>');
     
       // Footer with Approved by section
       printWindow.document.write('<div class="footer">');
       printWindow.document.write(`
-          <div>Approved By:</div>
-          <div class="signature-line"></div>
-          <div class="signature-text">Signature over Printed Name</div>
+        <div>Approved By:</div>
+        <div class="signature-line"></div>
+        <div class="signature-text">Signature over Printed Name</div>
       </div>
       </div>`);
     
@@ -264,6 +258,12 @@ const CashflowStatement = () => {
         printWindow.print();
       }, 500);
     };
+    
+    
+    
+    
+    
+    
 
 
     return (
