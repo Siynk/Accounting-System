@@ -195,7 +195,7 @@ const IncomeStatement = () => {
                   border-bottom: 1px solid #000;
                   text-align: center;
                   padding-bottom: 2px;
-                  margin-top: 5px;
+                  margin-top:30px;
               }
               .footer .signature-text {
                   text-align: left;
