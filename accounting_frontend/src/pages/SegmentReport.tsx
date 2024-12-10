@@ -30,96 +30,144 @@ const SegmentReport = () => {
     }, [companyName, dateFrom, dateTo]);
 
     const handlePrint = () => {
-      const printContent = document.querySelector('.segmentReport-content');
-      const printWindow = window.open('', '', 'height=600,width=800');
-      
-      // Check if the printWindow was opened successfully
-      if (printWindow) {
-          printWindow.document.write('<html><head><title>Segment Report</title>');
-          printWindow.document.write('<link rel="stylesheet" href="../css/reports.css">');
-          
-          // Add custom print styles
-          printWindow.document.write(`
-              <style>
-                  body {
-                      font-family: Arial, sans-serif;
-                      margin: 20px;
-                  }
-                  .header {
-                      display: flex;
-                      align-items: center;
-                      justify-content: space-between;
-                      margin-bottom: 20px;
-                  }
-                  .header img {
-                      height: 60px;
-                      width: auto;
-                  }
-                  .report-title {
-                      text-align: center;
-                      font-size: 24px;
-                      font-weight: bold;
-                      margin-bottom: 10px;
-                  }
-                  table {
-                      width: 100%;
-                      border-collapse: collapse;
-                      margin-top: 20px;
-                  }
-                  th, td {
-                      padding: 12px;
-                      text-align: left;
-                      border: 1px solid #ddd;
-                  }
-                  th {
-                      background-color: #f4f4f4;
-                  }
-                  .approved-section {
-                      margin-top: 40px;
-                      text-align: right; /* Align the content to the right */
-                  }
-                  .approved-section .underline {
-                      text-decoration: underline;
-                      margin-top: 5px;
-                  }
-                  .signature {
-                      margin-top: 10px;
-                      font-style: italic;
-                  }
-              </style>
-          `);
-          
-          printWindow.document.write('</head><body>');
-          
-          // Print content with appLogo and additional information
-          printWindow.document.write(`
-              <div class="header">
-                  <img src="${appLogo}" alt="App Logo" />
-                  <div class="report-title">Segment Report</div>
-              </div>
-              <div id="printable-content">${printContent.innerHTML}</div>
-          `);
-          
-          // Add Approved By section
-          printWindow.document.write(`
-              <div class="approved-section">
-                  <div>Approved By:</div>
-                  <div class="underline">____________________</div>
-                  <div class="signature">Signature over printed name</div>
-              </div>
-          `);
-          
-          printWindow.document.write('</body></html>');
-          printWindow.document.close();
-          
-          // Trigger the print dialog
-          setTimeout(() => {
-              printWindow.print();
-          }, 500);
-      } else {
-          console.error('Failed to open print window');
-      }
-  };
+      const printWindow = window.open('', '', 'height=800,width=1200');
+    
+      // Format currency in PHP format
+      const formatCurrency = (value) => {
+        return new Intl.NumberFormat('en-PH', {
+          style: 'currency',
+          currency: 'PHP',
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(value);
+      };
+    
+      printWindow.document.write('<html><head><title>Segment Report</title><style>');
+    
+      // Add styles for printing
+      printWindow.document.write(`
+        body {
+          font-family: 'Arial', sans-serif;
+          padding: 20px;
+          font-size: 12px;
+        }
+        .report-container {
+          width: 100%;
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+        .header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 20px;
+        }
+        .header img {
+          height: 50px;
+          width: auto;
+        }
+        .header h1 {
+          font-size: 18px;
+          margin: 0;
+          text-align: right;
+          flex-grow: 1;
+        }
+        .data-container {
+          margin-top: 20px;
+        }
+        .data-row {
+          margin-bottom: 8px;
+          display: flex;
+          justify-content: space-between;
+        }
+        .data-label {
+          width: 40%; /* Increase the width of the segment column */
+          font-weight: bold;
+          word-wrap: break-word; /* Allow text to wrap */
+        }
+        .data-value {
+          width: 20%; /* Reduce the width of the other columns */
+          text-align: right;
+        }
+        .data-row-header {
+          margin-bottom: 12px;
+          font-weight: bold;
+          font-size: 14px; /* Increase font size of column headers */
+        }
+        .footer {
+          margin-top: 50px; /* Increased space between content and the "Approved By" section */
+          font-size: 12px;
+          text-align: left;
+        }
+        .footer .signature-line {
+          width: 350px;
+          border-bottom: 1px solid #000;
+          text-align: center;
+          padding-bottom: 2px;
+          margin-top: 5px;
+        }
+        .footer .signature-text {
+          text-align: left;
+          margin-top: 10px; /* Increased space between signature line and text */
+        }
+      `);
+    
+      printWindow.document.write('</style></head><body>');
+    
+      // Generate the header with the app logo and title
+      printWindow.document.write(`
+        <div class="report-container">
+          <div class="header">
+            <img src="${appLogo}" alt="Company Logo">
+            <h1>Segment Report</h1>
+          </div>
+    
+          <div class="data-container">
+            <div class="data-row data-row-header">
+              <div class="data-label">Segment</div>
+              <div class="data-value">Total Revenue</div>
+              <div class="data-value">Total Expenses</div>
+              <div class="data-value">Profit</div>
+            </div>
+      `);
+    
+      // Generate the data rows dynamically based on the segmentReport
+      segmentReport.forEach(item => {
+        printWindow.document.write(`
+          <div class="data-row">
+            <div class="data-label">${item.productLine}</div>
+            <div class="data-value">${formatCurrency(item.totalRevenue)}</div>
+            <div class="data-value">${formatCurrency(item.totalExpenses)}</div>
+            <div class="data-value">${formatCurrency(item.netIncome)}</div>
+          </div>
+        `);
+      });
+    
+      printWindow.document.write(`
+          </div>
+    
+          <div class="footer">
+            <div>Approved By:</div>
+            <div class="signature-line"></div>
+            <div class="signature-text">Signature over Printed Name</div>
+          </div>
+        </div>
+      `);
+    
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+    
+      // Wait for the content to load and then print
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+    };
+    
+    
+    
+    
+    
+    
   
 
     return (

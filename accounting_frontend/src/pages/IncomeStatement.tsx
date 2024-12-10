@@ -75,12 +75,12 @@ const IncomeStatement = () => {
       };
   
       const printWindow = window.open('', '', 'height=600,width=800');
-      
+  
       // Check if the print window was opened successfully
       if (printWindow) {
           printWindow.document.write('<html><head><title>Income Statement</title>');
           printWindow.document.write('<style>');
-          
+  
           // Inline styles for print layout
           printWindow.document.write(`
               body {
@@ -128,6 +128,16 @@ const IncomeStatement = () => {
                   color: #333;
                   margin-bottom: 10px;
               }
+              .section-header {
+                  display: flex;
+                  justify-content: space-between;
+                  font-weight: bold;
+                  font-size: 12px;
+                  color: #333;
+                  border-bottom: 1px solid #ddd;
+                  padding-bottom: 5px;
+                  margin-bottom: 10px;
+              }
               .section-item {
                   display: flex;
                   justify-content: space-between;
@@ -150,6 +160,22 @@ const IncomeStatement = () => {
                   font-size: 12px;
                   color: #555;
               }
+              .section-header .description {
+                  flex: 3;
+                  padding-right: 10px;
+                  font-size: 12px;
+                  color: #555;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+              }
+              .section-header .amount,
+              .section-header .date {
+                  width: 120px;
+                  text-align: right;
+                  font-size: 12px;
+                  color: #555;
+              }
               .totals {
                   margin-top: 30px;
                   text-align: right;
@@ -157,20 +183,23 @@ const IncomeStatement = () => {
                   border-top: 2px solid #000;
                   padding-top: 14px;
                   font-size: 14px;
+                  margin-bottom: 20px;
               }
               .footer {
                   margin-top: 40px;
                   text-align: left;
                   font-size: 12px;
               }
-              .footer .approved {
-                  text-decoration: underline;
-                  display: inline-block;
-                  width: 200px;
-                  margin-bottom: 5px;
-              }
-              .footer .signature {
+              .footer .signature-line {
+                  width: 350px;
+                  border-bottom: 1px solid #000;
+                  text-align: center;
+                  padding-bottom: 2px;
                   margin-top: 5px;
+              }
+              .footer .signature-text {
+                  text-align: left;
+                  margin-top: 10px; /* Increased space between signature line and text */
               }
   
               /* Print-specific styles */
@@ -187,20 +216,30 @@ const IncomeStatement = () => {
                   }
               }
           `);
-          
+  
           printWindow.document.write('</style></head><body>');
-          
+  
           // Header with title and logo
           printWindow.document.write('<div class="container">');
           printWindow.document.write('<div class="header">');
           printWindow.document.write('<div class="title">Income Statement</div>');
           printWindow.document.write(`<img src="${logo}" alt="Logo">`);
           printWindow.document.write('</div>');
-          
+  
           // Render the revenues section
           const renderSection = (title, items) => {
               let sectionHtml = `<div class="section"><div class="section-title">${title}</div>`;
-              
+  
+              // Column headers with correct alignment
+              sectionHtml += `
+                  <div class="section-header">
+                      <div class="description">Description</div>
+                      <div class="amount">Amount</div>
+                      <div class="date">Date</div>
+                  </div>
+              `;
+  
+              // Section items
               items.forEach(item => {
                   const formattedDate = new Date(item.date).toLocaleDateString();
                   sectionHtml += `
@@ -211,38 +250,41 @@ const IncomeStatement = () => {
                       </div>
                   `;
               });
-              
+  
               sectionHtml += '</div>';
               return sectionHtml;
           };
-          
+  
           // Render all sections: Revenues, Operating Expenses, Financing Expenses, Investing Expenses
           printWindow.document.write(renderSection('Revenues', incomeStatement.revenues));
           printWindow.document.write(renderSection('Operating Expenses', incomeStatement.operatingExpenses));
           printWindow.document.write(renderSection('Financing Expenses', incomeStatement.financingExpenses));
           printWindow.document.write(renderSection('Investing Expenses', incomeStatement.investingExpenses));
-          
-          // Totals and net income
+  
+          // Totals and net income with extra spacing
           printWindow.document.write('<div class="totals">');
-          printWindow.document.write(`Total Revenue: ${formatCurrency(incomeStatement.totalRevenue)}<br>`);
-          printWindow.document.write(`Total Operating Expenses: ${formatCurrency(incomeStatement.totalOperatingExpenses)}<br>`);
-          printWindow.document.write(`Total Financing Expenses: ${formatCurrency(incomeStatement.totalFinancingExpenses)}<br>`);
-          printWindow.document.write(`Total Investing Expenses: ${formatCurrency(incomeStatement.totalInvestingExpenses)}<br>`);
-          printWindow.document.write(`Net Income: ${formatCurrency(incomeStatement.netIncome)}<br>`);
+          printWindow.document.write(`Total Revenue: ${formatCurrency(incomeStatement.totalRevenue)}<br><br>`);
+          printWindow.document.write(`Total Operating Expenses: ${formatCurrency(incomeStatement.totalOperatingExpenses)}<br><br>`);
+          printWindow.document.write(`Total Financing Expenses: ${formatCurrency(incomeStatement.totalFinancingExpenses)}<br><br>`);
+          printWindow.document.write(`Total Investing Expenses: ${formatCurrency(incomeStatement.totalInvestingExpenses)}<br><br>`);
+          printWindow.document.write(`Net Income: ${formatCurrency(incomeStatement.netIncome)}<br><br>`);
           printWindow.document.write(`<strong>Net Income After Tax: ${formatCurrency(incomeStatement.netIncomeAfterTax)}</strong>`);
           printWindow.document.write('</div>');
-          
+  
           // Footer with Approved by section
           printWindow.document.write('<div class="footer">');
-          printWindow.document.write('<div class="approved">Approved By: ___________________</div>');
-          printWindow.document.write('<div class="signature">Signature over Printed Name</div>');
+          printWindow.document.write(`
+              <div>Approved By:</div>
+              <div class="signature-line"></div>
+              <div class="signature-text">Signature over Printed Name</div>
+          </div>
+          </div>`);
+  
           printWindow.document.write('</div>');
-          
-          printWindow.document.write('</div>');
-          
+  
           // Finalize the document for printing
           printWindow.document.write('</body></html>');
-          
+  
           printWindow.document.close();
           setTimeout(() => {
               printWindow.print();
@@ -251,6 +293,8 @@ const IncomeStatement = () => {
           console.error('Failed to open print window');
       }
   };
+  
+  
   
   
   
